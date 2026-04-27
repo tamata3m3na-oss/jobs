@@ -1,0 +1,22 @@
+# Project Workflow
+
+## Phase 1: Backend Development (Module-based)
+- [x] Persist WORKFLOW.md to the repository.
+- [x] Initialize NestJS project in 'backend' directory with strict TypeScript.
+- [x] Implement core modules: Auth (JWT/Roles), Users (Profiles), Jobs (CRUD with PostGIS).
+- [x] Implement Global Error Handling (Exception Filters) and Response Interceptors.
+- [x] Setup Swagger for API documentation.
+- [x] Ensure no 'any' is used and Clean Architecture is followed.
+
+## Phase 2: AI Service & Advanced Features
+- [ ] Implement AI Recommendation Service (Python FastAPI).
+- [ ] Real-time Notifications (Socket.io).
+- [ ] Advanced Search & Filtering.
+
+## Phase 3: Frontend Development
+- [ ] Web Application (Next.js).
+- [ ] Mobile Application (Flutter).
+
+## Phase 4: Deployment & Finalization
+- [ ] CI/CD Pipeline.
+- [ ] Production Deployment.
