@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 import { UserRole, UserStatus, JobSeekerProfile, EmployerProfile } from '@smartjob/shared';
 
@@ -28,6 +29,7 @@ export class UserEntity {
     type: 'enum',
     enum: ['JOB_SEEKER', 'EMPLOYER', 'ADMIN'],
   })
+  @Index()
   role!: UserRole;
 
   @Column({
@@ -35,6 +37,7 @@ export class UserEntity {
     enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING_VERIFICATION'],
     default: 'PENDING_VERIFICATION',
   })
+  @Index()
   status!: UserStatus;
 
   @Column({ nullable: true })
