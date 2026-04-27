@@ -1,0 +1,11 @@
+{
+  "appTitle": "Smart Job Platform",
+  "login": "Login",
+  "register": "Register",
+  "email": "Email",
+  "password": "Password",
+  "jobsNearMe": "Jobs Near Me",
+  "search": "Search",
+  "noJobsFound": "No jobs found nearby",
+  "error": "An error occurred"
+}
