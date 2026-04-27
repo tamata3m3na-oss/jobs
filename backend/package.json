@@ -41,6 +41,9 @@
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
+    "stripe": "^14.19.0",
+    "helmet": "^7.1.0",
+    "@nestjs/throttler": "^5.1.2",
     "typeorm": "^0.3.20",
     "zod": "^3.22.4"
   },

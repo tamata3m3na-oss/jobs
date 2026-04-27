@@ -9,38 +9,42 @@ import { map } from 'rxjs/operators';
 
 @Injectable()
 export class SanitizationInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: unknown) => {
         if (!data) return data;
 
-        // If it's an array of applications
+        // If it's an array of items
         if (Array.isArray(data)) {
           return data.map((item) => this.sanitizeItem(item));
         }
 
-        // If it's a single application
-        return this.sanitizeItem(data);
+        // If it's a single item
+        return this.sanitizeItem(data as Record<string, unknown>);
       }),
     );
   }
 
-  private sanitizeItem(item: any) {
+  private sanitizeItem(item: Record<string, unknown>) {
     // Check if it's an application and has a job with blindHiring enabled
-    if (item.job && item.job.matchSettings && item.job.matchSettings.blindHiring) {
-      if (item.applicant) {
+    const job = item.job as Record<string, unknown> | undefined;
+    const matchSettings = job?.matchSettings as Record<string, unknown> | undefined;
+    
+    if (matchSettings?.blindHiring) {
+      const applicant = item.applicant as Record<string, unknown> | undefined;
+      if (applicant) {
         return {
           ...item,
           applicant: {
-            id: item.applicant.id,
+            id: applicant.id,
             // Redact personal info
             firstName: 'Candidate',
-            lastName: item.applicant.id.substring(0, 8),
+            lastName: (applicant.id as string)?.substring(0, 8),
             email: 'redacted@example.com',
             phone: 'REDACTED',
             avatarUrl: null,
             // Keep professional info
-            profile: item.applicant.profile,
+            profile: applicant.profile,
           },
         };
       }
