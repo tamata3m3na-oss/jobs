@@ -112,11 +112,12 @@ export const JobSchema = z.object({
       enableAiMatching: z.boolean().default(true),
       minMatchScore: z.number().min(0).max(100).default(60),
       autoSuggestCandidates: z.boolean().default(false),
+      blindHiring: z.boolean().default(false),
     })
     .default({}),
-});
+  });
 
-export type Job = z.infer<typeof JobSchema>;
+  export type Job = z.infer<typeof JobSchema>;
 
 export const JobSearchFiltersSchema = z.object({
   query: z.string().optional(),
@@ -193,11 +194,12 @@ export const CreateJobSchema = z.object({
       enableAiMatching: z.boolean().default(true),
       minMatchScore: z.number().min(0).max(100).default(60),
       autoSuggestCandidates: z.boolean().default(false),
+      blindHiring: z.boolean().default(false),
     })
     .default({}),
-});
+  });
 
-export const UpdateJobSchema = CreateJobSchema.partial().strict();
+  export const UpdateJobSchema = CreateJobSchema.partial().strict();
 
 export type CreateJob = z.infer<typeof CreateJobSchema>;
 export type UpdateJob = z.infer<typeof UpdateJobSchema>;

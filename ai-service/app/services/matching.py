@@ -4,7 +4,11 @@ import redis
 import json
 import hashlib
 from app.core.config import settings
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Any
+
+# Define a type that avoids 'Any' as much as possible
+JSONValue = Union[str, int, float, bool, None, List[str], Dict[str, str]]
+JobDict = Dict[str, JSONValue]
 
 class MatchingService:
     def __init__(self) -> None:
@@ -40,7 +44,7 @@ class MatchingService:
         similarity = util.cos_sim(embeddings[0], embeddings[1])
         return float(similarity.item())
 
-    def match_jobs(self, query: str, jobs: List[Dict[str, Union[str, int, float, bool, None, object]]]) -> List[Dict[str, Union[str, float]]]:
+    def match_jobs(self, query: str, jobs: List[JobDict]) -> List[Dict[str, Union[str, float]]]:
         if not jobs:
             return []
             
@@ -66,7 +70,7 @@ class MatchingService:
         results: List[Dict[str, Union[str, float]]] = []
         for i, score in enumerate(cosine_scores):
             results.append({
-                "job_id": job_ids[i],
+                "id": job_ids[i],
                 "score": float(score.item())
             })
             
@@ -84,6 +88,28 @@ class MatchingService:
             except Exception as e:
                 print(f"Redis set error: {e}")
             
+        return results
+
+    def match_candidates(self, job_description: str, candidates: List[JobDict]) -> List[Dict[str, Union[str, float]]]:
+        if not candidates:
+            return []
+            
+        candidate_texts = [f"{str(c.get('skills', ''))} {str(c.get('experience', ''))} {str(c.get('bio', ''))}" for c in candidates]
+        candidate_ids = [str(c.get("id", "")) for c in candidates]
+        
+        job_embedding = self.model.encode(job_description, convert_to_tensor=True)
+        candidate_embeddings = self.model.encode(candidate_texts, convert_to_tensor=True)
+        
+        cosine_scores = util.cos_sim(job_embedding, candidate_embeddings)[0]
+        
+        results: List[Dict[str, Union[str, float]]] = []
+        for i, score in enumerate(cosine_scores):
+            results.append({
+                "id": candidate_ids[i],
+                "score": float(score.item())
+            })
+            
+        results.sort(key=lambda x: x["score"], reverse=True)
         return results
 
 matching_service = MatchingService()

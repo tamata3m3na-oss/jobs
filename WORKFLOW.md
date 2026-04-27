@@ -27,3 +27,11 @@
 ## Phase 5: Deployment & Finalization
 - [ ] CI/CD Pipeline.
 - [ ] Production Deployment.
+
+## Phase 6: AI Intelligence Expansion
+- [x] Implement AI Resume Parser in FastAPI (PDF/DOCX extraction).
+- [x] Implement Bidirectional AI Matching (Candidates to Jobs and Jobs to Candidates).
+- [x] Implement Skill Gap Analysis engine to provide learning recommendations.
+- [x] Implement AI Pre-screening question generator and evaluation logic.
+- [x] Add Blind Hiring Mode to toggle candidate personal info visibility.
+- [x] Ensure strict typing (no 'any') across Python and TypeScript codebases.
