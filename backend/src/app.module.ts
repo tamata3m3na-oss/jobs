@@ -5,6 +5,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { MatchingModule } from './modules/matching/matching.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -18,6 +20,8 @@ import configuration from './config/configuration';
     UsersModule,
     JobsModule,
     MatchingModule,
+    AdminModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

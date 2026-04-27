@@ -209,6 +209,8 @@ All entities are defined using Zod in the `shared` package:
 - **User**: Job seekers, employers, and admin users
 - **Job**: Job postings with location, salary, and benefits
 - **Application**: Job applications with status tracking
+- **Analytics**: System and employer analytics data
+- **Admin**: Administrative actions and moderation
 
 Schema files are the single source of truth for validation across backend, frontend, and mobile.
 
