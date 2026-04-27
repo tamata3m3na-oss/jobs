@@ -1,0 +1,17 @@
+{
+  "Common": {
+    "title": "Smart Job Platform",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "search": "Search",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "Navigation": {
+    "jobs": "Jobs",
+    "profile": "Profile",
+    "applications": "Applications",
+    "postJob": "Post a Job"
+  }
+}
