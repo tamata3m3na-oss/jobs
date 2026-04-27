@@ -8,6 +8,14 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatDate } from '@/lib/utils';
 
+interface Job {
+  id: string;
+  title: string;
+  employerId: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminJobsPage() {
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useQuery({
@@ -35,7 +43,7 @@ export default function AdminJobsPage() {
     {
       header: 'Status',
       accessorKey: 'status',
-      cell: (job: any) => (
+      cell: (job: Job) => (
         <Badge
           variant={
             job.status === 'ACTIVE'
@@ -49,11 +57,11 @@ export default function AdminJobsPage() {
         </Badge>
       ),
     },
-    { header: 'Posted', accessorKey: 'createdAt', cell: (job: any) => formatDate(job.createdAt) },
+    { header: 'Posted', accessorKey: 'createdAt', cell: (job: Job) => formatDate(job.createdAt) },
     {
       header: 'Actions',
       accessorKey: 'id',
-      cell: (job: any) => (
+      cell: (job: Job) => (
         <div className="flex gap-2">
           {job.status === 'PENDING_APPROVAL' && (
             <>

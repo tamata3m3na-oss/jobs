@@ -35,3 +35,11 @@
 - [x] Implement AI Pre-screening question generator and evaluation logic.
 - [x] Add Blind Hiring Mode to toggle candidate personal info visibility.
 - [x] Ensure strict typing (no 'any') across Python and TypeScript codebases.
+
+## Phase 7: Production Readiness & QA
+- [x] Setup CI/CD Pipeline (GitHub Actions) for all services.
+- [x] Configure Stripe production environment and webhook security.
+- [x] Implement Security Hardening (Helmet, CORS, Rate Limiting).
+- [x] Conduct final QA and Load Testing scripts.
+- [x] Perform Security Audit and Dependency Scanning.
+- [x] Final documentation update and project cleanup.

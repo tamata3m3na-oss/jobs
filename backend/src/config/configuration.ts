@@ -20,4 +20,9 @@ export default () => ({
   aiService: {
     url: process.env.AI_SERVICE_URL || 'http://localhost:8000',
   },
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3001',
+  stripe: {
+    apiKey: process.env.STRIPE_API_KEY,
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+  },
 });

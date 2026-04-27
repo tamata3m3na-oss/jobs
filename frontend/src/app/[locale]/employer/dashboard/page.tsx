@@ -8,6 +8,18 @@ import apiClient from '@/lib/api-client';
 import { Briefcase, Users, CheckCircle, XCircle } from 'lucide-react';
 import { DataTable } from '@/components/ui/DataTable';
 
+interface AppStatus {
+  status: string;
+  count: string;
+}
+
+interface JobPerformance {
+  id: string;
+  title: string;
+  views: number;
+  applicationsCount: number;
+}
+
 export default function EmployerDashboardPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['employer-stats'],
@@ -20,7 +32,7 @@ export default function EmployerDashboardPage() {
   if (isLoading) return <div className="p-8 text-center">Loading dashboard...</div>;
 
   const appStatusData =
-    stats?.applicationsByStatus?.map((item: any) => ({
+    stats?.applicationsByStatus?.map((item: AppStatus) => ({
       name: item.status,
       value: parseInt(item.count),
     })) || [];
@@ -58,7 +70,7 @@ export default function EmployerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.applicationsByStatus?.find((a: any) => a.status === 'SHORTLISTED')?.count || 0}
+              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'SHORTLISTED')?.count || 0}
             </div>
           </CardContent>
         </Card>
@@ -69,7 +81,7 @@ export default function EmployerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.applicationsByStatus?.find((a: any) => a.status === 'REJECTED')?.count || 0}
+              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'REJECTED')?.count || 0}
             </div>
           </CardContent>
         </Card>
@@ -95,7 +107,7 @@ export default function EmployerDashboardPage() {
                   name: 'Views',
                   value:
                     stats?.jobPerformance?.reduce(
-                      (acc: number, j: any) => acc + (j.views || 0),
+                      (acc: number, j: JobPerformance) => acc + (j.views || 0),
                       0
                     ) || 0,
                 },
@@ -120,7 +132,7 @@ export default function EmployerDashboardPage() {
               {
                 header: 'Conversion Rate',
                 accessorKey: 'id',
-                cell: (job: any) => (
+                cell: (job: JobPerformance) => (
                   <span>
                     {job.views > 0 ? ((job.applicationsCount / job.views) * 100).toFixed(1) : 0}%
                   </span>

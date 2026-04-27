@@ -19,13 +19,13 @@ export default function AdminDashboardPage() {
   if (isLoading) return <div className="p-8 text-center">Loading dashboard...</div>;
 
   const usersByRoleData =
-    stats?.usersByRole?.map((item: any) => ({
+    stats?.usersByRole?.map((item: { role: string; count: string }) => ({
       name: item.role,
       value: parseInt(item.count),
     })) || [];
 
   const jobsByStatusData =
-    stats?.jobsByStatus?.map((item: any) => ({
+    stats?.jobsByStatus?.map((item: { status: string; count: string }) => ({
       name: item.status,
       value: parseInt(item.count),
     })) || [];

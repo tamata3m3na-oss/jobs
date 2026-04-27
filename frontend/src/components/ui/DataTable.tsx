@@ -36,8 +36,8 @@ export function DataTable<T>({
 
   const filteredData = React.useMemo(() => {
     if (!filterKey || !filterValue) return data;
-    return data.filter((item: any) => {
-      const val = item[filterKey];
+    return data.filter((item: T) => {
+      const val = item[filterKey as keyof T];
       if (typeof val === 'string') {
         return val.toLowerCase().includes(filterValue.toLowerCase());
       }
