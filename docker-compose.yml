@@ -38,6 +38,22 @@ services:
     networks:
       - smartjob-network
 
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: smartjob-ai-service
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=smartjob_redis_password
+    depends_on:
+      - redis
+    ports:
+      - '8000:8000'
+    networks:
+      - smartjob-network
+
 volumes:
   postgres_data:
     driver: local

@@ -25,6 +25,7 @@ export class JobEntity {
   employerId!: string;
 
   @Column()
+  @Index()
   title!: string;
 
   @Column({ unique: true })
@@ -59,6 +60,7 @@ export class JobEntity {
       'VOLUNTEER',
     ],
   })
+  @Index()
   jobType!: JobType;
 
   @Column({
@@ -66,6 +68,7 @@ export class JobEntity {
     enum: ['ENTRY', 'JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE'],
     default: 'MID',
   })
+  @Index()
   experienceLevel!: ExperienceLevel;
 
   @Column({
