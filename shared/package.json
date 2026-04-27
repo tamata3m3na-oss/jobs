@@ -1,0 +1,35 @@
+{
+  "name": "@smartjob/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./schemas/*": {
+      "types": "./dist/schemas/*.d.ts",
+      "import": "./dist/schemas/*.mjs",
+      "require": "./dist/schemas/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "eslint": "^8.57.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  }
+}

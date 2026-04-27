@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: smartjob-postgres
+    environment:
+      POSTGRES_USER: smartjob
+      POSTGRES_PASSWORD: smartjob_dev_password
+      POSTGRES_DB: smartjob_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartjob -d smartjob_db']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - smartjob-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: smartjob-redis
+    command: redis-server --appendonly yes --requirepass smartjob_redis_password
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - smartjob-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  smartjob-network:
+    driver: bridge
