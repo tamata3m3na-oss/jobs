@@ -170,5 +170,6 @@ export class JobEntity {
     enableAiMatching: boolean;
     minMatchScore: number;
     autoSuggestCandidates: boolean;
+    blindHiring: boolean;
   };
 }

@@ -10,7 +10,7 @@ class MatchRequest(BaseModel):
     jobs: List[Dict[str, Union[str, int, float, bool, List[str], Dict[str, str], None, object]]]
 
 class MatchResult(BaseModel):
-    job_id: str
+    id: str
     score: float
 
 class MatchResponse(BaseModel):
