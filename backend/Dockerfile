@@ -8,11 +8,13 @@ COPY package.json package-lock.json tsconfig.base.json ./
 
 # Copy package and config files for each workspace to ensure npm ci works correctly in a monorepo
 COPY shared/package.json ./shared/package.json
-COPY shared/tsconfig.json ./shared/tsconfig.json
 COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+
+# Copy other configuration files needed for building
+COPY shared/tsconfig.json ./shared/tsconfig.json
 COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/nest-cli.json ./backend/nest-cli.json
-COPY frontend/package.json ./frontend/package.json
 
 # Install all dependencies
 RUN npm ci
