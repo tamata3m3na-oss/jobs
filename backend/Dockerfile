@@ -57,6 +57,8 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nestjs:nodejs /app/shared/package.json ./shared/package.json
 COPY --from=builder --chown=nestjs:nodejs /app/backend/package.json ./backend/package.json
+COPY --from=builder --chown=nestjs:nodejs /app/frontend/package.json ./frontend/package.json
+COPY --from=builder --chown=nestjs:nodejs /app/tsconfig.base.json ./tsconfig.base.json
 
 # Copy built artifacts from builder
 COPY --from=builder --chown=nestjs:nodejs /app/shared/dist ./shared/dist
