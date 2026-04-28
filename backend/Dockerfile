@@ -6,12 +6,13 @@ WORKDIR /app
 # Copy root configuration files for npm workspaces
 COPY package.json package-lock.json tsconfig.base.json ./
 
-# Copy package and config files for each workspace
+# Copy package and config files for each workspace to ensure npm ci works correctly in a monorepo
 COPY shared/package.json ./shared/package.json
 COPY shared/tsconfig.json ./shared/tsconfig.json
 COPY backend/package.json ./backend/package.json
 COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY backend/nest-cli.json ./backend/nest-cli.json
+COPY frontend/package.json ./frontend/package.json
 
 # Install all dependencies
 RUN npm ci
@@ -21,8 +22,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy all configuration
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy all configuration and source code
 COPY package.json package-lock.json tsconfig.base.json ./
+# Copy all package.json files to ensure npm workspace resolution works
+COPY --from=deps /app/shared/package.json ./shared/package.json
+COPY --from=deps /app/backend/package.json ./backend/package.json
+COPY --from=deps /app/frontend/package.json ./frontend/package.json
+
+# Copy source code for building
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 
@@ -41,19 +51,25 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
+# Copy package.json files for workspaces to preserve symlink integrity
+COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nestjs:nodejs /app/shared/package.json ./shared/package.json
+COPY --from=builder --chown=nestjs:nodejs /app/backend/package.json ./backend/package.json
+
 # Copy built artifacts from builder
 COPY --from=builder --chown=nestjs:nodejs /app/shared/dist ./shared/dist
 COPY --from=builder --chown=nestjs:nodejs /app/backend/dist ./backend/dist
 
 # Copy node_modules (keep permissions intact)
 COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/shared/node_modules ./shared/node_modules
-COPY --from=builder --chown=nestjs:nodejs /app/backend/node_modules ./backend/node_modules
 
 # Set ownership for the app directory
 RUN chown -R nestjs:nodejs /app
 
 USER nestjs
+
+# Environment variables
+ENV NODE_ENV=production
 
 # Expose port
 EXPOSE 3000

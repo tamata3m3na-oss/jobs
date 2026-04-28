@@ -6,7 +6,7 @@ WORKDIR /app
 # Copy root configuration files for npm workspaces
 COPY package.json package-lock.json tsconfig.base.json ./
 
-# Copy package and config files for each workspace
+# Copy package and config files for each workspace to ensure npm ci works correctly in a monorepo
 COPY shared/package.json ./shared/package.json
 COPY shared/tsconfig.json ./shared/tsconfig.json
 COPY frontend/package.json ./frontend/package.json
@@ -14,6 +14,7 @@ COPY frontend/tsconfig.json ./frontend/tsconfig.json
 COPY frontend/next.config.js ./frontend/next.config.js
 COPY frontend/postcss.config.js ./frontend/postcss.config.js
 COPY frontend/tailwind.config.ts ./frontend/tailwind.config.ts
+COPY backend/package.json ./backend/package.json
 
 # Install all dependencies
 RUN npm ci
@@ -23,8 +24,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy all configuration and source
+# Copy node_modules from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy all configuration and source code
 COPY package.json package-lock.json tsconfig.base.json ./
+# Copy all package.json files to ensure npm workspace resolution works
+COPY --from=deps /app/shared/package.json ./shared/package.json
+COPY --from=deps /app/frontend/package.json ./frontend/package.json
+COPY --from=deps /app/backend/package.json ./backend/package.json
+
+# Copy source code for building
 COPY shared/ ./shared/
 COPY frontend/ ./frontend/
 
@@ -43,15 +53,19 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Copy built artifacts from builder
+# Copy package.json files and configuration for workspaces
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/shared/package.json ./shared/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/package.json ./frontend/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/next.config.js ./frontend/next.config.js
+
+# Copy built artifacts and public files
 COPY --from=builder --chown=nextjs:nodejs /app/shared/dist ./shared/dist
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next ./.next
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next ./frontend/.next
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
 
 # Copy node_modules (keep permissions intact)
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/shared/node_modules ./shared/node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/node_modules ./frontend/node_modules
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
@@ -70,4 +84,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001 || exit 1
 
 # Start Next.js production server
-CMD ["node_modules/.bin/next", "start", "-p", "3001"]
+CMD ["node_modules/.bin/next", "start", "frontend", "-p", "3001"]
