@@ -59,6 +59,8 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/shared/package.json ./shared/package.json
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/package.json ./frontend/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/backend/package.json ./backend/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.base.json ./tsconfig.base.json
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/next.config.js ./frontend/next.config.js
 
 # Copy built artifacts and public files
