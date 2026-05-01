@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { BarChartComponent, PieChartComponent } from '@/components/ui/Charts';
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
-import { Briefcase, Users, CheckCircle, XCircle } from 'lucide-react';
+import { Briefcase, Users, CheckCircle, XCircle, PlusCircle, ArrowRight } from 'lucide-react';
 import { DataTable } from '@/components/ui/DataTable';
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 interface AppStatus {
   status: string;
@@ -18,6 +20,15 @@ interface JobPerformance {
   title: string;
   views: number;
   applicationsCount: number;
+}
+
+interface RecentApplication {
+  id: string;
+  candidateName: string;
+  jobTitle: string;
+  status: string;
+  appliedAt: string;
+  matchScore: number;
 }
 
 export default function EmployerDashboardPage() {
@@ -39,9 +50,22 @@ export default function EmployerDashboardPage() {
 
   return (
     <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Employer Dashboard</h1>
-        <p className="text-muted-foreground">Manage your job postings and candidates.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Employer Dashboard</h1>
+          <p className="text-muted-foreground">Manage your job postings and candidates.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link href="/employer/jobs/new">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Post New Job
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/employer/applications">View Applications</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -100,22 +124,33 @@ export default function EmployerDashboardPage() {
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Job Views vs Applications</CardTitle>
+            <CardTitle>Recent Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            <PieChartComponent
-              data={[
-                {
-                  name: 'Views',
-                  value:
-                    stats?.jobPerformance?.reduce(
-                      (acc: number, j: JobPerformance) => acc + (j.views || 0),
-                      0
-                    ) || 0,
-                },
-                { name: 'Applications', value: stats?.totalApplications || 0 },
-              ]}
-            />
+            <div className="space-y-4">
+              {stats?.recentApplications?.length > 0 ? (
+                stats.recentApplications.map((app: RecentApplication) => (
+                  <div key={app.id} className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">{app.candidateName}</p>
+                      <p className="text-xs text-muted-foreground">{app.jobTitle}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-bold text-green-600">{app.matchScore}%</div>
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/employer/applications/${app.id}`}>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No recent applications
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
