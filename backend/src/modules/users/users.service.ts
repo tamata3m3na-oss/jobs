@@ -1,18 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../../database/entities/user.entity';
+import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
 import { UpdateJobSeekerProfile, UpdateEmployerProfile } from '@smartjob/shared';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    private readonly userRepository: IUserRepository,
   ) {}
 
-  async findOne(id: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<Record<string, unknown>> {
+    const user = await this.userRepository.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -22,13 +19,17 @@ export class UsersService {
   async updateProfile(
     id: string,
     profileData: UpdateJobSeekerProfile | UpdateEmployerProfile,
-  ): Promise<UserEntity> {
+  ): Promise<Record<string, unknown>> {
     const user = await this.findOne(id);
-    user.profile = { ...user.profile, ...profileData };
-    return this.userRepository.save(user);
+    const existingProfile = (user.profile as Record<string, unknown>) ?? {};
+    return this.userRepository.updateProfile(id, {
+      ...existingProfile,
+      ...profileData,
+    });
   }
 
-  async findAll(): Promise<UserEntity[]> {
-    return this.userRepository.find();
+  async findAll(): Promise<Record<string, unknown>[]> {
+    const result = await this.userRepository.findAll({}, { page: 1, limit: 1000 });
+    return result.data;
   }
 }

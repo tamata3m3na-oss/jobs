@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   Headers,
   Req,
   RawBodyRequest,
@@ -29,22 +28,25 @@ export class PaymentsController {
       throw new BadRequestException('Missing stripe-signature header');
     }
 
+    const rawBody = req.rawBody;
+    if (!rawBody) {
+      throw new BadRequestException('Missing raw body');
+    }
+
     try {
       const event = await this.paymentsService.constructEventFromPayload(
         sig,
-        req.rawBody,
+        rawBody,
       );
 
       this.logger.log(`Received stripe event: ${event.type}`);
 
       switch (event.type) {
         case 'checkout.session.completed':
-          const session = event.data.object;
-          // Handle successful subscription
-          this.logger.log(`Session completed: ${session.id}`);
+          this.paymentsService.handleCheckoutCompleted(event.data.object as { id: string });
           break;
         case 'customer.subscription.deleted':
-          // Handle subscription cancellation
+          this.paymentsService.handleSubscriptionDeleted(event.data.object as { id: string });
           break;
         default:
           this.logger.warn(`Unhandled event type: ${event.type}`);
@@ -52,8 +54,9 @@ export class PaymentsController {
 
       return { received: true };
     } catch (err) {
-      this.logger.error(`Webhook Error: ${err.message}`);
-      throw new BadRequestException(`Webhook Error: ${err.message}`);
+      const error = err as Error;
+      this.logger.error(`Webhook Error: ${error.message}`);
+      throw new BadRequestException(`Webhook Error: ${error.message}`);
     }
   }
 }

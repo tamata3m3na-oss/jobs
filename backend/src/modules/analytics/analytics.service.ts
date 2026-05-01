@@ -1,93 +1,75 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../../database/entities/user.entity';
-import { JobEntity } from '../../database/entities/job.entity';
-import { ApplicationEntity } from '../../database/entities/application.entity';
+import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    @InjectRepository(JobEntity)
-    private jobRepository: Repository<JobEntity>,
-    @InjectRepository(ApplicationEntity)
-    private applicationRepository: Repository<ApplicationEntity>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async getAdminStats() {
-    const totalUsers = await this.userRepository.count();
-    const totalJobs = await this.jobRepository.count();
-    const totalApplications = await this.applicationRepository.count();
-    
-    const usersByRole = await this.userRepository
-      .createQueryBuilder('user')
-      .select('user.role', 'role')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.role')
-      .getRawMany();
-
-    const jobsByStatus = await this.jobRepository
-      .createQueryBuilder('job')
-      .select('job.status', 'status')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('job.status')
-      .getRawMany();
+  async getUserStats() {
+    const [totalUsers, activeUsers, employers, jobSeekers] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.user.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.user.count({ where: { role: 'EMPLOYER' } }),
+      this.prisma.user.count({ where: { role: 'JOB_SEEKER' } }),
+    ]);
 
     return {
-      overview: { totalUsers, totalJobs, totalApplications },
-      usersByRole,
-      jobsByStatus,
+      totalUsers,
+      activeUsers,
+      employers,
+      jobSeekers,
     };
   }
 
-  async getEmployerStats(employerId: string) {
-    const jobs = await this.jobRepository.find({ where: { employerId } });
-
-    const totalApplications = await this.applicationRepository.count({
-      where: { employerId }
-    });
-
-    const applicationsByStatus = await this.applicationRepository
-      .createQueryBuilder('app')
-      .select('app.status', 'status')
-      .addSelect('COUNT(*)', 'count')
-      .where('app.employerId = :employerId', { employerId })
-      .groupBy('app.status')
-      .getRawMany();
-
-    const jobPerformance = await this.jobRepository
-      .createQueryBuilder('job')
-      .select(['job.id', 'job.title', 'job.views', 'job.applicationsCount'])
-      .where('job.employerId = :employerId', { employerId })
-      .getMany();
+  async getJobStats() {
+    const [totalJobs, activeJobs, applications] = await Promise.all([
+      this.prisma.job.count(),
+      this.prisma.job.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.application.count(),
+    ]);
 
     return {
-      totalJobs: jobs.length,
-      totalApplications,
-      applicationsByStatus,
-      jobPerformance,
+      totalJobs,
+      activeJobs,
+      applications,
     };
   }
-  
-  async getRevenueStats() {
+
+  async getRecentActivity(days = 7) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const [recentUsers, recentJobs, recentApplications] = await Promise.all([
+      this.prisma.user.count({
+        where: { createdAt: { gte: startDate } },
+      }),
+      this.prisma.job.count({
+        where: { createdAt: { gte: startDate } },
+      }),
+      this.prisma.application.count({
+        where: { submittedAt: { gte: startDate } },
+      }),
+    ]);
+
     return {
-      totalRevenue: 15420.50,
-      currency: 'USD',
-      subscriptions: {
-        active: 45,
-        trial: 12,
-        expired: 5
-      },
-      revenueHistory: [
-        { month: 'Jan', amount: 1200 },
-        { month: 'Feb', amount: 1500 },
-        { month: 'Mar', amount: 1800 },
-        { month: 'Apr', amount: 2100 },
-        { month: 'May', amount: 2500 },
-        { month: 'Jun', amount: 3200 },
-      ]
+      recentUsers,
+      recentJobs,
+      recentApplications,
+      period: `${days} days`,
+    };
+  }
+
+  async getDashboardSummary() {
+    const [userStats, jobStats, recentActivity] = await Promise.all([
+      this.getUserStats(),
+      this.getJobStats(),
+      this.getRecentActivity(),
+    ]);
+
+    return {
+      ...userStats,
+      ...jobStats,
+      ...recentActivity,
     };
   }
 }

@@ -1,13 +1,26 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminController } from './admin.controller';
+import { PrismaService } from '../../database/prisma.service';
+import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
+import { PrismaUserRepository } from '../../repositories/implementations/prisma-user.repository';
+import { IJobRepository } from '../../repositories/interfaces/i-job.repository';
+import { PrismaJobRepository } from '../../repositories/implementations/prisma-job.repository';
 import { AdminService } from './admin.service';
-import { UserEntity } from '../../database/entities/user.entity';
-import { JobEntity } from '../../database/entities/job.entity';
+import { AdminController } from './admin.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, JobEntity])],
+  providers: [
+    PrismaService,
+    {
+      provide: IUserRepository,
+      useClass: PrismaUserRepository,
+    },
+    {
+      provide: IJobRepository,
+      useClass: PrismaJobRepository,
+    },
+    AdminService,
+  ],
   controllers: [AdminController],
-  providers: [AdminService],
+  exports: [AdminService],
 })
 export class AdminModule {}

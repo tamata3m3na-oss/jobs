@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AnalyticsController } from './analytics.controller';
+import { PrismaService } from '../../database/prisma.service';
 import { AnalyticsService } from './analytics.service';
-import { UserEntity } from '../../database/entities/user.entity';
-import { JobEntity } from '../../database/entities/job.entity';
-import { ApplicationEntity } from '../../database/entities/application.entity';
+import { AnalyticsController } from './analytics.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, JobEntity, ApplicationEntity])],
+  providers: [
+    PrismaService,
+    AnalyticsService,
+  ],
   controllers: [AnalyticsController],
-  providers: [AnalyticsService],
+  exports: [AnalyticsService],
 })
 export class AnalyticsModule {}

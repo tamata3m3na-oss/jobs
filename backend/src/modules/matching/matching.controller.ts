@@ -3,10 +3,16 @@ import { MatchingService } from './matching.service';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import {
-  SkillGapAnalysis,
-  PreScreeningQuestionsResponse,
-  ScreeningEvaluation,
-} from '@shared/schemas/ai.schema';
+  SkillGapAnalysisSchema,
+  PreScreeningQuestionsResponseSchema,
+  ScreeningEvaluationSchema,
+  ResumeParserResponseSchema,
+} from '@smartjob/shared';
+
+type SkillGapAnalysis = typeof SkillGapAnalysisSchema.static;
+type PreScreeningQuestionsResponse = typeof PreScreeningQuestionsResponseSchema.static;
+type ScreeningEvaluation = typeof ScreeningEvaluationSchema.static;
+type ResumeParserResponse = typeof ResumeParserResponseSchema.static;
 
 @ApiTags('matching')
 @Controller('matching')
@@ -69,8 +75,6 @@ export class MatchingController {
   async parseResume(
     @Body() data: { file: string; filename: string },
   ): Promise<ResumeParserResponse | null> {
-    // Note: In a real app, this would use multipart upload. 
-    // Here we assume base64 encoded file content for simplicity in this specific endpoint.
     const buffer = Buffer.from(data.file, 'base64');
     return this.matchingService.parseResume(buffer, data.filename);
   }

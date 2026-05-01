@@ -1,75 +1,66 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../../database/entities/user.entity';
-import { JobEntity } from '../../database/entities/job.entity';
+import { PrismaService } from '../../database/prisma.service';
+import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
+import { IJobRepository } from '../../repositories/interfaces/i-job.repository';
 import { UserStatus, JobStatus } from '@smartjob/shared';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    @InjectRepository(JobEntity)
-    private jobRepository: Repository<JobEntity>,
+    private readonly userRepository: IUserRepository,
+    private readonly jobRepository: IJobRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async getUsers(page = 1, limit = 10) {
-    const [data, total] = await this.userRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const result = await this.userRepository.findAll({}, { page, limit });
     return {
-      data,
+      data: result.data,
       pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
       },
     };
   }
 
   async updateUserStatus(id: string, status: UserStatus) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findById(id);
     if (!user) throw new NotFoundException('User not found');
-    user.status = status;
-    return this.userRepository.save(user);
+    return this.userRepository.update(id, { status });
   }
 
   async getJobs(page = 1, limit = 10) {
-    const [data, total] = await this.jobRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: { createdAt: 'DESC' },
-    });
+    const result = await this.jobRepository.findAll({}, { page, limit });
     return {
-      data,
+      data: result.data,
       pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
       },
     };
   }
 
   async updateJobStatus(id: string, status: JobStatus) {
-    const job = await this.jobRepository.findOne({ where: { id } });
+    const job = await this.jobRepository.findById(id);
     if (!job) throw new NotFoundException('Job not found');
-    job.status = status;
-    if (status === 'ACTIVE' && !job.publishedAt) {
-      job.publishedAt = new Date();
+
+    const updateData: Record<string, unknown> = { status };
+    if (status === 'ACTIVE') {
+      updateData.publishedAt = new Date();
     }
-    return this.jobRepository.save(job);
+
+    return this.jobRepository.update(id, updateData as Record<string, unknown>);
   }
 
   async getSystemStats() {
-    const totalUsers = await this.userRepository.count();
-    const totalJobs = await this.jobRepository.count();
-    const pendingJobs = await this.jobRepository.count({ where: { status: 'PENDING_APPROVAL' as JobStatus } });
-    
+    const totalUsers = await this.prisma.user.count();
+    const totalJobs = await this.prisma.job.count();
+    const pendingJobs = await this.prisma.job.count({ where: { status: 'PENDING_APPROVAL' } });
+
     return {
       totalUsers,
       totalJobs,
