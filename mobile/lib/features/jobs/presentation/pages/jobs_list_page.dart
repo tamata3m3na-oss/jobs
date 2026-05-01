@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../../shared/widgets/error_widget.dart' as shared;
-import '../../../shared/widgets/skeleton_widget.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../shared/widgets/error_widget.dart' as shared;
+import '../../../../shared/widgets/skeleton_widget.dart';
 import '../../../../shared/models/job_model.dart';
 import '../providers/jobs_provider.dart';
 
+/// Jobs list page with search and filter functionality
 class JobsListPage extends ConsumerStatefulWidget {
   const JobsListPage({super.key});
 
@@ -47,8 +48,14 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Find Jobs'),
+        title: Text(
+          'Find Jobs',
+          style: AppTypography.titleLarge.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         elevation: 0,
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -66,7 +73,7 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                 child: _buildJobsList(state),
               ),
               loading: () => _buildSkeletonList(),
-              error: (error, stack) => shared.CustomErrorWidget(
+              error: (error, stack) => shared.FailureWidget(
                 message: error.toString(),
                 onRetry: () => ref.read(jobsProvider.notifier).refresh(),
               ),
@@ -79,7 +86,7 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
 
   Widget _buildSearchAndFilters() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.m),
+      padding: const EdgeInsets.all(AppSpacing.base),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
@@ -97,12 +104,16 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
             onChanged: (value) {
               ref.read(jobSearchQueryProvider.notifier).state = value;
             },
+            style: AppTypography.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Search jobs, companies...',
-              prefixIcon: const Icon(Icons.search),
+              hintStyle: AppTypography.bodyMedium.copyWith(
+                color: AppColors.grey500,
+              ),
+              prefixIcon: const Icon(Icons.search, color: AppColors.grey500),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: const Icon(Icons.clear, color: AppColors.grey500),
                       onPressed: () {
                         _searchController.clear();
                         ref.read(jobSearchQueryProvider.notifier).state = '';
@@ -110,14 +121,22 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
                     )
                   : null,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.s),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: AppColors.neutral100,
+              fillColor: AppColors.grey100,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.base,
+                vertical: AppSpacing.md,
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.s),
+          const SizedBox(height: AppSpacing.base),
           _buildFilterChips(),
         ],
       ),
@@ -132,22 +151,38 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
       child: Row(
         children: [
           FilterChip(
-            label: const Text('All Types'),
+            label: Text(
+              'All Types',
+              style: AppTypography.labelMedium.copyWith(
+                color: selectedType == null
+                    ? Colors.white
+                    : AppColors.grey700,
+              ),
+            ),
             selected: selectedType == null,
+            selectedColor: AppColors.primary,
+            checkmarkColor: Colors.white,
             onSelected: (selected) {
               if (selected) {
                 ref.read(jobTypeFilterProvider.notifier).state = null;
               }
             },
           ),
-          const SizedBox(width: AppSpacing.s),
+          const SizedBox(width: AppSpacing.sm),
           ...JobType.values.map((type) {
             final isSelected = selectedType == type;
             return Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.s),
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: FilterChip(
-                label: Text(_getJobTypeLabel(type)),
+                label: Text(
+                  _getJobTypeLabel(type),
+                  style: AppTypography.labelMedium.copyWith(
+                    color: isSelected ? Colors.white : AppColors.grey700,
+                  ),
+                ),
                 selected: isSelected,
+                selectedColor: AppColors.primary,
+                checkmarkColor: Colors.white,
                 onSelected: (selected) {
                   ref.read(jobTypeFilterProvider.notifier).state = selected ? type : null;
                 },
@@ -161,31 +196,21 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
 
   Widget _buildJobsList(JobsState state) {
     if (state.jobs.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.search_off, size: 64, color: AppColors.neutral400),
-            const SizedBox(height: AppSpacing.m),
-            Text(
-              'No jobs found',
-              style: AppTypography.h3,
-            ),
-            const SizedBox(height: AppSpacing.s),
-            const Text('Try adjusting your search or filters'),
-          ],
-        ),
+      return shared.EmptyStateWidget(
+        title: 'No jobs found',
+        message: 'Try adjusting your search or filters',
+        icon: Icons.search_off,
       );
     }
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.all(AppSpacing.m),
+      padding: const EdgeInsets.all(AppSpacing.base),
       itemCount: state.jobs.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.jobs.length) {
           return const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.m),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.base),
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -198,11 +223,11 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
 
   Widget _buildSkeletonList() {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.m),
+      padding: const EdgeInsets.all(AppSpacing.base),
       itemCount: 5,
       itemBuilder: (context, index) => const Padding(
-        padding: EdgeInsets.only(bottom: AppSpacing.m),
-        child: Skeleton(height: 120, width: double.infinity),
+        padding: EdgeInsets.only(bottom: AppSpacing.base),
+        child: JobCardSkeleton(),
       ),
     );
   }
@@ -210,8 +235,11 @@ class _JobsListPageState extends ConsumerState<JobsListPage> {
   void _showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.l)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
       ),
       builder: (context) => const _FilterBottomSheet(),
     );
@@ -241,17 +269,17 @@ class _JobCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.m),
+      margin: const EdgeInsets.only(bottom: AppSpacing.base),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.s),
-        side: const BorderSide(color: AppColors.neutral200),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        side: const BorderSide(color: AppColors.grey200),
       ),
       elevation: 0,
       child: InkWell(
         onTap: () => context.push('/jobs/${job.id}'),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.m),
+          padding: const EdgeInsets.all(AppSpacing.base),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -262,61 +290,108 @@ class _JobCard extends StatelessWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: AppColors.neutral100,
-                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                      color: AppColors.grey100,
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     child: job.companyLogo != null
-                        ? Image.network(job.companyLogo!, errorBuilder: (_, __, ___) => const Icon(Icons.business))
-                        : const Icon(Icons.business, color: AppColors.neutral400),
+                        ? Image.network(
+                            job.companyLogo!,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.business,
+                              color: AppColors.grey400,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.business,
+                            color: AppColors.grey400,
+                          ),
                   ),
-                  const SizedBox(width: AppSpacing.m),
+                  const SizedBox(width: AppSpacing.base),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           job.title,
-                          style: AppTypography.h4,
+                          style: AppTypography.titleMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
                           job.companyName,
-                          style: AppTypography.bodyMedium.copyWith(color: AppColors.neutral600),
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.grey600,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.m),
+              const SizedBox(height: AppSpacing.base),
               Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: AppColors.neutral400),
-                  const SizedBox(width: 4),
-                  Text(job.location, style: AppTypography.bodySmall),
-                  const SizedBox(width: AppSpacing.m),
-                  const Icon(Icons.access_time, size: 16, color: AppColors.neutral400),
-                  const SizedBox(width: 4),
-                  Text(_getJobTypeLabel(job.type), style: AppTypography.bodySmall),
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: AppSpacing.iconXs,
+                    color: AppColors.grey500,
+                  ),
+                  const SizedBox(width: AppSpacing.xxs),
+                  Expanded(
+                    child: Text(
+                      job.location,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.grey600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.base),
+                  const Icon(
+                    Icons.access_time,
+                    size: AppSpacing.iconXs,
+                    color: AppColors.grey500,
+                  ),
+                  const SizedBox(width: AppSpacing.xxs),
+                  Text(
+                    _getJobTypeLabel(job.type),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: AppColors.grey600,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.s),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (job.salaryRange != null)
-                    Text(
-                      job.salaryRange!,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: AppColors.primary600,
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xxs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                      ),
+                      child: Text(
+                        job.salaryRange!,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   Text(
-                    '2 days ago', // Placeholder for created at
-                    style: AppTypography.labelSmall.copyWith(color: AppColors.neutral400),
+                    '2 days ago',
+                    style: AppTypography.labelSmall.copyWith(
+                      color: AppColors.grey500,
+                    ),
                   ),
                 ],
               ),
@@ -349,67 +424,135 @@ class _FilterBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedType = ref.watch(jobTypeFilterProvider);
-    final locationController = TextEditingController(text: ref.read(jobLocationFilterProvider));
+    final locationController = TextEditingController(
+      text: ref.read(jobLocationFilterProvider),
+    );
 
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.l,
-        right: AppSpacing.l,
-        top: AppSpacing.l,
-        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.l,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.grey300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.base),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Filters', style: AppTypography.h2),
+              Text(
+                'Filters',
+                style: AppTypography.titleLarge.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               TextButton(
                 onPressed: () {
                   ref.read(jobTypeFilterProvider.notifier).state = null;
                   ref.read(jobLocationFilterProvider.notifier).state = null;
                   Navigator.pop(context);
                 },
-                child: const Text('Reset'),
+                child: Text(
+                  'Reset',
+                  style: AppTypography.labelLarge.copyWith(
+                    color: AppColors.primary,
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.m),
-          Text('Location', style: AppTypography.h4),
-          const SizedBox(height: AppSpacing.s),
-          TextField(
-            controller: locationController,
-            decoration: const InputDecoration(
-              hintText: 'City, Country or Remote',
-              prefixIcon: Icon(Icons.location_on_outlined),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Location',
+            style: AppTypography.titleSmall.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: AppSpacing.m),
-          Text('Job Type', style: AppTypography.h4),
-          const SizedBox(height: AppSpacing.s),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: locationController,
+            style: AppTypography.bodyMedium,
+            decoration: InputDecoration(
+              hintText: 'City, Country or Remote',
+              hintStyle: AppTypography.bodyMedium.copyWith(
+                color: AppColors.grey500,
+              ),
+              prefixIcon: const Icon(
+                Icons.location_on_outlined,
+                color: AppColors.grey500,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.grey300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.grey300),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Job Type',
+            style: AppTypography.titleSmall.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: AppSpacing.s,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: JobType.values.map((type) {
               return ChoiceChip(
                 label: Text(_getJobTypeLabel(type)),
                 selected: selectedType == type,
+                selectedColor: AppColors.primary,
+                labelStyle: AppTypography.labelMedium.copyWith(
+                  color: selectedType == type ? Colors.white : AppColors.grey700,
+                ),
                 onSelected: (selected) {
                   ref.read(jobTypeFilterProvider.notifier).state = selected ? type : null;
                 },
               );
             }).toList(),
           ),
-          const SizedBox(height: AppSpacing.l),
+          const SizedBox(height: AppSpacing.xl),
           SizedBox(
             width: double.infinity,
+            height: AppSpacing.buttonHeightMd,
             child: ElevatedButton(
               onPressed: () {
-                ref.read(jobLocationFilterProvider.notifier).state = locationController.text.isEmpty ? null : locationController.text;
+                ref.read(jobLocationFilterProvider.notifier).state =
+                    locationController.text.isEmpty ? null : locationController.text;
                 Navigator.pop(context);
               },
-              child: const Text('Apply Filters'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+              ),
+              child: Text(
+                'Apply Filters',
+                style: AppTypography.labelLarge.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],

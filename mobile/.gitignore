@@ -61,3 +61,8 @@ coverage/
 *.g.dart
 *.config.dart
 *.chopper.dart
+
+# Test related
+test/widget/.env
+test/integration/.env
+*.mocks.dart

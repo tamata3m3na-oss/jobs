@@ -5,6 +5,9 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../providers/auth_provider.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 
@@ -62,7 +65,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(message),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         },
@@ -74,47 +77,70 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(AppSpacing.screenPaddingHorizontal),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // App logo and title
-                  const Icon(
-                    Icons.work,
-                    size: 80,
-                    color: Colors.blue,
+                  const SizedBox(height: AppSpacing.xl),
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.work,
+                      size: 64,
+                      color: AppColors.primary,
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     'Smart Job',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: AppTypography.headlineLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Find your dream job',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                        ),
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: AppColors.grey600,
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppSpacing.xxl),
 
                   // Email field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
+                    style: AppTypography.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'Email',
+                      labelStyle: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.grey600,
+                      ),
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.grey300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.error),
                       ),
                     ),
                     validator: (value) {
@@ -127,15 +153,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   // Password field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
+                    style: AppTypography.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'Password',
+                      labelStyle: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.grey600,
+                      ),
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -150,7 +180,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         },
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.grey300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderSide: const BorderSide(color: AppColors.error),
                       ),
                     ),
                     validator: (value) {
@@ -164,60 +206,102 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     },
                     onFieldSubmitted: (_) => _handleLogin(),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
 
-                  // Remember me
+                  // Remember me & Forgot password
                   Row(
                     children: [
-                      Checkbox(
-                        value: _rememberMe,
-                        onChanged: (value) {
-                          setState(() {
-                            _rememberMe = value ?? false;
-                          });
-                        },
+                      SizedBox(
+                        height: 48,
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              activeColor: AppColors.primary,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rememberMe = value ?? false;
+                                });
+                              },
+                            ),
+                            Text(
+                              'Remember me',
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.grey700,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Text('Remember me'),
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          // Forgot password logic
+                          // TODO: Navigate to forgot password
                         },
-                        child: const Text('Forgot Password?'),
+                        child: Text(
+                          'Forgot Password?',
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.base),
 
                   // Login button
                   authState.maybeWhen(
-                    loading: () => const LoadingWidget(),
-                    orElse: () => ElevatedButton(
-                      onPressed: _handleLogin,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 4),
+                    loading: () => SizedBox(
+                      height: AppSpacing.buttonHeightLg,
+                      child: const LoadingWidget(),
+                    ),
+                    orElse: () => SizedBox(
+                      height: AppSpacing.buttonHeightLg,
+                      child: ElevatedButton(
+                        onPressed: _handleLogin,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          ),
+                          elevation: 0,
+                        ),
                         child: Text(
                           'Login',
-                          style: TextStyle(fontSize: 16),
+                          style: AppTypography.labelLarge.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Register link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Don't have an account? ",
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: AppColors.grey600,
+                        ),
                       ),
                       TextButton(
                         onPressed: () => context.push(AppRoutes.register),
-                        child: const Text('Register'),
+                        child: Text(
+                          'Register',
+                          style: AppTypography.labelLarge.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: AppSpacing.xxl),
                 ],
               ),
             ),

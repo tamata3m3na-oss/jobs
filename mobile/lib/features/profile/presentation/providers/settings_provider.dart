@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../core/network/services/profile_service.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../shared/models/user_model.dart';
 
-/// Settings state
+/// Settings state with theme, language, and notification preferences
 class SettingsState {
   final ThemeMode themeMode;
   final Locale locale;
   final bool notificationsEnabled;
   final bool emailNotificationsEnabled;
   final double textScaleFactor;
+  final bool isLoading;
 
   const SettingsState({
     this.themeMode = ThemeMode.system,
@@ -19,6 +22,7 @@ class SettingsState {
     this.notificationsEnabled = true,
     this.emailNotificationsEnabled = true,
     this.textScaleFactor = 1.0,
+    this.isLoading = false,
   });
 
   SettingsState copyWith({
@@ -27,6 +31,7 @@ class SettingsState {
     bool? notificationsEnabled,
     bool? emailNotificationsEnabled,
     double? textScaleFactor,
+    bool? isLoading,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -34,11 +39,18 @@ class SettingsState {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       emailNotificationsEnabled: emailNotificationsEnabled ?? this.emailNotificationsEnabled,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 
   bool get isDarkMode => themeMode == ThemeMode.dark;
   bool get isArabic => locale.languageCode == 'ar';
+
+  TextStyle get scaledTypography {
+    return AppTypography.bodyMedium.copyWith(
+      fontSize: 14 * textScaleFactor,
+    );
+  }
 }
 
 /// Settings notifier provider
@@ -76,6 +88,14 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   void setTextScaleFactor(double factor) {
     state = state.copyWith(textScaleFactor: factor.clamp(0.8, 1.4));
   }
+
+  void setLoading(bool isLoading) {
+    state = state.copyWith(isLoading: isLoading);
+  }
+
+  void reset() {
+    state = const SettingsState();
+  }
 }
 
 /// Profile service provider
@@ -106,6 +126,9 @@ class ProfileState {
       errorMessage: errorMessage,
     );
   }
+
+  bool get hasError => errorMessage != null;
+  bool get hasData => user != null;
 }
 
 /// Profile provider
@@ -115,7 +138,7 @@ final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((re
 
 /// Profile notifier for managing user profile
 class ProfileNotifier extends StateNotifier<ProfileState> {
-  final ProfileService _profileService;
+  final ProfileService? _profileService;
 
   ProfileNotifier(this._profileService) : super(const ProfileState());
 
@@ -123,8 +146,15 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final user = await _profileService.getProfile();
-      state = state.copyWith(user: user, isLoading: false);
+      if (_profileService != null) {
+        final user = await _profileService.getProfile();
+        state = state.copyWith(user: user, isLoading: false);
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Profile service not available',
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -139,6 +169,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     String? bio,
     String? location,
   }) async {
+    if (_profileService == null) return false;
+
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
@@ -160,6 +192,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<bool> uploadAvatar(String filePath) async {
+    if (_profileService == null) return false;
+
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
@@ -181,6 +215,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   Future<bool> deleteAccount() async {
+    if (_profileService == null) return false;
+
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
@@ -201,8 +237,15 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   String _formatError(dynamic error) {
-    if (error.toString().contains('network')) {
+    final errorStr = error.toString().toLowerCase();
+    if (errorStr.contains('network') || errorStr.contains('connection')) {
       return 'Network error. Please check your connection.';
+    }
+    if (errorStr.contains('timeout')) {
+      return 'Request timed out. Please try again.';
+    }
+    if (errorStr.contains('401') || errorStr.contains('unauthorized')) {
+      return 'Session expired. Please sign in again.';
     }
     return 'Failed to update profile. Please try again.';
   }
@@ -216,4 +259,14 @@ final currentLocaleProvider = Provider<Locale>((ref) {
 /// Convenience provider for theme mode
 final themeModeProvider = Provider<ThemeMode>((ref) {
   return ref.watch(settingsProvider).themeMode;
+});
+
+/// Convenience provider for text scale factor
+final textScaleFactorProvider = Provider<double>((ref) {
+  return ref.watch(settingsProvider).textScaleFactor;
+});
+
+/// Convenience provider for notifications enabled
+final notificationsEnabledProvider = Provider<bool>((ref) {
+  return ref.watch(settingsProvider).notificationsEnabled;
 });
