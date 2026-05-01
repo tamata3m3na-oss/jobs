@@ -1,11 +1,5 @@
 import * as shared from '@smartjob/shared';
 import type { IUserRepository } from '../../repositories/interfaces/i-user.repository';
-
-type RegisterJobSeeker = shared.RegisterJobSeeker;
-type RegisterEmployer = shared.RegisterEmployer;
-type UserRole = shared.UserRole;
-type AuthTokens = shared.AuthTokens;
-
 import {
   Injectable,
   ConflictException,
@@ -15,6 +9,12 @@ import {
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../database/prisma.service';
 import { TokenService, TokenPair } from './services/token.service';
+import { AuditService, AuditEvent } from '../audit/audit.service';
+
+type RegisterJobSeeker = shared.RegisterJobSeeker;
+type RegisterEmployer = shared.RegisterEmployer;
+type UserRole = shared.UserRole;
+type AuthTokens = shared.AuthTokens;
 
 const BCRYPT_SALT_ROUNDS = 12;
 
@@ -37,6 +37,7 @@ export class AuthService {
     private readonly userRepository: IUserRepository,
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
+    private readonly auditService: AuditService,
   ) {}
 
   async registerJobSeeker(
@@ -72,6 +73,15 @@ export class AuthService {
       user.email as string,
       user.role as UserRole,
     );
+
+    await this.auditService.log({
+      entityType: 'User',
+      entityId: user.id as string,
+      action: AuditEvent.REGISTER_SUCCESS,
+      userId: user.id as string,
+      userEmail: user.email as string,
+      metadata: { role: 'JOB_SEEKER' },
+    });
 
     return {
       user: {
@@ -128,6 +138,15 @@ export class AuthService {
       user.role as UserRole,
     );
 
+    await this.auditService.log({
+      entityType: 'User',
+      entityId: user.id as string,
+      action: AuditEvent.REGISTER_SUCCESS,
+      userId: user.id as string,
+      userEmail: user.email as string,
+      metadata: { role: 'EMPLOYER' },
+    });
+
     return {
       user: {
         id: user.id as string,
@@ -158,6 +177,13 @@ export class AuthService {
     });
 
     if (user && (await bcrypt.compare(pass, user.password))) {
+      await this.auditService.log({
+        entityType: 'User',
+        entityId: user.id,
+        action: AuditEvent.LOGIN_SUCCESS,
+        userId: user.id,
+        userEmail: user.email,
+      });
       return {
         id: user.id,
         email: user.email,
@@ -166,6 +192,14 @@ export class AuthService {
         lastName: user.lastName,
       };
     }
+    
+    await this.auditService.log({
+      entityType: 'User',
+      entityId: 'unknown',
+      action: AuditEvent.LOGIN_FAILED,
+      userEmail: email,
+    });
+    
     return null;
   }
 
@@ -192,14 +226,30 @@ export class AuthService {
         'user-placeholder',
         refreshToken,
       );
+      await this.auditService.log({
+        entityType: 'Token',
+        entityId: 'placeholder',
+        action: AuditEvent.REFRESH_TOKEN_SUCCESS,
+      });
       return newTokens;
     } catch {
+      await this.auditService.log({
+        entityType: 'Token',
+        entityId: 'placeholder',
+        action: AuditEvent.REFRESH_TOKEN_FAILED,
+      });
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
   async logout(userId: string): Promise<void> {
     await this.tokenService.revokeAllUserTokens(userId);
+    await this.auditService.log({
+      entityType: 'User',
+      entityId: userId,
+      action: AuditEvent.LOGOUT,
+      userId: userId,
+    });
   }
 
   async getUserById(userId: string): Promise<AuthenticatedUser | null> {
