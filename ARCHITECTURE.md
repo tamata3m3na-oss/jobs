@@ -1,338 +1,123 @@
-# Smart Job Platform - Architecture Guidelines
+# Smart Job Platform - Architecture Documentation
 
-## Overview
+## High-Level Architecture
 
-This document defines the Clean Architecture guidelines and patterns for the Smart Job Platform monorepo.
+The Smart Job Platform is built using a **Microservices-inspired Monorepo Architecture**. Each component is designed with **Clean Architecture** principles to maintain a strict separation of concerns.
 
-## Technology Stack
+### System Diagram
 
-| Layer          | Technology           | Purpose                                      |
-| -------------- | -------------------- | -------------------------------------------- |
-| **Backend**    | NestJS + TypeScript  | REST API, WebSocket handlers, business logic |
-| **Frontend**   | Next.js + TypeScript | Web application, SSR, SSG                    |
-| **Mobile**     | Flutter + Dart       | Cross-platform mobile application            |
-| **AI Service** | Python FastAPI       | ML inference, semantic matching              |
-| **Database**   | PostgreSQL + PostGIS | Primary data store with geospatial support   |
-| **Cache**      | Redis                | Session, cache, real-time pub/sub            |
-| **Auth**       | JWT                  | Stateless authentication                     |
+```mermaid
+graph TD
+    User((User))
+    Web[Next.js Web App]
+    Mobile[Flutter Mobile App]
+    API[NestJS Backend API]
+    AI[FastAPI AI Service]
+    DB[(PostgreSQL + PostGIS)]
+    Cache[(Redis)]
+    Storage[Cloud Storage]
+    Stripe[Stripe Payments]
 
-## Directory Structure
-
-```
-smartjob/
-├── shared/                    # Shared packages
-│   ├── src/
-│   │   ├── schemas/          # Zod validation schemas
-│   │   └── index.ts         # Common types, utilities
-│   └── dist/                # Compiled output
-│
-├── backend/                  # NestJS application
-│   └── src/
-│       ├── modules/         # Feature modules
-│       │   ├── auth/
-│       │   ├── users/
-│       │   ├── jobs/
-│       │   ├── matching/
-│       │   ├── location/
-│       │   ├── notifications/
-│       │   ├── payments/
-│       │   └── admin/
-│       ├── common/          # Shared utilities
-│       │   ├── decorators/
-│       │   ├── filters/
-│       │   ├── guards/
-│       │   ├── interceptors/
-│       │   └── pipes/
-│       ├── database/        # TypeORM entities, migrations
-│       ├── config/           # Configuration modules
-│       └── main.ts
-│
-├── frontend/                # Next.js application
-│   └── src/
-│       ├── app/             # Next.js App Router pages
-│       ├── components/      # React components
-│       │   ├── ui/          # Base UI components
-│       │   ├── features/    # Feature-specific components
-│       │   └── layouts/     # Layout components
-│       ├── lib/             # Utilities, API clients
-│       ├── hooks/           # Custom React hooks
-│       ├── stores/          # State management
-│       ├── i18n/            # Internationalization
-│       └── styles/          # Global styles
-│
-├── mobile/                  # Flutter application (placeholder)
-│   └── lib/
-│       ├── core/            # App configuration, theme
-│       ├── features/        # Feature modules
-│       ├── shared/          # Shared widgets, utilities
-│       └── l10n/            # Localization
-│
-└── ai-service/              # Python FastAPI service
-    └── app/
-        ├── api/             # API routes
-        ├── core/            # Configuration
-        ├── services/        # ML services
-        └── models/          # Pydantic models
+    User <--> Web
+    User <--> Mobile
+    Web <--> API
+    Mobile <--> API
+    API <--> DB
+    API <--> Cache
+    API <--> AI
+    API <--> Stripe
+    AI <--> Cache
 ```
 
-## Clean Architecture Layers
+## Backend Architecture (NestJS)
 
-### Backend (NestJS)
+The backend follows a modular approach where each domain is encapsulated in its own module.
 
-```
-┌─────────────────────────────────────────┐
-│           Presentation Layer             │
-│  (Controllers, DTOs, OpenAPI/Swagger)   │
-├─────────────────────────────────────────┤
-│           Application Layer              │
-│  (Services, Use Cases, CQRS Handlers)   │
-├─────────────────────────────────────────┤
-│             Domain Layer                 │
-│  (Entities, Value Objects, Interfaces)  │
-├─────────────────────────────────────────┤
-│          Infrastructure Layer             │
-│  (Database, External APIs, Caching)     │
-└─────────────────────────────────────────┘
-```
+### Core Modules
 
-#### Layer Responsibilities
+- **Auth**: JWT-based authentication with Refresh Tokens and Role-Based Access Control (RBAC).
+- **Users**: Profile management for Job Seekers and Employers.
+- **Jobs**: Job lifecycle management with geospatial indexing for location-based search.
+- **Applications**: Handles the hiring pipeline, from submission to hire/reject.
+- **Matching**: Orchestrates calls to the AI Service for candidate ranking.
+- **Payments**: Integration with Stripe for employer subscriptions and featured jobs.
+- **Audit**: Tracks all critical system actions for security and compliance.
+- **Analytics**: Aggregates data for dashboards.
 
-1. **Presentation (Controllers)**
-   - Handle HTTP requests/responses
-   - Input validation via class-validator/Zod
-   - Authentication/authorization guards
-   - Rate limiting
-   - Response serialization
+### Patterns & Practices
 
-2. **Application (Services)**
-   - Business logic orchestration
-   - Transaction management
-   - Event publishing
-   - Caching strategies
-   - Logging and monitoring
+- **Dependency Injection**: Heavy use of NestJS DI for decoupled components.
+- **Interceptors**: Global response transformation and logging.
+- **Filters**: Unified error handling across all endpoints.
+- **Guards**: Role-based and ownership-based authorization.
+- **Decorators**: Custom decorators for user extraction and caching.
 
-3. **Domain (Entities)**
-   - Business rules and invariants
-   - Value objects for type safety
-   - Domain events
-   - Repository interfaces
+## Frontend Architecture (Next.js)
 
-4. **Infrastructure (Repositories)**
-   - Database access (TypeORM/Prisma)
-   - External service integrations
-   - Cache implementation
-   - File storage
+Built using Next.js 14 with the App Router, focusing on performance and accessibility.
 
-### Mobile (Flutter)
+- **Routing**: Locale-based routing (`/[locale]/...`) for i18n.
+- **State Management**:
+  - **Zustand**: For lightweight global state (e.g., UI preferences).
+  - **React Query**: For server-state synchronization and caching.
+  - **React Context**: For localized state (e.g., multi-step forms).
+- **Styling**: Tailwind CSS for responsive and RTL-compatible design.
+- **Components**: Atomic design approach with a focus on reusability.
 
-```
-┌─────────────────────────────────────────┐
-│            Presentation Layer            │
-│     (Widgets, Screens, ViewModels)       │
-├─────────────────────────────────────────┤
-│            Domain Layer                  │
-│      (Entities, Use Cases, Repos)        │
-├─────────────────────────────────────────┤
-│             Data Layer                   │
-│   (Models, Repositories, Data Sources)   │
-└─────────────────────────────────────────┘
-```
+## Mobile Architecture (Flutter)
 
-## Naming Conventions
+The mobile app implements **Clean Architecture** with three main layers:
 
-### TypeScript
+1.  **Presentation Layer**: Widgets and Riverpod Providers.
+2.  **Domain Layer**: Entities, Repositories (Interfaces), and Use Cases.
+3.  **Data Layer**: Repository Implementations, Data Sources (Remote/Local), and Models.
 
-| Type                   | Convention          | Example                   |
-| ---------------------- | ------------------- | ------------------------- |
-| Files                  | kebab-case          | `user-profile.service.ts` |
-| Classes                | PascalCase          | `UserService`             |
-| Interfaces             | PascalCase + prefix | `IUserRepository`         |
-| Types                  | PascalCase          | `UserProfile`             |
-| Enums                  | PascalCase          | `UserRole`                |
-| Constants              | UPPER_SNAKE_CASE    | `MAX_RETRY_COUNT`         |
-| Variables              | camelCase           | `userProfile`             |
-| Functions              | camelCase           | `getUserById`             |
-| Private methods        | camelCase + prefix  | `_validateInput`          |
-| Angular/NestJS modules | PascalCase          | `AuthModule`              |
-| DTOs                   | PascalCase + suffix | `CreateUserDto`           |
+### Key Features
 
-### Python (AI Service)
+- **Responsive UI**: Adaptive layouts for different screen sizes.
+- **Offline Support**: Local caching of job listings and profiles.
+- **Bilingual**: Seamless RTL/LTR switching.
 
-| Type      | Convention       | Example              |
-| --------- | ---------------- | -------------------- |
-| Files     | snake_case       | `user_repository.py` |
-| Classes   | PascalCase       | `UserRepository`     |
-| Functions | snake_case       | `get_user_by_id`     |
-| Variables | snake_case       | `user_profile`       |
-| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`    |
-| Private   | prefix `_`       | `_internal_method`   |
+## AI Service (Python FastAPI)
 
-### Database
+A specialized service for heavy ML tasks, utilizing sentence-transformers for semantic understanding.
 
-| Object       | Convention         | Example                 |
-| ------------ | ------------------ | ----------------------- |
-| Tables       | snake_case, plural | `user_profiles`         |
-| Columns      | snake_case         | `created_at`            |
-| Primary Keys | `id`               | `id UUID PRIMARY KEY`   |
-| Foreign Keys | `*_id`             | `user_id`               |
-| Indexes      | `idx_*`            | `idx_users_email`       |
-| Constraints  | `chk_*`            | `chk_users_email_valid` |
+- **Semantic Matching**: Converts resumes and job descriptions into high-dimensional embeddings.
+- **Resume Parsing**: Extracts structured data (skills, experience, education) from PDF/DOCX.
+- **Skill Gap Analysis**: Compares candidate skills against job requirements to identify missing areas.
+- **Screening Engine**: Generates context-aware interview questions and evaluates candidate answers.
 
-## TypeScript Strict Mode Configuration
+## Data Flow
 
-All projects MUST use strict TypeScript with these settings enforced:
+### 1. Job Search Flow
 
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "exactOptionalPropertyTypes": true,
-    "noUncheckedIndexedAccess": true
-  }
-}
-```
+1. User enters keywords and location on the Frontend.
+2. Frontend sends request to `GET /api/v1/jobs` with coordinates.
+3. Backend performs a PostGIS query to find jobs within the specified radius.
+4. Results are enriched with matching scores if the user is logged in as a Job Seeker.
+5. Paginated results are returned to the user.
 
-## Shared Validation Schemas
+### 2. Application Flow
 
-All entities are defined using Zod in the `shared` package:
+1. Job Seeker applies to a job.
+2. Backend triggers the AI Service to parse the resume (if not already parsed).
+3. Backend stores the application and notifies the Employer via WebSockets.
+4. Employer views the application, seeing an AI-generated match score and summary.
 
-- **User**: Job seekers, employers, and admin users
-- **Job**: Job postings with location, salary, and benefits
-- **Application**: Job applications with status tracking
-- **Analytics**: System and employer analytics data
-- **Admin**: Administrative actions and moderation
+## Security
 
-Schema files are the single source of truth for validation across backend, frontend, and mobile.
+- **Authentication**: JWT with `access_token` and `refresh_token`.
+- **Authorization**: RBAC (Admin, Employer, Job Seeker).
+- **Data Protection**:
+  - Input validation using Zod schemas.
+  - Sanitization of all user-generated content.
+  - Rate limiting on sensitive endpoints.
+  - Security headers via Helmet.
+- **Blind Hiring**: Optional mode that hides candidate names, photos, and gender to reduce bias.
 
-## API Design
+## Scalability & Performance
 
-### REST Endpoints
-
-```
-GET    /api/v1/jobs              - List jobs
-POST   /api/v1/jobs              - Create job
-GET    /api/v1/jobs/:id          - Get job by ID
-PATCH  /api/v1/jobs/:id          - Update job
-DELETE /api/v1/jobs/:id          - Delete job
-
-GET    /api/v1/jobs/:id/applications    - List applications for job
-POST   /api/v1/applications             - Submit application
-GET    /api/v1/applications/:id         - Get application
-PATCH  /api/v1/applications/:id/status  - Update status
-```
-
-### Response Format
-
-```typescript
-// Success
-{
-  success: true,
-  data: T,
-  message?: string,
-  timestamp: string
-}
-
-// Error
-{
-  statusCode: number,
-  message: string,
-  error: string,
-  details?: Record<string, unknown>,
-  timestamp: string
-}
-
-// Paginated
-{
-  data: T[],
-  pagination: {
-    page: number,
-    limit: number,
-    total: number,
-    totalPages: number,
-    hasNextPage: boolean,
-    hasPrevPage: boolean
-  }
-}
-```
-
-## Environment Variables
-
-See `.env.example` for required variables. Never commit `.env` files.
-
-## Geospatial Considerations
-
-- All coordinates stored as `[longitude, latitude]` (GeoJSON format)
-- Use PostGIS functions for distance calculations
-- Radius search: `ST_DWithin(location, point, radius_in_meters)`
-- Distance calculation: `ST_Distance(location, point)`
-
-## Internationalization (i18n)
-
-- Supported locales: `en` (LTR), `ar` (RTL)
-- Use `next-intl` for Next.js
-- All user-facing strings must be translatable
-- Date/time formatting via `date-fns`
-
-## Testing Strategy
-
-- **Unit Tests**: Individual functions/classes
-- **Integration Tests**: API endpoints with real DB
-- **E2E Tests**: Full user workflows
-
-## Security Considerations
-
-- JWT tokens with short expiry (15 min access, 7 day refresh)
-- Rate limiting on auth endpoints
-- Input sanitization (Zod)
-- SQL injection prevention (TypeORM parameterized queries)
-- XSS prevention (React auto-escaping)
-- CORS configuration
-- Helmet security headers
-
-## Performance
-
-- Redis caching for frequently accessed data
-- Database indexes on:
-  - `user_profiles.email` (unique)
-  - `jobs.employer_id`
-  - `jobs.status`
-  - `jobs.location` (PostGIS GIST)
-  - `applications.job_id`
-  - `applications.applicant_id`
-- Pagination on all list endpoints
-- Optimistic UI updates
-
-## Deployment
-
-- Backend: Docker container with multi-stage build
-- Frontend: Vercel or Docker (Next.js can be containerized)
-- AI Service: Docker container
-- Database: Managed PostgreSQL (Cloud SQL, RDS) or self-hosted
-
-## Git Workflow
-
-1. Create feature branch from `main`
-2. Follow conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`
-3. Submit PR with description
-4. CI/CD runs tests, linting, type checking
-5. Code review and approval
-6. Merge to `main`
-7. Auto-deploy to staging/production
-
-## Contributing
-
-1. Read this architecture document
-2. Follow naming conventions
-3. Run `npm run lint` and `npm run typecheck` before committing
-4. Write tests for new features
-5. Update documentation as needed
+- **Caching**: Redis caches hot data like job categories, popular searches, and user sessions.
+- **Database**: Indexed frequently queried columns and used PostGIS GIST indexes for locations.
+- **Statelessness**: The API is fully stateless, allowing easy horizontal scaling.
+- **Concurrency**: Leverages Node.js non-blocking I/O and FastAPI's asynchronous capabilities.
