@@ -142,9 +142,11 @@ class ApiClient {
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
+    String? userId,
   }) =>
       _authInterceptor.saveTokens(
         accessToken: accessToken,
         refreshToken: refreshToken,
+        userId: userId,
       );
 }

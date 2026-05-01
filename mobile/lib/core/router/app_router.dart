@@ -31,15 +31,26 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     debugLogDiagnostics: true,
-    refreshListenable: _RouterRefreshNotifier(authState),
+    refreshListenable: RouterRefreshNotifier(ref),
     redirect: (context, state) {
-      // Extract auth status from AsyncValue
       final isLoggedIn = authState.maybeWhen(
-        data: (data) => data.status == AuthStatus.authenticated,
+        authenticated: (_) => true,
         orElse: () => false,
       );
 
       final isPublicRoute = _isPublicRoute(state.matchedLocation);
+
+      // Handle Splash screen separately or let it fall through
+      if (state.matchedLocation == AppRoutes.splash) {
+        return authState.maybeWhen(
+          initial: () => null,
+          loading: () => null,
+          authenticated: (_) => AppRoutes.jobs,
+          unauthenticated: () => AppRoutes.login,
+          error: (_) => AppRoutes.login,
+          orElse: () => AppRoutes.login,
+        );
+      }
 
       // If not logged in and trying to access protected route
       if (!isLoggedIn && !isPublicRoute) {
@@ -125,18 +136,10 @@ bool _isPublicRoute(String location) {
 }
 
 /// Helper to refresh router when auth state changes
-class _RouterRefreshNotifier extends ChangeNotifier {
-  _RouterRefreshNotifier(AsyncValue<AuthState> authState) {
-    authState.whenData((state) {
-      // Use AuthState data
-    });
+class RouterRefreshNotifier extends ChangeNotifier {
+  RouterRefreshNotifier(Ref ref) {
+    ref.listen(authStateProvider, (_, __) => notifyListeners());
   }
-
-  @override
-  int get hashCode => 0;
-
-  @override
-  bool operator ==(Object other) => false;
 }
 
 /// Splash screen shown on app start
@@ -147,48 +150,35 @@ class SplashScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
 
-    return authState.when(
-      data: (state) {
-        // Redirect handled by router redirect
-        return const Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.work, size: 80, color: Colors.blue),
-                SizedBox(height: 24),
-                Text(
-                  'Smart Job',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 16),
-                LoadingWidget(),
-              ],
-            ),
-          ),
-        );
-      },
-      loading: () => const Scaffold(
-        body: Center(child: LoadingWidget()),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 60, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Error: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.go(AppRoutes.login),
-                child: const Text('Go to Login'),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.work, size: 80, color: Colors.blue),
+            const SizedBox(height: 24),
+            const Text(
+              'Smart Job',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            authState.maybeWhen(
+              error: (message) => Column(
+                children: [
+                  Text('Error: $message', style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => ref.read(authStateProvider.notifier).checkAuthStatus(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+              orElse: () => const LoadingWidget(),
+            ),
+          ],
         ),
       ),
     );

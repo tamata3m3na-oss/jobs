@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
@@ -19,6 +21,25 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _rememberMe = false;
+  static const String _rememberMeKey = 'remember_me_email';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedEmail();
+  }
+
+  Future<void> _loadSavedEmail() async {
+    final storage = GetIt.I<FlutterSecureStorage>();
+    final email = await storage.read(key: _rememberMeKey);
+    if (email != null && email.isNotEmpty) {
+      setState(() {
+        _emailController.text = email;
+        _rememberMe = true;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -30,20 +51,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final l10n = _getLocalizations(context);
 
     // Listen for auth state changes
-    ref.listen<AsyncValue<AuthState>>(authStateProvider, (previous, next) {
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
       next.maybeWhen(
-        data: (state) {
-          if (state.isAuthenticated) {
-            context.go(AppRoutes.jobs);
-          }
+        authenticated: (user) {
+          context.go(AppRoutes.jobs);
         },
-        error: (error, stack) {
+        error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(error.toString()),
+              content: Text(message),
               backgroundColor: Colors.red,
             ),
           );
@@ -79,7 +97,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n?.loginSubtitle ?? 'Find your dream job',
+                    'Find your dream job',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                         ),
@@ -93,7 +111,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
                     decoration: InputDecoration(
-                      labelText: l10n?.email ?? 'Email',
+                      labelText: 'Email',
                       prefixIcon: const Icon(Icons.email_outlined),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -101,10 +119,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return l10n?.emailRequired ?? 'Email is required';
+                        return 'Email is required';
                       }
                       if (!value.contains('@')) {
-                        return l10n?.invalidEmail ?? 'Invalid email address';
+                        return 'Invalid email address';
                       }
                       return null;
                     },
@@ -117,7 +135,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      labelText: l10n?.password ?? 'Password',
+                      labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -137,27 +155,50 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return l10n?.passwordRequired ?? 'Password is required';
+                        return 'Password is required';
                       }
                       if (value.length < 6) {
-                        return l10n?.passwordTooShort ?? 'Password must be at least 6 characters';
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
                     onFieldSubmitted: (_) => _handleLogin(),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+
+                  // Remember me
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            _rememberMe = value ?? false;
+                          });
+                        },
+                      ),
+                      const Text('Remember me'),
+                      const Spacer(),
+                      TextButton(
+                        onPressed: () {
+                          // Forgot password logic
+                        },
+                        child: const Text('Forgot Password?'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
                   // Login button
                   authState.maybeWhen(
                     loading: () => const LoadingWidget(),
                     orElse: () => ElevatedButton(
                       onPressed: _handleLogin,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 4),
                         child: Text(
-                          l10n?.login ?? 'Login',
-                          style: const TextStyle(fontSize: 16),
+                          'Login',
+                          style: TextStyle(fontSize: 16),
                         ),
                       ),
                     ),
@@ -168,13 +209,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        l10n?.dontHaveAccount ?? "Don't have an account? ",
-                        style: Theme.of(context).textTheme.bodyMedium,
+                      const Text(
+                        "Don't have an account? ",
                       ),
                       TextButton(
                         onPressed: () => context.push(AppRoutes.register),
-                        child: Text(l10n?.register ?? 'Register'),
+                        child: const Text('Register'),
                       ),
                     ],
                   ),
@@ -187,21 +227,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
+      final email = _emailController.text.trim();
+      final storage = GetIt.I<FlutterSecureStorage>();
+      
+      if (_rememberMe) {
+        await storage.write(key: _rememberMeKey, value: email);
+      } else {
+        await storage.delete(key: _rememberMeKey);
+      }
+      
       ref.read(authStateProvider.notifier).login(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
+            email,
+            _passwordController.text,
           );
-    }
-  }
-
-  dynamic _getLocalizations(BuildContext context) {
-    // Fallback localizations if not available
-    try {
-      return null;
-    } catch (_) {
-      return null;
     }
   }
 }

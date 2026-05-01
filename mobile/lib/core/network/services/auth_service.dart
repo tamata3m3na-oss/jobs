@@ -12,7 +12,7 @@ class AuthService {
   AuthService({required ApiClient apiClient}) : _apiClient = apiClient;
 
   /// Login with email and password
-  Future<UserModel> login({
+  Future<Map<String, dynamic>> login({
     required String email,
     required String password,
   }) async {
@@ -30,13 +30,14 @@ class AuthService {
     await _apiClient.saveTokens(
       accessToken: data['accessToken'] as String,
       refreshToken: data['refreshToken'] as String,
+      userId: data['user']['id'] as String,
     );
 
-    return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+    return data;
   }
 
   /// Register a new user
-  Future<UserModel> register({
+  Future<Map<String, dynamic>> register({
     required String email,
     required String password,
     required String fullName,
@@ -60,9 +61,10 @@ class AuthService {
     await _apiClient.saveTokens(
       accessToken: data['accessToken'] as String,
       refreshToken: data['refreshToken'] as String,
+      userId: data['user']['id'] as String,
     );
 
-    return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+    return data;
   }
 
   /// Logout the current user

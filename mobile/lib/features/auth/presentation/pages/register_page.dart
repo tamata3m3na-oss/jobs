@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../domain/models/auth_models.dart';
 import '../providers/auth_provider.dart';
 import '../../../../shared/widgets/loading_widget.dart';
 
@@ -41,17 +42,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final authState = ref.watch(authStateProvider);
 
     // Listen for auth state changes
-    ref.listen<AsyncValue<AuthState>>(authStateProvider, (previous, next) {
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
       next.maybeWhen(
-        data: (state) {
-          if (state.isAuthenticated) {
-            context.go(AppRoutes.jobs);
-          }
+        authenticated: (user) {
+          context.go(AppRoutes.jobs);
         },
-        error: (error, stack) {
+        error: (message) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(error.toString()),
+              content: Text(message),
               backgroundColor: Colors.red,
             ),
           );
@@ -63,10 +62,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Account'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
       ),
       body: SafeArea(
         child: Center(
@@ -171,7 +166,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       }
                       return null;
                     },
+                    onChanged: (value) {
+                      setState(() {});
+                    },
                   ),
+                  if (_passwordController.text.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4),
+                      child: Text(
+                        _getPasswordStrengthText(_passwordController.text),
+                        style: TextStyle(
+                          color: _getPasswordStrengthColor(_passwordController.text),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 16),
 
                   // Confirm password field
@@ -255,9 +265,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'Already have an account? ',
-                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       TextButton(
                         onPressed: () => context.pop(),
@@ -277,12 +286,32 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   void _handleRegister() {
     if (_formKey.currentState?.validate() ?? false) {
       ref.read(authStateProvider.notifier).register(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            fullName: _fullNameController.text.trim(),
-            role: _selectedRole,
-            phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+            RegisterRequest(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              fullName: _fullNameController.text.trim(),
+              role: _selectedRole,
+              phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+            ),
           );
     }
+  }
+
+  String _getPasswordStrengthText(String password) {
+    if (password.length < 6) return 'Weak';
+    if (password.length < 10) return 'Medium';
+    if (_hasSpecialChars(password)) return 'Strong';
+    return 'Medium';
+  }
+
+  Color _getPasswordStrengthColor(String password) {
+    if (password.length < 6) return Colors.red;
+    if (password.length < 10) return Colors.orange;
+    if (_hasSpecialChars(password)) return Colors.green;
+    return Colors.orange;
+  }
+
+  bool _hasSpecialChars(String password) {
+    return password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
   }
 }
