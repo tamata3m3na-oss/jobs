@@ -1,19 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { JobSearchFilters } from '@smartjob/shared';
+import { JobSearchFilters, JobStatus } from '@smartjob/shared';
 import {
   IJobRepository,
   CreateJobInput,
   UpdateJobInput,
   JobFilterInput,
+  JobListResult,
+  JobWithEmployerResult,
+  JobStats,
 } from '../interfaces/i-job.repository';
 
 @Injectable()
 export class PrismaJobRepository implements IJobRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateJobInput): Promise<Record<string, unknown>> {
-    const job = await this.prisma.job.create({
+  async create(data: CreateJobInput): Promise<JobWithEmployerResult> {
+    const prismaJob = this.prisma.job as any;
+    const job = await prismaJob.create({
       data: {
         employerId: data.employerId,
         title: data.title,
@@ -27,54 +31,98 @@ export class PrismaJobRepository implements IJobRepository {
         jobType: data.jobType,
         experienceLevel: data.experienceLevel ?? 'MID',
         location: data.location,
-        locationDetails: data.locationDetails ?? null,
-        salaryMin: data.salaryMin ?? null,
-        salaryMax: data.salaryMax ?? null,
+        locationDetails: data.locationDetails ?? undefined,
+        salaryMin: data.salaryMin ?? undefined,
+        salaryMax: data.salaryMax ?? undefined,
         salaryCurrency: data.salaryCurrency ?? 'USD',
         salaryPeriod: data.salaryPeriod ?? 'YEARLY',
         salaryNegotiable: data.salaryNegotiable ?? false,
         salaryCompetitive: data.salaryCompetitive ?? true,
         benefits: data.benefits ?? {},
         applicationQuestions: data.applicationQuestions ?? [],
-        applicationDeadline: data.applicationDeadline ?? null,
-        startDate: data.startDate ?? null,
+        applicationDeadline: data.applicationDeadline ?? undefined,
+        startDate: data.startDate ?? undefined,
         openings: data.openings ?? 1,
         status: data.status ?? 'DRAFT',
         featured: data.featured ?? false,
         screeningCriteria: data.screeningCriteria ?? [],
         matchSettings: data.matchSettings ?? {},
       },
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
     });
 
-    return job as unknown as Record<string, unknown>;
+    return this.mapJobToResult(job);
   }
 
-  async findById(id: string): Promise<Record<string, unknown> | null> {
-    const job = await this.prisma.job.findUnique({
+  async findById(id: string): Promise<JobWithEmployerResult | null> {
+    const prismaJob = this.prisma.job as any;
+    const job = await prismaJob.findUnique({
       where: { id },
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
     });
 
-    return job as unknown as Record<string, unknown> | null;
+    if (!job) return null;
+
+    return this.mapJobToResult(job);
   }
 
-  async findBySlug(slug: string): Promise<Record<string, unknown> | null> {
-    const job = await this.prisma.job.findUnique({
+  async findByIdWithEmployer(id: string): Promise<JobWithEmployerResult | null> {
+    return this.findById(id);
+  }
+
+  async findBySlug(slug: string): Promise<JobWithEmployerResult | null> {
+    const prismaJob = this.prisma.job as any;
+    const job = await prismaJob.findUnique({
       where: { slug },
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
     });
 
-    return job as unknown as Record<string, unknown> | null;
+    if (!job) return null;
+
+    return this.mapJobToResult(job);
+  }
+
+  async findBySlugWithEmployer(slug: string): Promise<JobWithEmployerResult | null> {
+    return this.findBySlug(slug);
   }
 
   async findAll(
     filter: JobFilterInput,
-    pagination: { page: number; limit: number }
-  ): Promise<{
-    data: Record<string, unknown>[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string },
+  ): Promise<JobListResult> {
     const where: Record<string, unknown> = {};
 
     if (filter.employerId) {
@@ -93,18 +141,33 @@ export class PrismaJobRepository implements IJobRepository {
       where.experienceLevel = filter.experienceLevel;
     }
 
+    const orderBy = this.buildOrderBy(pagination.sortBy, pagination.sortOrder);
+    const prismaJob = this.prisma.job as any;
+
     const [jobs, total] = await Promise.all([
-      this.prisma.job.findMany({
+      prismaJob.findMany({
         where,
         skip: (pagination.page - 1) * pagination.limit,
         take: pagination.limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
+        include: {
+          employer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              avatarUrl: true,
+              profile: true,
+            },
+          },
+        },
       }),
       this.prisma.job.count({ where }),
     ]);
 
     return {
-      data: jobs as unknown as Record<string, unknown>[],
+      data: jobs.map((job: any) => this.mapJobToResult(job)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -112,17 +175,13 @@ export class PrismaJobRepository implements IJobRepository {
     };
   }
 
-  async search(filters: JobSearchFilters): Promise<{
-    data: Record<string, unknown>[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
+  async search(filters: JobSearchFilters): Promise<JobListResult> {
     const where: Record<string, unknown> = {};
 
     if (filters.status) {
       where.status = filters.status;
+    } else {
+      where.status = 'ACTIVE';
     }
 
     if (filters.employerId) {
@@ -138,11 +197,28 @@ export class PrismaJobRepository implements IJobRepository {
     }
 
     if (filters.query) {
-      where.OR = [
-        { title: { contains: filters.query, mode: 'insensitive' } },
-        { description: { contains: filters.query, mode: 'insensitive' } },
-        { skills: { hasSome: [filters.query] } },
-      ];
+      const searchTerms = filters.query.trim().split(/\s+/);
+      where.AND = searchTerms.map((term) => ({
+        OR: [
+          { title: { contains: term, mode: 'insensitive' } },
+          { description: { contains: term, mode: 'insensitive' } },
+          { shortDescription: { contains: term, mode: 'insensitive' } },
+          { skills: { hasSome: [term] } },
+          { requirements: { hasSome: [term] } },
+        ],
+      }));
+    }
+
+    if (filters.skills && filters.skills.length > 0) {
+      where.skills = { hasSome: filters.skills };
+    }
+
+    if (filters.salaryMin) {
+      where.salaryMax = { gte: filters.salaryMin };
+    }
+
+    if (filters.salaryMax) {
+      where.salaryMin = { lte: filters.salaryMax };
     }
 
     if (filters.postedWithin && filters.postedWithin !== 'ANY') {
@@ -169,22 +245,33 @@ export class PrismaJobRepository implements IJobRepository {
       where.createdAt = { gte: dateFilter };
     }
 
-    const orderBy: Record<string, string> = filters.sortBy === 'salary'
-      ? { salaryMax: filters.sortOrder }
-      : { createdAt: 'desc' };
+    const orderBy = this.buildSearchOrderBy(filters.sortBy, filters.sortOrder);
+    const prismaJob = this.prisma.job as any;
 
     const [jobs, total] = await Promise.all([
-      this.prisma.job.findMany({
+      prismaJob.findMany({
         where,
         skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
         orderBy,
+        include: {
+          employer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              avatarUrl: true,
+              profile: true,
+            },
+          },
+        },
       }),
       this.prisma.job.count({ where }),
     ]);
 
     return {
-      data: jobs as unknown as Record<string, unknown>[],
+      data: jobs.map((job: any) => this.mapJobToResult(job)),
       total,
       page: filters.page,
       limit: filters.limit,
@@ -192,7 +279,15 @@ export class PrismaJobRepository implements IJobRepository {
     };
   }
 
-  async update(id: string, data: UpdateJobInput): Promise<Record<string, unknown>> {
+  async paginate(
+    page: number,
+    limit: number,
+    filters?: JobFilterInput,
+  ): Promise<JobListResult> {
+    return this.findAll(filters ?? {}, { page, limit });
+  }
+
+  async update(id: string, data: UpdateJobInput): Promise<JobWithEmployerResult> {
     const updateData: Record<string, unknown> = {};
 
     if (data.title !== undefined) updateData.title = data.title;
@@ -227,12 +322,55 @@ export class PrismaJobRepository implements IJobRepository {
     if (data.screeningCriteria !== undefined) updateData.screeningCriteria = data.screeningCriteria;
     if (data.matchSettings !== undefined) updateData.matchSettings = data.matchSettings;
 
-    const job = await this.prisma.job.update({
+    const prismaJob = this.prisma.job as any;
+    const job = await prismaJob.update({
       where: { id },
       data: updateData,
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
     });
 
-    return job as unknown as Record<string, unknown>;
+    return this.mapJobToResult(job);
+  }
+
+  async updateStatus(id: string, status: JobStatus): Promise<JobWithEmployerResult> {
+    const updateData: Record<string, unknown> = { status };
+
+    if (status === 'ACTIVE') {
+      updateData.publishedAt = new Date();
+    } else if (status === 'CLOSED') {
+      updateData.closedAt = new Date();
+    }
+
+    const prismaJob = this.prisma.job as any;
+    const job = await prismaJob.update({
+      where: { id },
+      data: updateData,
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
+    });
+
+    return this.mapJobToResult(job);
   }
 
   async delete(id: string): Promise<void> {
@@ -245,6 +383,12 @@ export class PrismaJobRepository implements IJobRepository {
     await this.prisma.job.update({
       where: { id },
       data: { views: { increment: 1 } },
+    });
+  }
+
+  async countApplications(id: string): Promise<number> {
+    return this.prisma.application.count({
+      where: { jobId: id },
     });
   }
 
@@ -265,30 +409,129 @@ export class PrismaJobRepository implements IJobRepository {
 
   async findByEmployer(
     employerId: string,
-    pagination: { page: number; limit: number }
-  ): Promise<{
-    data: Record<string, unknown>[];
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  }> {
-    const [jobs, total] = await Promise.all([
-      this.prisma.job.findMany({
-        where: { employerId },
-        skip: (pagination.page - 1) * pagination.limit,
-        take: pagination.limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.job.count({ where: { employerId } }),
-    ]);
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string },
+  ): Promise<JobListResult> {
+    return this.findAll({ employerId }, pagination);
+  }
+
+  async findFeaturedJobs(limit = 10): Promise<JobWithEmployerResult[]> {
+    const prismaJob = this.prisma.job as any;
+    const jobs = await prismaJob.findMany({
+      where: {
+        status: 'ACTIVE',
+        featured: true,
+      },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        employer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+            profile: true,
+          },
+        },
+      },
+    });
+
+    return jobs.map((job: any) => this.mapJobToResult(job));
+  }
+
+  async getJobStats(jobId: string): Promise<JobStats> {
+    const job = await this.prisma.job.findUnique({
+      where: { id: jobId },
+      select: {
+        id: true,
+        views: true,
+        applicationsCount: true,
+      },
+    });
+
+    if (!job) {
+      throw new NotFoundException('Job not found');
+    }
 
     return {
-      data: jobs as unknown as Record<string, unknown>[],
-      total,
-      page: pagination.page,
-      limit: pagination.limit,
-      totalPages: Math.ceil(total / pagination.limit),
+      jobId: job.id,
+      views: job.views,
+      applicationsCount: job.applicationsCount,
     };
+  }
+
+  private mapJobToResult(job: any): JobWithEmployerResult {
+    return {
+      id: job.id,
+      employerId: job.employerId,
+      title: job.title,
+      slug: job.slug,
+      description: job.description,
+      shortDescription: job.shortDescription,
+      requirements: job.requirements || [],
+      responsibilities: job.responsibilities || [],
+      niceToHave: job.niceToHave || [],
+      skills: job.skills || [],
+      jobType: job.jobType,
+      experienceLevel: job.experienceLevel,
+      location: job.location || { type: 'Point', coordinates: [0, 0] },
+      locationDetails: job.locationDetails || null,
+      salaryMin: job.salaryMin ? Number(job.salaryMin) : null,
+      salaryMax: job.salaryMax ? Number(job.salaryMax) : null,
+      salaryCurrency: job.salaryCurrency || 'USD',
+      salaryPeriod: job.salaryPeriod || 'YEARLY',
+      salaryNegotiable: job.salaryNegotiable || false,
+      salaryCompetitive: job.salaryCompetitive || true,
+      benefits: job.benefits || {},
+      applicationQuestions: job.applicationQuestions || [],
+      applicationDeadline: job.applicationDeadline || null,
+      startDate: job.startDate || null,
+      openings: job.openings || 1,
+      status: job.status,
+      featured: job.featured || false,
+      views: job.views || 0,
+      applicationsCount: job.applicationsCount || 0,
+      publishedAt: job.publishedAt || null,
+      expiresAt: job.expiresAt || null,
+      closedAt: job.closedAt || null,
+      aiGeneratedDescription: job.aiGeneratedDescription || false,
+      screeningCriteria: job.screeningCriteria || [],
+      matchSettings: job.matchSettings || {},
+      createdAt: new Date(job.createdAt),
+      updatedAt: new Date(job.updatedAt),
+      employer: job.employer || null,
+    };
+  }
+
+  private buildOrderBy(
+    sortBy?: string,
+    sortOrder?: string,
+  ): Record<string, string> {
+    const validSortFields = ['createdAt', 'updatedAt', 'title', 'views', 'applicationsCount'];
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
+    
+    if (sortBy && validSortFields.includes(sortBy)) {
+      return { [sortBy]: order };
+    }
+    
+    return { createdAt: 'desc' };
+  }
+
+  private buildSearchOrderBy(
+    sortBy?: 'relevance' | 'date' | 'salary' | 'distance',
+    sortOrder?: 'asc' | 'desc',
+  ): Record<string, string> {
+    const order = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    switch (sortBy) {
+      case 'date':
+        return { createdAt: order };
+      case 'salary':
+        return { salaryMax: order };
+      case 'relevance':
+      default:
+        return { createdAt: 'desc' };
+    }
   }
 }
