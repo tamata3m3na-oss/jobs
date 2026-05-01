@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import {
   IAuditLogRepository,
@@ -17,12 +18,13 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
         entityType: data.entityType,
         entityId: data.entityId,
         action: data.action,
-        userId: data.userId ?? null,
-        userEmail: data.userEmail ?? null,
-        changes: data.changes ?? null,
-        metadata: data.metadata ?? null,
-        ipAddress: data.ipAddress ?? null,
-        userAgent: data.userAgent ?? null,
+        userId: data.userId ?? Prisma.DbNull,
+        userEmail: data.userEmail ?? Prisma.DbNull,
+        changes: data.changes != null ? (data.changes as Prisma.InputJsonValue) : Prisma.JsonNull,
+        metadata:
+          data.metadata != null ? (data.metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
+        ipAddress: data.ipAddress ?? Prisma.DbNull,
+        userAgent: data.userAgent ?? Prisma.DbNull,
       },
     });
 

@@ -4,7 +4,7 @@ import redis
 import json
 import hashlib
 from app.core.config import settings
-from typing import List, Dict, Union, Optional, Any
+from typing import List, Dict, Union, Optional
 
 # Define a type that avoids 'Any' as much as possible
 JSONValue = Union[str, int, float, bool, None, List[str], Dict[str, str]]

@@ -4,7 +4,7 @@ import { ThrottlerException } from '@nestjs/throttler';
 
 @Catch(ThrottlerException)
 export class ThrottlerExceptionFilter extends BaseExceptionFilter {
-  catch(exception: ThrottlerException, host: ArgumentsHost) {
+  catch(exception: ThrottlerException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 

@@ -9,7 +9,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+  override canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -22,7 +22,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as boolean | Promise<boolean>;
   }
 
-  handleRequest<TUser = Record<string, unknown>>(
+  override handleRequest<TUser = Record<string, unknown>>(
     err: Error | null,
     user: TUser | false,
     info: Error | undefined

@@ -9,6 +9,7 @@ import { MatchingModule } from './modules/matching/matching.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { HealthModule } from './modules/health/health.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule } from './common/cache/cache.module';
@@ -42,6 +43,7 @@ import configuration from './config/configuration';
     AdminModule,
     AnalyticsModule,
     PaymentsModule,
+    HealthModule,
   ],
   providers: [
     {

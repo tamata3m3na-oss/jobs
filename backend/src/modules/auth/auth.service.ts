@@ -206,20 +206,19 @@ export class AuthService {
     }
 
     try {
-      const newTokens = await this.tokenService.rotateRefreshToken(
-        'user-placeholder',
-        refreshToken
-      );
+      const payload = await this.tokenService.verifyRefreshToken(refreshToken);
+      const newTokens = await this.tokenService.rotateRefreshToken(payload.sub, refreshToken);
       await this.auditService.log({
         entityType: 'Token',
-        entityId: 'placeholder',
+        entityId: payload.sub,
         action: AuditEvent.REFRESH_TOKEN_SUCCESS,
+        userId: payload.sub,
       });
       return newTokens;
     } catch {
       await this.auditService.log({
         entityType: 'Token',
-        entityId: 'placeholder',
+        entityId: 'unknown',
         action: AuditEvent.REFRESH_TOKEN_FAILED,
       });
       throw new UnauthorizedException('Invalid refresh token');

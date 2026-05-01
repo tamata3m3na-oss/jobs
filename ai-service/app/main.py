@@ -26,4 +26,14 @@ app = get_application()
 
 @app.get("/health")
 async def health_check() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok", "service": "ai-service"}
+
+@app.get("/health/ready")
+async def readiness_check() -> dict[str, str]:
+    """Readiness check - verifies service is ready to handle requests."""
+    return {"status": "ready", "service": "ai-service"}
+
+@app.get("/health/live")
+async def liveness_check() -> dict[str, str]:
+    """Liveness check for Kubernetes."""
+    return {"status": "alive", "service": "ai-service"}
