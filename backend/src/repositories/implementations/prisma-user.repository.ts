@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { UserRole, UserStatus } from '@smartjob/shared';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import {
   IUserRepository,
@@ -88,18 +90,66 @@ export class PrismaUserRepository implements IUserRepository {
     };
   }
 
+  async paginate(page: number, limit: number, search?: string): Promise<PaginatedResult<Record<string, unknown>>> {
+    const where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users as Record<string, unknown>[],
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   async update(id: string, data: UpdateUserInput): Promise<Record<string, unknown>> {
     const user = await this.prisma.user.update({
       where: { id },
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: data.phone ?? null,
-        avatarUrl: data.avatarUrl ?? null,
+        phone: data.phone === undefined ? undefined : data.phone,
+        avatarUrl: data.avatarUrl === undefined ? undefined : data.avatarUrl,
         status: data.status,
-        verifiedAt: data.verifiedAt ?? null,
-        profile: data.profile ?? null,
+        verifiedAt: data.verifiedAt === undefined ? undefined : data.verifiedAt,
+        profile: data.profile === undefined ? undefined : data.profile,
       },
+    });
+
+    return user as Record<string, unknown>;
+  }
+
+  async updateRole(userId: string, role: UserRole): Promise<Record<string, unknown>> {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { role },
+    });
+
+    return user as Record<string, unknown>;
+  }
+
+  async updateStatus(userId: string, status: UserStatus): Promise<Record<string, unknown>> {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: { status },
     });
 
     return user as Record<string, unknown>;

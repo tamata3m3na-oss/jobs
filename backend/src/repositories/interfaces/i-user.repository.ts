@@ -45,7 +45,10 @@ export interface IUserRepository {
   findById(id: string): Promise<Record<string, unknown> | null>;
   findByEmail(email: string): Promise<Record<string, unknown> | null>;
   findAll(filter: UserFilterInput, pagination: PaginationInput): Promise<PaginatedResult<Record<string, unknown>>>;
+  paginate(page: number, limit: number, search?: string): Promise<PaginatedResult<Record<string, unknown>>>;
   update(id: string, data: UpdateUserInput): Promise<Record<string, unknown>>;
+  updateRole(userId: string, role: UserRole): Promise<Record<string, unknown>>;
+  updateStatus(userId: string, status: UserStatus): Promise<Record<string, unknown>>;
   delete(id: string): Promise<void>;
   updateProfile(id: string, profile: Record<string, unknown>): Promise<Record<string, unknown>>;
   existsByEmail(email: string): Promise<boolean>;
