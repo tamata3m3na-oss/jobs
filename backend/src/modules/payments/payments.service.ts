@@ -10,7 +10,7 @@ export class PaymentsService {
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('stripe.apiKey');
     this.stripe = new Stripe(apiKey || '', {
-      apiVersion: '2023-10-16',
+      apiVersion: '2023-10-16' as const,
     });
   }
 
@@ -31,7 +31,8 @@ export class PaymentsService {
       });
       return session;
     } catch (error) {
-      this.logger.error(`Error creating checkout session: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Error creating checkout session: ${err.message}`);
       throw error;
     }
   }
@@ -39,5 +40,13 @@ export class PaymentsService {
   async constructEventFromPayload(signature: string, payload: Buffer) {
     const webhookSecret = this.configService.get<string>('stripe.webhookSecret');
     return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret || '');
+  }
+
+  async handleCheckoutCompleted(session: { id: string }) {
+    this.logger.log(`Processing checkout completed: ${session.id}`);
+  }
+
+  async handleSubscriptionDeleted(subscription: { id: string }) {
+    this.logger.log(`Processing subscription deleted: ${subscription.id}`);
   }
 }

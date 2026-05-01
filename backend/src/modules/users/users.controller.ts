@@ -1,51 +1,58 @@
 import {
   Controller,
   Get,
+  Put,
   Body,
-  Patch,
   UseGuards,
   Request,
+  UsePipes,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import {
-  UpdateJobSeekerProfile,
-  UpdateEmployerProfile,
-  UserRole,
+  UpdateJobSeekerProfileSchema,
+  UpdateEmployerProfileSchema,
 } from '@smartjob/shared';
 
 @ApiTags('Users')
-@ApiBearerAuth()
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Return current user' })
-  async getMe(@Request() req: { user: { id: string } }) {
+  @ApiResponse({ status: 200, description: 'User profile retrieved' })
+  async getProfile(@Request() req: { user: { id: string } }) {
     return this.usersService.findOne(req.user.id);
   }
 
-  @Patch('profile')
-  @ApiOperation({ summary: 'Update user profile' })
+  @Put('profile/job-seeker')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UsePipes(new ZodValidationPipe(UpdateJobSeekerProfileSchema))
+  @ApiOperation({ summary: 'Update job seeker profile' })
   @ApiResponse({ status: 200, description: 'Profile updated' })
-  async updateProfile(
+  async updateJobSeekerProfile(
     @Request() req: { user: { id: string } },
-    @Body() profileData: UpdateJobSeekerProfile | UpdateEmployerProfile,
+    @Body() data: Record<string, unknown>,
   ) {
-    return this.usersService.updateProfile(req.user.id, profileData);
+    return this.usersService.updateProfile(req.user.id, data as never);
   }
 
-  @Get()
-  @Roles('ADMIN' as UserRole)
-  @ApiOperation({ summary: 'Get all users (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Return all users' })
-  async findAll() {
-    return this.usersService.findAll();
+  @Put('profile/employer')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UsePipes(new ZodValidationPipe(UpdateEmployerProfileSchema))
+  @ApiOperation({ summary: 'Update employer profile' })
+  @ApiResponse({ status: 200, description: 'Profile updated' })
+  async updateEmployerProfile(
+    @Request() req: { user: { id: string } },
+    @Body() data: Record<string, unknown>,
+  ) {
+    return this.usersService.updateProfile(req.user.id, data as never);
   }
 }

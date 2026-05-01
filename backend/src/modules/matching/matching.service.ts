@@ -1,11 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  SkillGapAnalysis,
-  PreScreeningQuestionsResponse,
-  ScreeningEvaluation,
-  ResumeParserResponse,
-} from '@shared/schemas/ai.schema';
+  SkillGapAnalysisSchema,
+  PreScreeningQuestionsResponseSchema,
+  ScreeningEvaluationSchema,
+  ResumeParserResponseSchema,
+} from '@smartjob/shared';
+
+type SkillGapAnalysis = typeof SkillGapAnalysisSchema.static;
+type PreScreeningQuestionsResponse = typeof PreScreeningQuestionsResponseSchema.static;
+type ScreeningEvaluation = typeof ScreeningEvaluationSchema.static;
+type ResumeParserResponse = typeof ResumeParserResponseSchema.static;
 
 @Injectable()
 export class MatchingService {
@@ -13,7 +18,13 @@ export class MatchingService {
   private readonly aiServiceUrl: string;
 
   constructor(private configService: ConfigService) {
-    this.aiServiceUrl = this.configService.get<string>('aiService.url');
+    const url = this.configService.get<string>('aiService.url');
+    if (!url) {
+      this.logger.warn('AI Service URL not configured, using default');
+      this.aiServiceUrl = 'http://localhost:8000';
+    } else {
+      this.aiServiceUrl = url;
+    }
   }
 
   async matchJobs(query: string, jobs: Array<{ id: string; title: string; description: string }>): Promise<Array<{ id: string; score: number }>> {
@@ -30,10 +41,11 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as { results: Array<{ id: string; score: number }> };
       return result.results;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service: ${err.message}`);
       return jobs.map(job => ({ id: job.id, score: 0 }));
     }
   }
@@ -52,10 +64,11 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as { results: Array<{ id: string; score: number }> };
       return result.results;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service for candidate matching: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service for candidate matching: ${err.message}`);
       return candidates.map(c => ({ id: c.id, score: 0 }));
     }
   }
@@ -74,10 +87,11 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as { score: number };
       return result.score;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service: ${err.message}`);
       return 0;
     }
   }
@@ -96,9 +110,10 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as SkillGapAnalysis;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service for skill gap analysis: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service for skill gap analysis: ${err.message}`);
       return null;
     }
   }
@@ -117,9 +132,10 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as PreScreeningQuestionsResponse;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service for question generation: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service for question generation: ${err.message}`);
       return null;
     }
   }
@@ -138,9 +154,10 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as ScreeningEvaluation;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service for answer evaluation: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service for answer evaluation: ${err.message}`);
       return null;
     }
   }
@@ -160,9 +177,10 @@ export class MatchingService {
         throw new Error(`AI Service returned ${response.status}`);
       }
 
-      return await response.json();
+      return (await response.json()) as ResumeParserResponse;
     } catch (error) {
-      this.logger.error(`Failed to call AI Service for resume parsing: ${error.message}`);
+      const err = error as Error;
+      this.logger.error(`Failed to call AI Service for resume parsing: ${err.message}`);
       return null;
     }
   }

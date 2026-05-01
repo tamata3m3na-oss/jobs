@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobsService } from './jobs.service';
 import { JobsController } from './jobs.controller';
-import { JobEntity } from '../../database/entities/job.entity';
+import { PrismaJobRepository } from '../repositories/implementations/prisma-job.repository';
+import { IJobRepository } from '../repositories/interfaces/i-job.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([JobEntity])],
-  providers: [JobsService],
+  providers: [
+    {
+      provide: IJobRepository,
+      useClass: PrismaJobRepository,
+    },
+    JobsService,
+  ],
   controllers: [JobsController],
   exports: [JobsService],
 })

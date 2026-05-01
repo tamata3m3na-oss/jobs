@@ -6,7 +6,11 @@
     "rootDir": "./src",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "paths": {
+      "@backend/*": ["./src/*"],
+      "@prisma/client": ["./node_modules/@prisma/client"]
+    }
   },
   "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]

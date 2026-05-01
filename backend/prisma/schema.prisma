@@ -1,0 +1,354 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  JOB_SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  TEMPORARY
+  VOLUNTEER
+}
+
+enum JobStatus {
+  DRAFT
+  PENDING_APPROVAL
+  ACTIVE
+  PAUSED
+  EXPIRED
+  CLOSED
+  REJECTED
+}
+
+enum ExperienceLevel {
+  ENTRY
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum SalaryPeriod {
+  HOURLY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum RemoteOptions {
+  FULLY_REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum ApplicationSourceType {
+  DIRECT
+  REFERRAL
+  LINKEDIN
+  INDEED
+  OTHER_JOB_BOARD
+  SOCIAL_MEDIA
+  EMAIL
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  OFFER_EXTENDED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  REJECTED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum InterviewType {
+  VIDEO
+  PHONE
+  ONSITE
+  TECHNICAL
+  ASSESSMENT
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum InterviewRecommendation {
+  STRONG_HIRE
+  HIRE
+  NO_HIRE
+  STRONG_NO_HIRE
+}
+
+enum LanguageProficiency {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  NATIVE
+}
+
+enum Availability {
+  IMMEDIATELY
+  ONE_WEEK
+  TWO_WEEKS
+  ONE_MONTH
+  NOT_AVAILABLE
+}
+
+enum CompanySize {
+  SMALL_1_10
+  SMALL_11_50
+  MEDIUM_51_200
+  MEDIUM_201_500
+  LARGE_501_1000
+  LARGE_1000_PLUS
+}
+
+enum CompanyType {
+  STARTUP
+  SME
+  CORPORATION
+  NON_PROFIT
+  GOVERNMENT
+  EDUCATION
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum QuestionType {
+  TEXT
+  TEXTAREA
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  DROPDOWN
+  DATE
+  NUMBER
+  FILE
+}
+
+enum ScreeningCriterionType {
+  SKILL
+  EXPERIENCE
+  EDUCATION
+  CERTIFICATION
+  LANGUAGE
+  CUSTOM
+}
+
+// ============================================
+// USER MODEL
+// ============================================
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String    @map("first_name")
+  lastName        String    @map("last_name")
+  role            UserRole
+  status          UserStatus @default(PENDING_VERIFICATION)
+  phone           String?
+  avatarUrl       String?   @map("avatar_url")
+  verifiedAt      DateTime? @map("verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  profile         Json?
+
+  refreshTokens   RefreshToken[]
+  jobs            Job[]           @relation("EmployerJobs")
+  applications    Application[]   @relation("ApplicantApplications")
+  employerApplications Application[] @relation("EmployerApplications")
+
+  @@index([role])
+  @@index([status])
+  @@index([email])
+}
+
+// ============================================
+// REFRESH TOKEN MODEL
+// ============================================
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ============================================
+// JOB MODEL
+// ============================================
+
+model Job {
+  id                       String           @id @default(uuid())
+  employerId               String           @map("employer_id")
+  employer                 User             @relation("EmployerJobs", fields: [employerId], references: [id], onDelete: Cascade)
+  title                    String
+  slug                     String           @unique
+  description              String           @db.Text
+  shortDescription         String           @map("short_description")
+  requirements             String[]
+  responsibilities          String[]
+  niceToHave               String[]         @map("nice_to_have")
+  skills                   String[]
+  jobType                  JobType          @map("job_type")
+  experienceLevel          ExperienceLevel @default(MID) @map("experience_level")
+
+  location                 Unsupported("geography(Point, 4326)")
+  locationDetails          Json?            @map("location_details")
+
+  salaryMin                Decimal?         @map("salary_min")
+  salaryMax                Decimal?         @map("salary_max")
+  salaryCurrency           String           @default("USD") @map("salary_currency")
+  salaryPeriod             SalaryPeriod     @default(YEARLY) @map("salary_period")
+  salaryNegotiable          Boolean          @default(false) @map("salary_negotiable")
+  salaryCompetitive        Boolean          @default(true) @map("salary_competitive")
+
+  benefits                 Json             @default("{}")
+
+  applicationQuestions     Json             @default("[]") @map("application_questions")
+  applicationDeadline      DateTime?        @map("application_deadline")
+  startDate                DateTime?        @map("start_date")
+  openings                 Int              @default(1)
+  status                   JobStatus        @default(DRAFT)
+  featured                 Boolean          @default(false)
+  views                    Int              @default(0)
+  applicationsCount        Int              @default(0) @map("applications_count")
+
+  publishedAt              DateTime?        @map("published_at")
+  expiresAt                DateTime?        @map("expires_at")
+  closedAt                 DateTime?        @map("closed_at")
+  aiGeneratedDescription   Boolean          @default(false) @map("ai_generated_description")
+
+  screeningCriteria        Json             @default("[]") @map("screening_criteria")
+  matchSettings            Json             @default("{}") @map("match_settings")
+
+  createdAt                DateTime         @default(now()) @map("created_at")
+  updatedAt                DateTime         @updatedAt @map("updated_at")
+
+  applications             Application[]
+
+  @@index([employerId])
+  @@index([status])
+  @@index([jobType])
+  @@index([experienceLevel])
+  @@index([createdAt])
+  @@index([title])
+}
+
+// ============================================
+// APPLICATION MODEL
+// ============================================
+
+model Application {
+  id                String            @id @default(uuid())
+  jobId             String            @map("job_id")
+  job               Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantId       String            @map("applicant_id")
+  applicant         User              @relation("ApplicantApplications", fields: [applicantId], references: [id], onDelete: Cascade)
+  employerId        String            @map("employer_id")
+  employer          User              @relation("EmployerApplications", fields: [employerId], references: [id], onDelete: Cascade)
+
+  status            ApplicationStatus @default(SUBMITTED)
+  answers           Json             @default("[]")
+  resumeUrl         String?          @map("resume_url")
+  coverLetterUrl    String?          @map("cover_letter_url")
+  portfolioUrls     String[]         @default([]) @map("portfolio_urls")
+  matchScore        Float?           @map("match_score")
+  aiAnalysis        Json?            @map("ai_analysis")
+
+  interviews        Json             @default("[]")
+
+  notes             String?          @db.Text
+  employerNotes     Json             @default("[]") @map("employer_notes")
+  rejectionReason   String?          @map("rejection_reason")
+
+  offeredSalaryAmount   Decimal?      @map("offered_salary_amount")
+  offeredSalaryCurrency String?       @map("offered_salary_currency")
+  offeredSalaryPeriod   SalaryPeriod? @map("offered_salary_period")
+
+  sourceType        ApplicationSourceType @default(DIRECT) @map("source_type")
+  sourceReferralId  String?          @map("source_referral_id")
+  sourceUtmSource   String?          @map("source_utm_source")
+  sourceUtmMedium   String?          @map("source_utm_medium")
+  sourceUtmCampaign String?          @map("source_utm_campaign")
+
+  submittedAt       DateTime         @default(now()) @map("submitted_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+  lastActivityAt    DateTime         @default(now()) @map("last_activity_at")
+  expiresAt         DateTime?        @map("expires_at")
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  @@unique([jobId, applicantId])
+  @@index([jobId])
+  @@index([applicantId])
+  @@index([employerId])
+  @@index([status])
+  @@index([submittedAt])
+}
+
+// ============================================
+// AUDIT LOG MODEL
+// ============================================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  action     String
+  userId     String?  @map("user_id")
+  userEmail  String?  @map("user_email")
+  changes    Json?
+  metadata   Json?
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+}

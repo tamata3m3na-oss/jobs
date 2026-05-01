@@ -12,7 +12,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../../common/guards/local-auth.guard';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { UserEntity } from '../../database/entities/user.entity';
 import {
   RegisterJobSeekerSchema,
   RegisterEmployerSchema,
@@ -55,7 +54,7 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
-  async login(@Request() req: { user: Omit<UserEntity, 'password'> }) {
+  async login(@Request() req: { user: Record<string, unknown> }) {
     return this.authService.login(req.user);
   }
 }
