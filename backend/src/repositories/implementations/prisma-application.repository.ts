@@ -30,7 +30,14 @@ export class PrismaApplicationRepository implements IApplicationRepository {
         resumeUrl: data.resumeUrl ?? null,
         coverLetterUrl: data.coverLetterUrl ?? null,
         portfolioUrls: data.portfolioUrls ?? [],
-        sourceType: sourceType as 'DIRECT' | 'REFERRAL' | 'LINKEDIN' | 'INDEED' | 'OTHER_JOB_BOARD' | 'SOCIAL_MEDIA' | 'EMAIL',
+        sourceType: sourceType as
+          | 'DIRECT'
+          | 'REFERRAL'
+          | 'LINKEDIN'
+          | 'INDEED'
+          | 'OTHER_JOB_BOARD'
+          | 'SOCIAL_MEDIA'
+          | 'EMAIL',
         sourceReferralId: data.source?.referralId ?? null,
         sourceUtmSource: data.source?.utmData?.source ?? null,
         sourceUtmMedium: data.source?.utmData?.medium ?? null,
@@ -110,7 +117,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     return this.mapToApplicationWithRelations(application);
   }
 
-  async findByJobAndApplicant(jobId: string, applicantId: string): Promise<ApplicationWithRelations | null> {
+  async findByJobAndApplicant(
+    jobId: string,
+    applicantId: string
+  ): Promise<ApplicationWithRelations | null> {
     const application = await this.prisma.application.findUnique({
       where: { jobId_applicantId: { jobId, applicantId } },
       include: {
@@ -150,7 +160,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     return this.mapToApplicationWithRelations(application);
   }
 
-  async findByJob(jobId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>> {
+  async findByJob(
+    jobId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>> {
     const skip = (pagination.page - 1) * pagination.limit;
     const orderBy = this.buildOrderBy(pagination.sortBy, pagination.sortOrder);
 
@@ -201,7 +214,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     };
   }
 
-  async findByApplicant(applicantId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>> {
+  async findByApplicant(
+    applicantId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>> {
     const skip = (pagination.page - 1) * pagination.limit;
     const orderBy = this.buildOrderBy(pagination.sortBy, pagination.sortOrder);
 
@@ -252,7 +268,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     };
   }
 
-  async findByEmployer(employerId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>> {
+  async findByEmployer(
+    employerId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>> {
     const skip = (pagination.page - 1) * pagination.limit;
     const orderBy = this.buildOrderBy(pagination.sortBy, pagination.sortOrder);
 
@@ -379,7 +398,9 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     };
   }
 
-  async search(filters: ApplicationSearchFilters): Promise<PaginatedResult<ApplicationWithRelations>> {
+  async search(
+    filters: ApplicationSearchFilters
+  ): Promise<PaginatedResult<ApplicationWithRelations>> {
     const where: Record<string, unknown> = {};
 
     if (filters.jobId) {
@@ -413,11 +434,17 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     }
 
     if (filters.submittedAfter) {
-      where.submittedAt = { ...((where.submittedAt as Record<string, unknown>) ?? {}), gte: filters.submittedAfter };
+      where.submittedAt = {
+        ...((where.submittedAt as Record<string, unknown>) ?? {}),
+        gte: filters.submittedAfter,
+      };
     }
 
     if (filters.submittedBefore) {
-      where.submittedAt = { ...((where.submittedAt as Record<string, unknown>) ?? {}), lte: filters.submittedBefore };
+      where.submittedAt = {
+        ...((where.submittedAt as Record<string, unknown>) ?? {}),
+        lte: filters.submittedBefore,
+      };
     }
 
     const page = filters.page || 1;
@@ -778,7 +805,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
         where: { jobId, status: { in: ['SUBMITTED', 'UNDER_REVIEW'] } },
       }),
       this.prisma.application.count({
-        where: { jobId, status: { in: ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED'] } },
+        where: {
+          jobId,
+          status: { in: ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED'] },
+        },
       }),
     ]);
 
@@ -867,7 +897,9 @@ export class PrismaApplicationRepository implements IApplicationRepository {
       };
     };
 
-    const mapApplicant = (a: typeof application.applicant): ApplicationWithRelations['applicant'] => {
+    const mapApplicant = (
+      a: typeof application.applicant
+    ): ApplicationWithRelations['applicant'] => {
       if (!a) return null;
       return {
         id: a.id,
@@ -887,7 +919,9 @@ export class PrismaApplicationRepository implements IApplicationRepository {
       answers: application.answers as ApplicationWithRelations['answers'],
       resumeUrl: application.resumeUrl,
       coverLetterUrl: application.coverLetterUrl,
-      portfolioUrls: (Array.isArray(application.portfolioUrls) ? application.portfolioUrls : []) as string[],
+      portfolioUrls: (Array.isArray(application.portfolioUrls)
+        ? application.portfolioUrls
+        : []) as string[],
       matchScore: application.matchScore,
       aiAnalysis: application.aiAnalysis as ApplicationWithRelations['aiAnalysis'],
       interviews: (application.interviews || []) as ApplicationWithRelations['interviews'],
@@ -898,17 +932,34 @@ export class PrismaApplicationRepository implements IApplicationRepository {
         ? Number(application.offeredSalaryAmount)
         : null,
       offeredSalaryCurrency: application.offeredSalaryCurrency,
-      offeredSalaryPeriod: application.offeredSalaryPeriod as ApplicationWithRelations['offeredSalaryPeriod'],
+      offeredSalaryPeriod:
+        application.offeredSalaryPeriod as ApplicationWithRelations['offeredSalaryPeriod'],
       sourceType: application.sourceType,
       sourceReferralId: application.sourceReferralId,
       sourceUtmSource: application.sourceUtmSource,
       sourceUtmMedium: application.sourceUtmMedium,
       sourceUtmCampaign: application.sourceUtmCampaign,
-      submittedAt: application.submittedAt instanceof Date ? application.submittedAt : new Date(application.submittedAt),
-      updatedAt: application.updatedAt instanceof Date ? application.updatedAt : new Date(application.updatedAt),
-      lastActivityAt: application.lastActivityAt instanceof Date ? application.lastActivityAt : new Date(application.lastActivityAt),
-      expiresAt: application.expiresAt ? (application.expiresAt instanceof Date ? application.expiresAt : new Date(application.expiresAt)) : null,
-      createdAt: application.createdAt instanceof Date ? application.createdAt : new Date(application.createdAt),
+      submittedAt:
+        application.submittedAt instanceof Date
+          ? application.submittedAt
+          : new Date(application.submittedAt),
+      updatedAt:
+        application.updatedAt instanceof Date
+          ? application.updatedAt
+          : new Date(application.updatedAt),
+      lastActivityAt:
+        application.lastActivityAt instanceof Date
+          ? application.lastActivityAt
+          : new Date(application.lastActivityAt),
+      expiresAt: application.expiresAt
+        ? application.expiresAt instanceof Date
+          ? application.expiresAt
+          : new Date(application.expiresAt)
+        : null,
+      createdAt:
+        application.createdAt instanceof Date
+          ? application.createdAt
+          : new Date(application.createdAt),
       job: mapJob(application.job),
       applicant: mapApplicant(application.applicant),
     };

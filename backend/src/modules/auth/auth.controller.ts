@@ -53,7 +53,10 @@ const COOKIE_OPTIONS = {
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService, private tokenService: TokenService) {}
+  constructor(
+    private authService: AuthService,
+    private tokenService: TokenService
+  ) {}
 
   @Post('register/job-seeker')
   @ApiOperation({ summary: 'Register as a job seeker' })
@@ -64,7 +67,7 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(RegisterJobSeekerSchema))
   async registerJobSeeker(
     @Body() data: RegisterJobSeeker,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authService.registerJobSeeker(data);
     this.setRefreshTokenCookie(res, result.tokens.refreshToken);
@@ -80,7 +83,7 @@ export class AuthController {
   @UsePipes(new ZodValidationPipe(RegisterEmployerSchema))
   async registerEmployer(
     @Body() data: RegisterEmployer,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authService.registerEmployer(data);
     this.setRefreshTokenCookie(res, result.tokens.refreshToken);
@@ -101,10 +104,7 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
-  async login(
-    @Req() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Req() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(req.user);
     this.setRefreshTokenCookie(res, result.tokens.refreshToken);
     return result;
@@ -118,7 +118,7 @@ export class AuthController {
   async refreshTokens(
     @Body() body: { refreshToken?: string },
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const refreshToken = body.refreshToken || this.getRefreshTokenFromCookie(req);
 
@@ -134,10 +134,7 @@ export class AuthController {
         throw new UnauthorizedException('User not found');
       }
 
-      const newTokens = await this.tokenService.rotateRefreshToken(
-        user.id,
-        refreshToken,
-      );
+      const newTokens = await this.tokenService.rotateRefreshToken(user.id, refreshToken);
 
       this.setRefreshTokenCookie(res, newTokens.refreshToken);
       return {
@@ -157,7 +154,7 @@ export class AuthController {
   async logout(
     @Body() body: { refreshToken?: string },
     @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const refreshToken = body.refreshToken || this.getRefreshTokenFromCookie(req);
     this.clearRefreshTokenCookie(res);

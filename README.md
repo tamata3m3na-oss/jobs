@@ -21,14 +21,14 @@ Smart Job Platform is a comprehensive job management platform built with modern 
 
 ## البنية التقنية | Tech Stack
 
-| الخدمة | Technology | المنفذ | Port |
-|--------|------------|--------|------|
-| **Backend** | NestJS + TypeScript | 3000 | REST API + WebSocket |
-| **Frontend** | Next.js 14 + TypeScript | 3001 | Web Application |
-| **AI Service** | Python FastAPI | 8000 | ML Inference |
-| **Mobile** | Flutter + Dart | - | Cross-platform App |
-| **Database** | PostgreSQL + PostGIS | 5432 | Primary Data Store |
-| **Cache** | Redis 7 | 6379 | Sessions & Pub/Sub |
+| الخدمة         | Technology              | المنفذ | Port                 |
+| -------------- | ----------------------- | ------ | -------------------- |
+| **Backend**    | NestJS + TypeScript     | 3000   | REST API + WebSocket |
+| **Frontend**   | Next.js 14 + TypeScript | 3001   | Web Application      |
+| **AI Service** | Python FastAPI          | 8000   | ML Inference         |
+| **Mobile**     | Flutter + Dart          | -      | Cross-platform App   |
+| **Database**   | PostgreSQL + PostGIS    | 5432   | Primary Data Store   |
+| **Cache**      | Redis 7                 | 6379   | Sessions & Pub/Sub   |
 
 ## هيكل المشروع | Project Structure
 
@@ -99,18 +99,21 @@ cp .env.example .env
 #### تشغيل الخدمات | Running Services
 
 **Backend:**
+
 ```bash
 cd backend
 npm run dev
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 **AI Service:**
+
 ```bash
 cd ai-service
 pip install -r requirements.txt
@@ -125,12 +128,12 @@ See `.env.example` for required variables. Never commit `.env` files.
 
 ### متغيرات البيئة الأساسية | Key Environment Variables
 
-| المتغير | Variable | الوصف | Description |
-|---------|----------|-------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string | سلسلة اتصال قاعدة البيانات |
-| `REDIS_URL` | Redis connection string | سلسلة اتصال Redis |
-| `JWT_SECRET` | JWT signing secret | سر توقيع JWT |
-| `STRIPE_API_KEY` | Stripe API key | مفتاح Stripe API |
+| المتغير          | Variable                     | الوصف                      | Description |
+| ---------------- | ---------------------------- | -------------------------- | ----------- |
+| `DATABASE_URL`   | PostgreSQL connection string | سلسلة اتصال قاعدة البيانات |
+| `REDIS_URL`      | Redis connection string      | سلسلة اتصال Redis          |
+| `JWT_SECRET`     | JWT signing secret           | سر توقيع JWT               |
+| `STRIPE_API_KEY` | Stripe API key               | مفتاح Stripe API           |
 
 ## API Documentation
 
@@ -205,9 +208,9 @@ MIT License
 3. شغّل `npm run lint` و `npm run typecheck` قبل الالتزام
 4. اكتب اختبارات للميزات الجديدة
 
-1. Read `ARCHITECTURE.md` for guidelines
-2. Follow Conventional Commits
-3. Run `npm run lint` and `npm run typecheck` before committing
-4. Write tests for new features
+5. Read `ARCHITECTURE.md` for guidelines
+6. Follow Conventional Commits
+7. Run `npm run lint` and `npm run typecheck` before committing
+8. Write tests for new features
 
 </div>

@@ -27,7 +27,10 @@ export class MatchingService {
     }
   }
 
-  async matchJobs(query: string, jobs: Array<{ id: string; title: string; description: string }>): Promise<Array<{ id: string; score: number }>> {
+  async matchJobs(
+    query: string,
+    jobs: Array<{ id: string; title: string; description: string }>
+  ): Promise<Array<{ id: string; score: number }>> {
     try {
       const response = await fetch(`${this.aiServiceUrl}/api/v1/match`, {
         method: 'POST',
@@ -46,11 +49,14 @@ export class MatchingService {
     } catch (error) {
       const err = error as Error;
       this.logger.error(`Failed to call AI Service: ${err.message}`);
-      return jobs.map(job => ({ id: job.id, score: 0 }));
+      return jobs.map((job) => ({ id: job.id, score: 0 }));
     }
   }
 
-  async matchCandidates(jobDescription: string, candidates: Array<{ id: string; skills: string[]; experience: string; bio: string }>): Promise<Array<{ id: string; score: number }>> {
+  async matchCandidates(
+    jobDescription: string,
+    candidates: Array<{ id: string; skills: string[]; experience: string; bio: string }>
+  ): Promise<Array<{ id: string; score: number }>> {
     try {
       const response = await fetch(`${this.aiServiceUrl}/api/v1/match-candidates`, {
         method: 'POST',
@@ -69,7 +75,7 @@ export class MatchingService {
     } catch (error) {
       const err = error as Error;
       this.logger.error(`Failed to call AI Service for candidate matching: ${err.message}`);
-      return candidates.map(c => ({ id: c.id, score: 0 }));
+      return candidates.map((c) => ({ id: c.id, score: 0 }));
     }
   }
 
@@ -96,14 +102,20 @@ export class MatchingService {
     }
   }
 
-  async analyzeSkillGap(candidateSkills: string[], requiredSkills: string[]): Promise<SkillGapAnalysis | null> {
+  async analyzeSkillGap(
+    candidateSkills: string[],
+    requiredSkills: string[]
+  ): Promise<SkillGapAnalysis | null> {
     try {
       const response = await fetch(`${this.aiServiceUrl}/api/v1/skill-gap`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ candidate_skills: candidateSkills, required_skills: requiredSkills }),
+        body: JSON.stringify({
+          candidate_skills: candidateSkills,
+          required_skills: requiredSkills,
+        }),
       });
 
       if (!response.ok) {
@@ -118,7 +130,10 @@ export class MatchingService {
     }
   }
 
-  async generateScreeningQuestions(jobDescription: string, skills: string[]): Promise<PreScreeningQuestionsResponse | null> {
+  async generateScreeningQuestions(
+    jobDescription: string,
+    skills: string[]
+  ): Promise<PreScreeningQuestionsResponse | null> {
     try {
       const response = await fetch(`${this.aiServiceUrl}/api/v1/screening/generate`, {
         method: 'POST',
@@ -140,7 +155,11 @@ export class MatchingService {
     }
   }
 
-  async evaluateScreeningAnswer(question: string, answer: string, expectedKeywords: string[] = []): Promise<ScreeningEvaluation | null> {
+  async evaluateScreeningAnswer(
+    question: string,
+    answer: string,
+    expectedKeywords: string[] = []
+  ): Promise<ScreeningEvaluation | null> {
     try {
       const response = await fetch(`${this.aiServiceUrl}/api/v1/screening/evaluate`, {
         method: 'POST',

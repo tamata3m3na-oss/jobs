@@ -15,13 +15,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -93,7 +87,7 @@ export class UsersController {
   async updateUser(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateUserSchema)) data: UpdateUserDto,
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUser
   ) {
     if (req.user.id !== id && req.user.role !== 'ADMIN') {
       throw new ForbiddenException('You can only update your own data');
@@ -126,7 +120,7 @@ export class UsersController {
   async updateJobSeekerProfile(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateJobSeekerProfileSchema)) data: UpdateJobSeekerProfileDto,
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUser
   ) {
     if (req.user.id !== id && req.user.role !== 'ADMIN') {
       throw new ForbiddenException('You can only update your own profile');
@@ -140,7 +134,7 @@ export class UsersController {
   async updateEmployerProfile(
     @Param('id') id: string,
     @Body(new ZodValidationPipe(UpdateEmployerProfileSchema)) data: UpdateEmployerProfileDto,
-    @Req() req: RequestWithUser,
+    @Req() req: RequestWithUser
   ) {
     if (req.user.id !== id && req.user.role !== 'ADMIN') {
       throw new ForbiddenException('You can only update your own profile');

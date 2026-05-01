@@ -52,7 +52,13 @@ describe('ApplicationsService', () => {
       const mockJob = { id: 'j1', status: 'ACTIVE', employerId: 'e1', applicationQuestions: [] };
       const dto = { jobId: 'j1' };
       const applicantId = 'a1';
-      const mockApp = { id: 'app1', jobId: 'j1', applicantId, employerId: 'e1', status: 'SUBMITTED' };
+      const mockApp = {
+        id: 'app1',
+        jobId: 'j1',
+        applicantId,
+        employerId: 'e1',
+        status: 'SUBMITTED',
+      };
 
       mockJobRepository.findById.mockResolvedValue(mockJob);
       mockApplicationRepository.findByJobAndApplicant.mockResolvedValue(null);
@@ -70,7 +76,9 @@ describe('ApplicationsService', () => {
 
     it('should throw BadRequestException if job is not active', async () => {
       mockJobRepository.findById.mockResolvedValue({ status: 'DRAFT' });
-      await expect(service.apply('a1', { jobId: 'j1' } as any)).rejects.toThrow(BadRequestException);
+      await expect(service.apply('a1', { jobId: 'j1' } as any)).rejects.toThrow(
+        BadRequestException
+      );
     });
 
     it('should throw ConflictException if already applied', async () => {

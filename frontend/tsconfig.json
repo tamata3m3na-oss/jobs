@@ -2,7 +2,7 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "composite": false,
     "declaration": false,
     "declarationMap": false,
@@ -13,10 +13,10 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@smartjob/shared": ["../shared/src"],
-      "@smartjob/shared/*": ["../shared/src/*"]
+      "@smartjob/shared": ["../shared/dist/index"],
+      "@smartjob/shared/*": ["../shared/dist/*"]
     }
   },
-  "include": ["src/**/*", "next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["src/**/*", "next-env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

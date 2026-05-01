@@ -2,13 +2,15 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import '../globals.css';
+import { Providers } from '@/providers';
+import { ErrorBoundary } from '@/components/error/ErrorBoundary';
 import Navbar from '@/components/layouts/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export default async function LocaleLayout({
   children,
-  params: { locale }
+  params: { locale },
 }: {
   children: React.ReactNode;
   params: { locale: string };
@@ -20,10 +22,14 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={direction}>
       <body className={inter.className}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Navbar />
-          <main>{children}</main>
-        </NextIntlClientProvider>
+        <ErrorBoundary>
+          <Providers>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              <Navbar />
+              <main>{children}</main>
+            </NextIntlClientProvider>
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

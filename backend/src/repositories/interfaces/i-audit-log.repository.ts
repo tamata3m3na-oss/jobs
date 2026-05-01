@@ -47,7 +47,10 @@ export interface IAuditLogRepository {
     totalPages: number;
   }>;
   findByEntity(entityType: string, entityId: string): Promise<AuditLog[]>;
-  findByUser(userId: string, pagination: { page: number; limit: number }): Promise<{
+  findByUser(
+    userId: string,
+    pagination: { page: number; limit: number }
+  ): Promise<{
     data: AuditLog[];
     total: number;
     page: number;

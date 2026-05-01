@@ -1,10 +1,25 @@
 import { z } from 'zod';
 import { LocationSchema } from './user.schema';
 
-export const JobType = z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'TEMPORARY', 'VOLUNTEER']);
+export const JobType = z.enum([
+  'FULL_TIME',
+  'PART_TIME',
+  'CONTRACT',
+  'INTERNSHIP',
+  'TEMPORARY',
+  'VOLUNTEER',
+]);
 export type JobType = z.infer<typeof JobType>;
 
-export const JobStatus = z.enum(['DRAFT', 'PENDING_APPROVAL', 'ACTIVE', 'PAUSED', 'EXPIRED', 'CLOSED', 'REJECTED']);
+export const JobStatus = z.enum([
+  'DRAFT',
+  'PENDING_APPROVAL',
+  'ACTIVE',
+  'PAUSED',
+  'EXPIRED',
+  'CLOSED',
+  'REJECTED',
+]);
 export type JobStatus = z.infer<typeof JobStatus>;
 
 export const ExperienceLevel = z.enum(['ENTRY', 'JUNIOR', 'MID', 'SENIOR', 'LEAD', 'EXECUTIVE']);
@@ -56,7 +71,16 @@ export type JobLocation = z.infer<typeof JobLocationSchema>;
 export const JobApplicationQuestionSchema = z.object({
   id: z.string().uuid(),
   question: z.string().min(1).max(500),
-  type: z.enum(['TEXT', 'TEXTAREA', 'SINGLE_CHOICE', 'MULTIPLE_CHOICE', 'DROPDOWN', 'DATE', 'NUMBER', 'FILE']),
+  type: z.enum([
+    'TEXT',
+    'TEXTAREA',
+    'SINGLE_CHOICE',
+    'MULTIPLE_CHOICE',
+    'DROPDOWN',
+    'DATE',
+    'NUMBER',
+    'FILE',
+  ]),
   required: z.boolean().default(false),
   options: z.array(z.string()).optional(),
   maxLength: z.number().positive().optional(),
@@ -115,9 +139,9 @@ export const JobSchema = z.object({
       blindHiring: z.boolean().default(false),
     })
     .default({}),
-  });
+});
 
-  export type Job = z.infer<typeof JobSchema>;
+export type Job = z.infer<typeof JobSchema>;
 
 export const JobSearchFiltersSchema = z.object({
   query: z.string().optional(),
@@ -153,9 +177,7 @@ export const JobSearchFiltersSchema = z.object({
   industry: z.string().optional(),
   page: z.number().int().positive().default(1),
   limit: z.number().int().positive().max(100).default(20),
-  sortBy: z
-    .enum(['relevance', 'date', 'salary', 'distance'])
-    .default('relevance'),
+  sortBy: z.enum(['relevance', 'date', 'salary', 'distance']).default('relevance'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
@@ -197,9 +219,9 @@ export const CreateJobSchema = z.object({
       blindHiring: z.boolean().default(false),
     })
     .default({}),
-  });
+});
 
-  export const UpdateJobSchema = CreateJobSchema.partial().strict();
+export const UpdateJobSchema = CreateJobSchema.partial().strict();
 
 export type CreateJob = z.infer<typeof CreateJobSchema>;
 export type UpdateJob = z.infer<typeof UpdateJobSchema>;

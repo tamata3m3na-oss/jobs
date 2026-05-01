@@ -60,10 +60,7 @@ export class ApplicationsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Job not found' })
   @ApiResponse({ status: 409, description: 'Already applied for this job' })
-  async apply(
-    @Request() req: AuthenticatedRequest,
-    @Body() data: CreateApplicationDto,
-  ) {
+  async apply(@Request() req: AuthenticatedRequest, @Body() data: CreateApplicationDto) {
     return this.applicationsService.apply(req.user.id, data);
   }
 
@@ -75,7 +72,7 @@ export class ApplicationsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyApplications(
     @Request() req: AuthenticatedRequest,
-    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
+    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto
   ) {
     return this.applicationsService.getApplicationsForSeeker(req.user.id, pagination);
   }
@@ -89,10 +86,7 @@ export class ApplicationsController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Application not found' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
-  async getApplicationById(
-    @Param('id') id: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  async getApplicationById(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.applicationsService.getApplicationById(id, req);
   }
 
@@ -106,10 +100,7 @@ export class ApplicationsController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Application not found' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
-  async withdrawApplication(
-    @Param('id') id: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  async withdrawApplication(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.applicationsService.withdrawApplication(id, req.user.id);
   }
 }
@@ -132,7 +123,7 @@ export class ApplicationsEmployerController {
   async getApplicationsForJob(
     @Param('jobId') jobId: string,
     @Request() req: AuthenticatedRequest,
-    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
+    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto
   ) {
     return this.applicationsService.getApplicationsForJob(jobId, req.user.id, pagination);
   }
@@ -149,7 +140,7 @@ export class ApplicationsEmployerController {
   async updateStatus(
     @Param('id') id: string,
     @Request() req: AuthenticatedRequest,
-    @Body() data: UpdateApplicationStatusDto,
+    @Body() data: UpdateApplicationStatusDto
   ) {
     return this.applicationsService.updateStatus(id, req.user.id, data);
   }
@@ -166,7 +157,7 @@ export class ApplicationsEmployerController {
   async scheduleInterview(
     @Param('id') id: string,
     @Request() req: AuthenticatedRequest,
-    @Body() data: ScheduleInterviewDto,
+    @Body() data: ScheduleInterviewDto
   ) {
     return this.applicationsService.scheduleInterview(id, req.user.id, data);
   }
@@ -179,10 +170,7 @@ export class ApplicationsEmployerController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Application or interview not found' })
   @ApiParam({ name: 'id', description: 'Application UUID' })
-  async submitFeedback(
-    @Param('id') id: string,
-    @Body() data: SubmitFeedbackDto,
-  ) {
+  async submitFeedback(@Param('id') id: string, @Body() data: SubmitFeedbackDto) {
     return this.applicationsService.completeInterview(id, data);
   }
 
@@ -197,9 +185,10 @@ export class ApplicationsEmployerController {
   async addNote(
     @Param('id') id: string,
     @Request() req: AuthenticatedRequest,
-    @Body() data: AddEmployerNoteDto,
+    @Body() data: AddEmployerNoteDto
   ) {
-    const authorName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email;
+    const authorName =
+      `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email;
     return this.applicationsService.addEmployerNote(id, req.user.id, data, authorName);
   }
 
@@ -210,10 +199,7 @@ export class ApplicationsEmployerController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Job not found' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async getJobApplicationStats(
-    @Param('id') jobId: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  async getJobApplicationStats(@Param('id') jobId: string, @Request() req: AuthenticatedRequest) {
     return this.applicationsService.getApplicationStats(jobId, req.user.id);
   }
 }
@@ -233,7 +219,7 @@ export class ApplicationsAdminController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async getAllApplications(
     @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
-    @Query(new ZodValidationPipe(ApplicationSearchQueryDto)) filters?: ApplicationSearchQueryDto,
+    @Query(new ZodValidationPipe(ApplicationSearchQueryDto)) filters?: ApplicationSearchQueryDto
   ) {
     return this.applicationsService.getAllApplicationsForAdmin(pagination, filters);
   }
@@ -247,7 +233,19 @@ export class ApplicationsAdminController {
   @ApiParam({ name: 'id', description: 'Application UUID' })
   async updateStatusAsAdmin(
     @Param('id') id: string,
-    @Body('status') status: 'SUBMITTED' | 'UNDER_REVIEW' | 'SHORTLISTED' | 'INTERVIEW_SCHEDULED' | 'INTERVIEW_COMPLETED' | 'OFFER_EXTENDED' | 'OFFER_ACCEPTED' | 'OFFER_DECLINED' | 'REJECTED' | 'WITHDRAWN' | 'EXPIRED',
+    @Body('status')
+    status:
+      | 'SUBMITTED'
+      | 'UNDER_REVIEW'
+      | 'SHORTLISTED'
+      | 'INTERVIEW_SCHEDULED'
+      | 'INTERVIEW_COMPLETED'
+      | 'OFFER_EXTENDED'
+      | 'OFFER_ACCEPTED'
+      | 'OFFER_DECLINED'
+      | 'REJECTED'
+      | 'WITHDRAWN'
+      | 'EXPIRED'
   ) {
     return this.applicationsService.updateStatusAsAdmin(id, status);
   }

@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { LoggerService } from '../logger/logger.service';
@@ -13,7 +8,7 @@ import { AuditService } from '../../modules/audit/audit.service';
 export class AuditLoggingInterceptor implements NestInterceptor {
   constructor(
     private readonly logger: LoggerService,
-    private readonly auditService: AuditService,
+    private readonly auditService: AuditService
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -53,7 +48,7 @@ export class AuditLoggingInterceptor implements NestInterceptor {
             this.logger.error('Failed to save audit log', error.stack);
           }
         }
-      }),
+      })
     );
   }
 }

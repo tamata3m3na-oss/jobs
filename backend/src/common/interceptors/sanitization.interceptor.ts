@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-} from '@nestjs/common';
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -21,7 +16,7 @@ export class SanitizationInterceptor implements NestInterceptor {
 
         // If it's a single item
         return this.sanitizeItem(data as Record<string, unknown>);
-      }),
+      })
     );
   }
 
@@ -29,7 +24,7 @@ export class SanitizationInterceptor implements NestInterceptor {
     // Check if it's an application and has a job with blindHiring enabled
     const job = item.job as Record<string, unknown> | undefined;
     const matchSettings = job?.matchSettings as Record<string, unknown> | undefined;
-    
+
     if (matchSettings?.blindHiring) {
       const applicant = item.applicant as Record<string, unknown> | undefined;
       if (applicant) {

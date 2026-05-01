@@ -37,12 +37,10 @@ export class AuthService {
     private readonly userRepository: IUserRepository,
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
-    private readonly auditService: AuditService,
+    private readonly auditService: AuditService
   ) {}
 
-  async registerJobSeeker(
-    data: RegisterJobSeeker,
-  ): Promise<AuthResponse> {
+  async registerJobSeeker(data: RegisterJobSeeker): Promise<AuthResponse> {
     const exists = await this.userRepository.existsByEmail(data.email);
     if (exists) {
       throw new ConflictException('Email already exists');
@@ -71,7 +69,7 @@ export class AuthService {
     const tokens = await this.tokenService.createTokenPair(
       user.id as string,
       user.email as string,
-      user.role as UserRole,
+      user.role as UserRole
     );
 
     await this.auditService.log({
@@ -102,14 +100,7 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
-    const {
-      companyName,
-      companySize,
-      companyType,
-      industry,
-      headquarters,
-      ...userData
-    } = data;
+    const { companyName, companySize, companyType, industry, headquarters, ...userData } = data;
 
     const profile = {
       companyName,
@@ -135,7 +126,7 @@ export class AuthService {
     const tokens = await this.tokenService.createTokenPair(
       user.id as string,
       user.email as string,
-      user.role as UserRole,
+      user.role as UserRole
     );
 
     await this.auditService.log({
@@ -159,10 +150,7 @@ export class AuthService {
     };
   }
 
-  async validateUser(
-    email: string,
-    pass: string,
-  ): Promise<AuthenticatedUser | null> {
+  async validateUser(email: string, pass: string): Promise<AuthenticatedUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -192,23 +180,19 @@ export class AuthService {
         lastName: user.lastName,
       };
     }
-    
+
     await this.auditService.log({
       entityType: 'User',
       entityId: 'unknown',
       action: AuditEvent.LOGIN_FAILED,
       userEmail: email,
     });
-    
+
     return null;
   }
 
   async login(user: AuthenticatedUser): Promise<AuthResponse> {
-    const tokens = await this.tokenService.createTokenPair(
-      user.id,
-      user.email,
-      user.role,
-    );
+    const tokens = await this.tokenService.createTokenPair(user.id, user.email, user.role);
 
     return {
       user,
@@ -224,7 +208,7 @@ export class AuthService {
     try {
       const newTokens = await this.tokenService.rotateRefreshToken(
         'user-placeholder',
-        refreshToken,
+        refreshToken
       );
       await this.auditService.log({
         entityType: 'Token',

@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ApplicationsController, ApplicationsEmployerController, ApplicationsAdminController } from './applications.controller';
+import {
+  ApplicationsController,
+  ApplicationsEmployerController,
+  ApplicationsAdminController,
+} from './applications.controller';
 import { ApplicationsService } from './applications.service';
 import { PrismaApplicationRepository } from '../../repositories/implementations/prisma-application.repository';
 import { PrismaJobRepository } from '../../repositories/implementations/prisma-job.repository';
@@ -10,11 +14,7 @@ import { PrismaJobRepository } from '../../repositories/implementations/prisma-j
     ApplicationsEmployerController,
     ApplicationsAdminController,
   ],
-  providers: [
-    ApplicationsService,
-    PrismaApplicationRepository,
-    PrismaJobRepository,
-  ],
+  providers: [ApplicationsService, PrismaApplicationRepository, PrismaJobRepository],
   exports: [ApplicationsService],
 })
 export class ApplicationsModule {}

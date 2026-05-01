@@ -1,14 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './Table';
 import { cn } from '../../lib/utils';
 
 interface DataTableProps<T> {

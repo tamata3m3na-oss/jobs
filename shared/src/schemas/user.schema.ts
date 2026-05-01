@@ -63,7 +63,9 @@ export const JobSeekerProfileSchema = z.object({
     )
     .default([]),
   resumeUrl: z.string().url().optional(),
-  preferredJobTypes: z.array(z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'REMOTE'])).default([]),
+  preferredJobTypes: z
+    .array(z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERNSHIP', 'REMOTE']))
+    .default([]),
   preferredLocations: z.array(LocationSchema).default([]),
   preferredSalary: z
     .object({
@@ -81,7 +83,9 @@ export const JobSeekerProfileSchema = z.object({
       })
     )
     .default([]),
-  availability: z.enum(['IMMEDIATELY', 'ONE_WEEK', 'TWO_WEEKS', 'ONE_MONTH', 'NOT_AVAILABLE']).default('IMMEDIATELY'),
+  availability: z
+    .enum(['IMMEDIATELY', 'ONE_WEEK', 'TWO_WEEKS', 'ONE_MONTH', 'NOT_AVAILABLE'])
+    .default('IMMEDIATELY'),
   searchVisibility: z.boolean().default(true),
 });
 
@@ -151,15 +155,17 @@ export const RegisterEmployerSchema = z
   })
   .strict();
 
-export const UpdateJobSeekerProfileSchema = JobSeekerProfileSchema.partial().extend({
-  preferredSalary: z
-    .object({
-      min: z.number().positive(),
-      max: z.number().positive(),
-      currency: z.string().default('USD'),
-    })
-    .optional(),
-}).strict();
+export const UpdateJobSeekerProfileSchema = JobSeekerProfileSchema.partial()
+  .extend({
+    preferredSalary: z
+      .object({
+        min: z.number().positive(),
+        max: z.number().positive(),
+        currency: z.string().default('USD'),
+      })
+      .optional(),
+  })
+  .strict();
 
 export const UpdateEmployerProfileSchema = EmployerProfileSchema.partial().strict();
 

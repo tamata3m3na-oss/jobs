@@ -62,9 +62,7 @@ export class JobsController {
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
   @ApiQuery({ name: 'sortBy', required: false, description: 'Sort by field' })
   @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order' })
-  async searchJobs(
-    @Query(new ZodValidationPipe(JobSearchQueryDto)) filters: JobSearchQueryDto,
-  ) {
+  async searchJobs(@Query(new ZodValidationPipe(JobSearchQueryDto)) filters: JobSearchQueryDto) {
     return this.jobsService.searchJobs(filters);
   }
 
@@ -87,10 +85,7 @@ export class JobsController {
   @ApiOperation({ summary: 'Get job by ID' })
   @ApiResponse({ status: 200, description: 'Job retrieved successfully' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async getJobById(
-    @Param('id') id: string,
-    @Request() req?: AuthenticatedRequest,
-  ) {
+  async getJobById(@Param('id') id: string, @Request() req?: AuthenticatedRequest) {
     return this.jobsService.getJobById(id, req);
   }
 
@@ -101,10 +96,7 @@ export class JobsController {
   @ApiOperation({ summary: 'Create a new job' })
   @ApiResponse({ status: 201, description: 'Job created successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async createJob(
-    @Request() req: AuthenticatedRequest,
-    @Body() data: CreateJobDto,
-  ) {
+  async createJob(@Request() req: AuthenticatedRequest, @Body() data: CreateJobDto) {
     return this.jobsService.createJob(req.user.id, data);
   }
 
@@ -121,7 +113,7 @@ export class JobsController {
   async updateJob(
     @Param('id') id: string,
     @Request() req: AuthenticatedRequest,
-    @Body() data: UpdateJobDto,
+    @Body() data: UpdateJobDto
   ) {
     return this.jobsService.updateJob(id, req.user.id, data);
   }
@@ -136,10 +128,7 @@ export class JobsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not the job owner' })
   @ApiResponse({ status: 404, description: 'Job not found' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async deleteJob(
-    @Param('id') id: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  async deleteJob(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     await this.jobsService.deleteJob(id, req.user.id);
     return { message: 'Job deleted successfully' };
   }
@@ -157,7 +146,7 @@ export class JobsController {
   async updateJobStatus(
     @Param('id') id: string,
     @Request() req: AuthenticatedRequest,
-    @Body('status') status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'PAUSED' | 'CLOSED',
+    @Body('status') status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'PAUSED' | 'CLOSED'
   ) {
     if (status === 'ACTIVE') {
       return this.jobsService.publishJob(id, req.user.id);
@@ -178,7 +167,7 @@ export class JobsController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyJobs(
     @Request() req: AuthenticatedRequest,
-    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
+    @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto
   ) {
     return this.jobsService.listEmployerJobs(req.user.id, pagination);
   }
@@ -192,10 +181,7 @@ export class JobsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not the job owner' })
   @ApiResponse({ status: 404, description: 'Job not found' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async getJobStats(
-    @Param('id') id: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
+  async getJobStats(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.jobsService.getJobStats(id, req.user.id);
   }
 }
@@ -216,10 +202,18 @@ export class JobsAdminController {
   async getAllJobs(
     @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
     @Query('status') status?: string,
-    @Query('jobType') jobType?: string,
+    @Query('jobType') jobType?: string
   ) {
     const filters = {
-      status: status as 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'PAUSED' | 'EXPIRED' | 'CLOSED' | 'REJECTED' | undefined, 
+      status: status as
+        | 'DRAFT'
+        | 'PENDING_APPROVAL'
+        | 'ACTIVE'
+        | 'PAUSED'
+        | 'EXPIRED'
+        | 'CLOSED'
+        | 'REJECTED'
+        | undefined,
       jobType,
     };
     return this.jobsService.getAllJobsForAdmin(pagination, filters);
@@ -234,7 +228,7 @@ export class JobsAdminController {
   @ApiParam({ name: 'id', description: 'Job UUID' })
   async updateJobStatusAsAdmin(
     @Param('id') id: string,
-    @Body('status') status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'PAUSED' | 'CLOSED',
+    @Body('status') status: 'DRAFT' | 'PENDING_APPROVAL' | 'ACTIVE' | 'PAUSED' | 'CLOSED'
   ) {
     return this.jobsService.updateJobStatusAsAdmin(id, status);
   }

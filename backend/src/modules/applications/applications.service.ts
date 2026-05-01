@@ -6,7 +6,12 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import type { ApplicationWithRelations, PaginationOptions, EmployerNoteData, InterviewData } from '../../repositories/interfaces/i-application.repository';
+import type {
+  ApplicationWithRelations,
+  PaginationOptions,
+  EmployerNoteData,
+  InterviewData,
+} from '../../repositories/interfaces/i-application.repository';
 import { PrismaApplicationRepository } from '../../repositories/implementations/prisma-application.repository';
 import { PrismaJobRepository } from '../../repositories/implementations/prisma-job.repository';
 import {
@@ -73,7 +78,7 @@ export class ApplicationsService {
 
   constructor(
     private readonly applicationRepository: PrismaApplicationRepository,
-    private readonly jobRepository: PrismaJobRepository,
+    private readonly jobRepository: PrismaJobRepository
   ) {}
 
   async apply(applicantId: string, data: CreateApplicationDto): Promise<ApplicationResponse> {
@@ -93,7 +98,7 @@ export class ApplicationsService {
 
     const existingApplication = await this.applicationRepository.findByJobAndApplicant(
       data.jobId,
-      applicantId,
+      applicantId
     );
 
     if (existingApplication) {
@@ -101,13 +106,15 @@ export class ApplicationsService {
     }
 
     if (job.applicationQuestions?.length > 0 && data.answers?.length > 0) {
-      const requiredQuestionIds = (job.applicationQuestions as Array<{ id?: string; required?: boolean }>)
+      const requiredQuestionIds = (
+        job.applicationQuestions as Array<{ id?: string; required?: boolean }>
+      )
         .filter((q) => q.required)
         .map((q) => q.id);
 
       const answeredQuestionIds = data.answers.map((a) => a.questionId);
       const missingRequired = requiredQuestionIds.filter(
-        (id) => id && !answeredQuestionIds.includes(id),
+        (id) => id && !answeredQuestionIds.includes(id)
       );
 
       if (missingRequired.length > 0) {
@@ -127,7 +134,9 @@ export class ApplicationsService {
 
     await this.jobRepository.incrementApplications(data.jobId);
 
-    this.logger.log(`Application created: ${application.id} for job: ${data.jobId} by applicant: ${applicantId}`);
+    this.logger.log(
+      `Application created: ${application.id} for job: ${data.jobId} by applicant: ${applicantId}`
+    );
 
     return toApplicationResponse(application);
   }
@@ -148,7 +157,7 @@ export class ApplicationsService {
 
   async getApplicationsForSeeker(
     seekerId: string,
-    pagination: PaginationQueryDto,
+    pagination: PaginationQueryDto
   ): Promise<ApplicationListResponse> {
     const paginationOptions: PaginationOptions = {
       page: pagination.page,
@@ -175,7 +184,7 @@ export class ApplicationsService {
   async getApplicationsForJob(
     jobId: string,
     employerId: string,
-    pagination: PaginationQueryDto,
+    pagination: PaginationQueryDto
   ): Promise<ApplicationListResponse> {
     const job = await this.jobRepository.findById(jobId);
 
@@ -212,7 +221,7 @@ export class ApplicationsService {
   async updateStatus(
     applicationId: string,
     employerId: string,
-    data: UpdateApplicationStatusDto,
+    data: UpdateApplicationStatusDto
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -226,7 +235,7 @@ export class ApplicationsService {
 
     if (!this.isValidTransition(application.status as ApplicationStatus, data.status)) {
       throw new BadRequestException(
-        `Invalid status transition from ${application.status} to ${data.status}`,
+        `Invalid status transition from ${application.status} to ${data.status}`
       );
     }
 
@@ -252,7 +261,7 @@ export class ApplicationsService {
 
   async withdrawApplication(
     applicationId: string,
-    applicantId: string,
+    applicantId: string
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -265,7 +274,11 @@ export class ApplicationsService {
     }
 
     const currentStatus = application.status as ApplicationStatus;
-    if (currentStatus === 'OFFER_ACCEPTED' || currentStatus === 'OFFER_DECLINED' || currentStatus === 'REJECTED') {
+    if (
+      currentStatus === 'OFFER_ACCEPTED' ||
+      currentStatus === 'OFFER_DECLINED' ||
+      currentStatus === 'REJECTED'
+    ) {
       throw new BadRequestException('Cannot withdraw an application that has been finalized');
     }
 
@@ -279,7 +292,7 @@ export class ApplicationsService {
   async scheduleInterview(
     applicationId: string,
     employerId: string,
-    data: ScheduleInterviewDto,
+    data: ScheduleInterviewDto
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -291,11 +304,13 @@ export class ApplicationsService {
       throw new ForbiddenException('You do not have permission to schedule an interview');
     }
 
-    const validStatuses: ApplicationStatus[] = ['SHORTLISTED', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED'];
+    const validStatuses: ApplicationStatus[] = [
+      'SHORTLISTED',
+      'INTERVIEW_SCHEDULED',
+      'INTERVIEW_COMPLETED',
+    ];
     if (!validStatuses.includes(application.status as ApplicationStatus)) {
-      throw new BadRequestException(
-        'Cannot schedule interview for application in current status',
-      );
+      throw new BadRequestException('Cannot schedule interview for application in current status');
     }
 
     const interview: InterviewDataInternal = {
@@ -324,7 +339,7 @@ export class ApplicationsService {
 
   async completeInterview(
     applicationId: string,
-    data: SubmitFeedbackDto,
+    data: SubmitFeedbackDto
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -352,7 +367,7 @@ export class ApplicationsService {
     };
 
     const updatedInterviews = interviews.map((i) =>
-      i.id === data.interviewId ? interviewWithFeedback : i,
+      i.id === data.interviewId ? interviewWithFeedback : i
     );
 
     const updated = await this.applicationRepository.update(applicationId, {
@@ -370,7 +385,7 @@ export class ApplicationsService {
     applicationId: string,
     employerId: string,
     data: AddEmployerNoteDto,
-    authorName: string,
+    authorName: string
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -397,10 +412,7 @@ export class ApplicationsService {
     return toApplicationResponse(updated);
   }
 
-  async getApplicationStats(
-    jobId: string,
-    employerId: string,
-  ): Promise<ApplicationStatsResponse> {
+  async getApplicationStats(jobId: string, employerId: string): Promise<ApplicationStatsResponse> {
     const job = await this.jobRepository.findById(jobId);
 
     if (!job) {
@@ -426,7 +438,7 @@ export class ApplicationsService {
 
   async getAllApplicationsForAdmin(
     pagination: PaginationQueryDto,
-    filters?: ApplicationSearchQueryDto,
+    filters?: ApplicationSearchQueryDto
   ): Promise<ApplicationListResponse> {
     let result;
     if (filters) {
@@ -454,7 +466,7 @@ export class ApplicationsService {
 
   async updateStatusAsAdmin(
     applicationId: string,
-    status: ApplicationStatus,
+    status: ApplicationStatus
   ): Promise<ApplicationResponse> {
     const application = await this.applicationRepository.findById(applicationId);
 
@@ -478,7 +490,10 @@ export class ApplicationsService {
     return validNextStatuses?.includes(to) ?? false;
   }
 
-  private canViewApplication(application: ApplicationWithRelations, user: { id: string; role: string }): boolean {
+  private canViewApplication(
+    application: ApplicationWithRelations,
+    user: { id: string; role: string }
+  ): boolean {
     if (user.role === 'ADMIN') {
       return true;
     }

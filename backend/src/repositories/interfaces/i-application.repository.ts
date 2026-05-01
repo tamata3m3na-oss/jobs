@@ -164,17 +164,27 @@ export interface PaginatedResult<T> {
 export interface IApplicationRepository {
   create(data: CreateApplicationInput): Promise<ApplicationWithRelations>;
   findById(id: string): Promise<ApplicationWithRelations | null>;
-  findByJobAndApplicant(jobId: string, applicantId: string): Promise<ApplicationWithRelations | null>;
-  findByJob(jobId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>>;
-  findByApplicant(applicantId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>>;
-  findByEmployer(employerId: string, pagination: PaginationOptions): Promise<PaginatedResult<ApplicationWithRelations>>;
+  findByJobAndApplicant(
+    jobId: string,
+    applicantId: string
+  ): Promise<ApplicationWithRelations | null>;
+  findByJob(
+    jobId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>>;
+  findByApplicant(
+    applicantId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>>;
+  findByEmployer(
+    employerId: string,
+    pagination: PaginationOptions
+  ): Promise<PaginatedResult<ApplicationWithRelations>>;
   findAll(
     filter: ApplicationFilterInput,
     pagination: PaginationOptions
   ): Promise<PaginatedResult<ApplicationWithRelations>>;
-  search(
-    filters: ApplicationSearchFilters
-  ): Promise<PaginatedResult<ApplicationWithRelations>>;
+  search(filters: ApplicationSearchFilters): Promise<PaginatedResult<ApplicationWithRelations>>;
   paginate(
     page: number,
     limit: number,

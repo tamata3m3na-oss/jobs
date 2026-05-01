@@ -18,88 +18,124 @@ export const ApplicationResponseSchema = z.object({
     'WITHDRAWN',
     'EXPIRED',
   ]),
-  answers: z.array(z.object({
-    questionId: z.string(),
-    value: z.union([z.string(), z.array(z.string())]),
-  })).default([]),
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string(),
+        value: z.union([z.string(), z.array(z.string())]),
+      })
+    )
+    .default([]),
   resumeUrl: z.string().url().nullable(),
   coverLetterUrl: z.string().url().nullable(),
   portfolioUrls: z.array(z.string().url()).default([]),
   matchScore: z.number().min(0).max(100).nullable(),
-  aiAnalysis: z.object({
-    strengths: z.array(z.string()).default([]),
-    weaknesses: z.array(z.string()).default([]),
-    summary: z.string(),
-    recommendation: z.enum(['STRONG_APPLY', 'APPLY', 'NEUTRAL', 'SKIP']),
-  }).nullable(),
-  interviews: z.array(z.object({
-    id: z.string().uuid(),
-    scheduledAt: z.coerce.date(),
-    duration: z.number().positive(),
-    type: z.enum(['VIDEO', 'PHONE', 'ONSITE', 'TECHNICAL', 'ASSESSMENT']),
-    meetingLink: z.string().url().optional(),
-    location: z.string().optional(),
-    interviewerId: z.string().uuid(),
-    interviewerName: z.string(),
-    interviewerEmail: z.string().email(),
-    notes: z.string().max(2000).optional(),
-    feedback: z.object({
-      rating: z.number().min(1).max(5),
+  aiAnalysis: z
+    .object({
       strengths: z.array(z.string()).default([]),
       weaknesses: z.array(z.string()).default([]),
-      recommendation: z.enum(['STRONG_HIRE', 'HIRE', 'NO_HIRE', 'STRONG_NO_HIRE']),
-      notes: z.string().max(2000),
-    }).optional(),
-    status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED']).default('SCHEDULED'),
-  })).default([]),
+      summary: z.string(),
+      recommendation: z.enum(['STRONG_APPLY', 'APPLY', 'NEUTRAL', 'SKIP']),
+    })
+    .nullable(),
+  interviews: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        scheduledAt: z.coerce.date(),
+        duration: z.number().positive(),
+        type: z.enum(['VIDEO', 'PHONE', 'ONSITE', 'TECHNICAL', 'ASSESSMENT']),
+        meetingLink: z.string().url().optional(),
+        location: z.string().optional(),
+        interviewerId: z.string().uuid(),
+        interviewerName: z.string(),
+        interviewerEmail: z.string().email(),
+        notes: z.string().max(2000).optional(),
+        feedback: z
+          .object({
+            rating: z.number().min(1).max(5),
+            strengths: z.array(z.string()).default([]),
+            weaknesses: z.array(z.string()).default([]),
+            recommendation: z.enum(['STRONG_HIRE', 'HIRE', 'NO_HIRE', 'STRONG_NO_HIRE']),
+            notes: z.string().max(2000),
+          })
+          .optional(),
+        status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'RESCHEDULED']).default('SCHEDULED'),
+      })
+    )
+    .default([]),
   notes: z.string().max(2000).nullable(),
-  employerNotes: z.array(z.object({
-    id: z.string().uuid(),
-    authorId: z.string().uuid(),
-    authorName: z.string(),
-    content: z.string().max(1000),
-    createdAt: z.coerce.date(),
-  })).default([]),
+  employerNotes: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        authorId: z.string().uuid(),
+        authorName: z.string(),
+        content: z.string().max(1000),
+        createdAt: z.coerce.date(),
+      })
+    )
+    .default([]),
   rejectionReason: z.string().max(500).nullable(),
-  offeredSalary: z.object({
-    amount: z.number().positive(),
-    currency: z.string(),
-    period: z.enum(['HOURLY', 'WEEKLY', 'BIWEEKLY', 'MONTHLY', 'YEARLY']),
-  }).nullable(),
-  source: z.object({
-    type: z.enum(['DIRECT', 'REFERRAL', 'LINKEDIN', 'INDEED', 'OTHER_JOB_BOARD', 'SOCIAL_MEDIA', 'EMAIL']),
-    referralId: z.string().uuid().optional(),
-    utmData: z.object({
-      source: z.string().optional(),
-      medium: z.string().optional(),
-      campaign: z.string().optional(),
-    }).optional(),
-  }).nullable(),
+  offeredSalary: z
+    .object({
+      amount: z.number().positive(),
+      currency: z.string(),
+      period: z.enum(['HOURLY', 'WEEKLY', 'BIWEEKLY', 'MONTHLY', 'YEARLY']),
+    })
+    .nullable(),
+  source: z
+    .object({
+      type: z.enum([
+        'DIRECT',
+        'REFERRAL',
+        'LINKEDIN',
+        'INDEED',
+        'OTHER_JOB_BOARD',
+        'SOCIAL_MEDIA',
+        'EMAIL',
+      ]),
+      referralId: z.string().uuid().optional(),
+      utmData: z
+        .object({
+          source: z.string().optional(),
+          medium: z.string().optional(),
+          campaign: z.string().optional(),
+        })
+        .optional(),
+    })
+    .nullable(),
   submittedAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   lastActivityAt: z.coerce.date(),
   expiresAt: z.coerce.date().nullable(),
   createdAt: z.coerce.date(),
-  job: z.object({
-    id: z.string().uuid(),
-    title: z.string(),
-    slug: z.string(),
-    status: z.string(),
-    employer: z.object({
+  job: z
+    .object({
+      id: z.string().uuid(),
+      title: z.string(),
+      slug: z.string(),
+      status: z.string(),
+      employer: z
+        .object({
+          id: z.string(),
+          firstName: z.string(),
+          lastName: z.string(),
+          email: z.string(),
+          avatarUrl: z.string().nullable(),
+        })
+        .nullable(),
+    })
+    .nullable(),
+  applicant: z
+    .object({
       id: z.string(),
       firstName: z.string(),
       lastName: z.string(),
       email: z.string(),
       avatarUrl: z.string().nullable(),
-    }).nullable(),
-  }).nullable(),
-  applicant: z.object({
-    id: z.string(),
-    firstName: z.string(),
-    lastName: z.string(),
-    email: z.string(),
-    avatarUrl: z.string().nullable(),
-  }).nullable(),
+    })
+    .nullable(),
 });
 
 export type ApplicationResponse = z.infer<typeof ApplicationResponseSchema>;
@@ -193,15 +229,25 @@ export function toApplicationResponse(application: ApplicationResponseInput): Ap
 
   const sourceVal = application.sourceType
     ? {
-        type: application.sourceType as 'DIRECT' | 'REFERRAL' | 'LINKEDIN' | 'INDEED' | 'OTHER_JOB_BOARD' | 'SOCIAL_MEDIA' | 'EMAIL',
+        type: application.sourceType as
+          | 'DIRECT'
+          | 'REFERRAL'
+          | 'LINKEDIN'
+          | 'INDEED'
+          | 'OTHER_JOB_BOARD'
+          | 'SOCIAL_MEDIA'
+          | 'EMAIL',
         referralId: application.sourceReferralId ?? undefined,
-        utmData: (application.sourceUtmSource || application.sourceUtmMedium || application.sourceUtmCampaign)
-          ? {
-              source: application.sourceUtmSource ?? undefined,
-              medium: application.sourceUtmMedium ?? undefined,
-              campaign: application.sourceUtmCampaign ?? undefined,
-            }
-          : undefined,
+        utmData:
+          application.sourceUtmSource ||
+          application.sourceUtmMedium ||
+          application.sourceUtmCampaign
+            ? {
+                source: application.sourceUtmSource ?? undefined,
+                medium: application.sourceUtmMedium ?? undefined,
+                campaign: application.sourceUtmCampaign ?? undefined,
+              }
+            : undefined,
       }
     : null;
 
@@ -209,7 +255,12 @@ export function toApplicationResponse(application: ApplicationResponseInput): Ap
     ? {
         amount: Number(application.offeredSalaryAmount),
         currency: application.offeredSalaryCurrency ?? 'USD',
-        period: (application.offeredSalaryPeriod ?? 'YEARLY') as 'HOURLY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY' | 'YEARLY',
+        period: (application.offeredSalaryPeriod ?? 'YEARLY') as
+          | 'HOURLY'
+          | 'WEEKLY'
+          | 'BIWEEKLY'
+          | 'MONTHLY'
+          | 'YEARLY',
       }
     : null;
 
