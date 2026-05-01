@@ -139,6 +139,34 @@ body {
   animation: scale-in-95 0.2s ease-out;
 }
 
+/* Shimmer animation for skeleton loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Progress bar shimmer animation */
+@keyframes progress-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-progress-shimmer {
+  animation: progress-shimmer 1s infinite linear;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

@@ -78,6 +78,18 @@ const config: Config = {
           from: { transform: 'scale(0.95)' },
           to: { transform: 'scale(1)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        'progress-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        spin: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -85,6 +97,9 @@ const config: Config = {
         'fade-in': 'fade-in 0.2s ease-out',
         'slide-in-from-top': 'slide-in-from-top 0.3s ease-out',
         'scale-in-95': 'scale-in-95 0.2s ease-out',
+        shimmer: 'shimmer 1.5s infinite linear',
+        'progress-shimmer': 'progress-shimmer 1s infinite linear',
+        spin: 'spin 1s infinite linear',
       },
     },
   },
