@@ -1,23 +1,55 @@
 import 'package:get_it/get_it.dart';
-import 'package:dio/dio.dart';
-import '../../features/auth/data/datasources/auth_remote_data_source.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/jobs/data/datasources/job_remote_data_source.dart';
-import '../../features/jobs/data/repositories/job_repository_impl.dart';
-import '../../features/jobs/domain/repositories/job_repository.dart';
+
+import '../network/api_client.dart';
+import '../network/interceptors/auth_interceptor.dart';
+import '../network/interceptors/error_interceptor.dart';
+import '../network/interceptors/logging_interceptor.dart';
+import '../network/services/auth_service.dart';
+import '../network/services/jobs_service.dart';
+import '../network/services/applications_service.dart';
+import '../network/services/profile_service.dart';
 
 final sl = GetIt.instance;
 
+/// Initialize dependency injection
 Future<void> init() async {
   // External
-  sl.registerLazySingleton(() => Dio(BaseOptions(baseUrl: 'http://api.smartjob.com/api/v1')));
+  // Pre-configured external dependencies
 
-  // Data Sources
-  sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<JobRemoteDataSource>(() => JobRemoteDataSourceImpl(dio: sl()));
+  // Interceptors
+  sl.registerLazySingleton<AuthInterceptor>(
+    () => AuthInterceptor(),
+  );
+  sl.registerLazySingleton<LoggingInterceptor>(
+    () => LoggingInterceptor(),
+  );
+  sl.registerLazySingleton<ErrorInterceptor>(
+    () => ErrorInterceptor(),
+  );
 
-  // Repositories
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<JobRepository>(() => JobRepositoryImpl(remoteDataSource: sl()));
+  // API Client
+  sl.registerLazySingleton<ApiClient>(
+    () => ApiClient(
+      authInterceptor: sl<AuthInterceptor>(),
+      loggingInterceptor: sl<LoggingInterceptor>(),
+      errorInterceptor: sl<ErrorInterceptor>(),
+    ),
+  );
+
+  // Services
+  sl.registerLazySingleton<AuthService>(
+    () => AuthService(apiClient: sl<ApiClient>()),
+  );
+  sl.registerLazySingleton<JobsService>(
+    () => JobsService(apiClient: sl<ApiClient>()),
+  );
+  sl.registerLazySingleton<ApplicationsService>(
+    () => ApplicationsService(apiClient: sl<ApiClient>()),
+  );
+  sl.registerLazySingleton<ProfileService>(
+    () => ProfileService(apiClient: sl<ApiClient>()),
+  );
 }
+
+/// ApiClient provider for Riverpod
+ApiClient apiClientProvider() => sl<ApiClient>();
