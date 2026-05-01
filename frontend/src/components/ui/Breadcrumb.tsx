@@ -46,7 +46,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
         );
       }
 
-      const firstItem = allItems[0];
+      const firstItem = allItems[0]!;
       const lastItems = allItems.slice(-2);
 
       return (
