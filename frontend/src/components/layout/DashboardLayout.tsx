@@ -16,6 +16,7 @@ interface DashboardLayoutProps {
     avatar?: string;
     role: string;
   };
+  navItems?: NavItem[];
 }
 
 const defaultNavItems: NavItem[] = [
@@ -51,9 +52,11 @@ const defaultNavItems: NavItem[] = [
   },
 ];
 
-export function DashboardLayout({ children, user }: DashboardLayoutProps) {
+export function DashboardLayout({ children, user, navItems }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  const items = navItems || defaultNavItems;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -67,7 +70,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
 
       {/* Desktop Sidebar */}
       <Sidebar
-        items={defaultNavItems}
+        items={items}
         user={user}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -84,12 +87,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
                 <X size={20} />
               </Button>
             </div>
-            <Sidebar
-              items={defaultNavItems}
-              user={user}
-              collapsed={false}
-              className="border-none"
-            />
+            <Sidebar items={items} user={user} collapsed={false} className="border-none" />
           </div>
         </div>
       )}

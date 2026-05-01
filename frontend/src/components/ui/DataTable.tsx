@@ -15,6 +15,8 @@ interface DataTableProps<T> {
   className?: string;
   filterPlaceholder?: string;
   filterKey?: keyof T | string;
+  isLoading?: boolean;
+  emptyMessage?: string;
 }
 
 export function DataTable<T>({
@@ -24,6 +26,8 @@ export function DataTable<T>({
   className,
   filterPlaceholder = 'Filter...',
   filterKey,
+  isLoading = false,
+  emptyMessage = 'No results.',
 }: DataTableProps<T>) {
   const [filterValue, setFilterValue] = React.useState('');
 
@@ -60,7 +64,13 @@ export function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.length > 0 ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : filteredData.length > 0 ? (
               filteredData.map((item, rowIndex) => (
                 <TableRow
                   key={rowIndex}
@@ -79,7 +89,7 @@ export function DataTable<T>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
