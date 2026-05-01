@@ -92,7 +92,12 @@ export interface ApplicationWithRelations {
   coverLetterUrl: string | null;
   portfolioUrls: string[];
   matchScore: number | null;
-  aiAnalysis: CreateApplicationInput['aiAnalysis'];
+  aiAnalysis: {
+    strengths: string[];
+    weaknesses: string[];
+    summary: string;
+    recommendation: string;
+  } | null;
   interviews: InterviewData[];
   notes: string | null;
   employerNotes: EmployerNoteData[];

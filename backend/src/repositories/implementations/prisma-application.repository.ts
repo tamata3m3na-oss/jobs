@@ -543,7 +543,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (data.employerNotes !== undefined) updateData.employerNotes = data.employerNotes;
     if (data.rejectionReason !== undefined) updateData.rejectionReason = data.rejectionReason;
-    if (data.offeredSalary !== undefined) {
+    if (data.offeredSalary) {
       updateData.offeredSalaryAmount = data.offeredSalary.amount;
       updateData.offeredSalaryCurrency = data.offeredSalary.currency;
       updateData.offeredSalaryPeriod = data.offeredSalary.period;
@@ -642,13 +642,15 @@ export class PrismaApplicationRepository implements IApplicationRepository {
       throw new Error('Application not found');
     }
 
-    const interviews = (application.interviews as InterviewData[]) ?? [];
-    interviews.push(interview);
+    const existingInterviews: InterviewData[] = Array.isArray(application.interviews)
+      ? (application.interviews as unknown as InterviewData[])
+      : [];
+    const updatedInterviews: InterviewData[] = [...existingInterviews, interview];
 
     const updated = await this.prisma.application.update({
       where: { id },
       data: {
-        interviews: interviews as unknown,
+        interviews: updatedInterviews as unknown as object,
         status: 'INTERVIEW_SCHEDULED',
         lastActivityAt: new Date(),
       },
@@ -694,13 +696,15 @@ export class PrismaApplicationRepository implements IApplicationRepository {
       throw new Error('Application not found');
     }
 
-    const employerNotes = (application.employerNotes as EmployerNoteData[]) ?? [];
-    employerNotes.push(note);
+    const existingNotes: EmployerNoteData[] = Array.isArray(application.employerNotes)
+      ? (application.employerNotes as unknown as EmployerNoteData[])
+      : [];
+    const updatedNotes: EmployerNoteData[] = [...existingNotes, note];
 
     const updated = await this.prisma.application.update({
       where: { id },
       data: {
-        employerNotes: employerNotes as unknown,
+        employerNotes: updatedNotes as unknown as object,
         lastActivityAt: new Date(),
       },
       include: {
@@ -808,10 +812,10 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     applicantId: string;
     employerId: string;
     status: ApplicationStatus;
-    answers: Array<{ questionId: string; value: string | string[] }>;
+    answers: unknown;
     resumeUrl: string | null;
     coverLetterUrl: string | null;
-    portfolioUrls: string[];
+    portfolioUrls: unknown;
     matchScore: number | null;
     aiAnalysis: unknown;
     interviews: unknown;
@@ -883,7 +887,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
       answers: application.answers as ApplicationWithRelations['answers'],
       resumeUrl: application.resumeUrl,
       coverLetterUrl: application.coverLetterUrl,
-      portfolioUrls: application.portfolioUrls,
+      portfolioUrls: (Array.isArray(application.portfolioUrls) ? application.portfolioUrls : []) as string[],
       matchScore: application.matchScore,
       aiAnalysis: application.aiAnalysis as ApplicationWithRelations['aiAnalysis'],
       interviews: (application.interviews || []) as ApplicationWithRelations['interviews'],
