@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../shared/widgets/loading_widget.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/jobs/presentation/pages/apply_page.dart';
 import '../../features/jobs/presentation/pages/job_detail_page.dart';
 import '../../features/jobs/presentation/pages/jobs_list_page.dart';
-import '../../features/jobs/presentation/pages/apply_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../features/profile/presentation/providers/settings_provider.dart';
+import '../../shared/widgets/loading_widget.dart';
 
 /// Route names for type-safe navigation
 class AppRoutes {
@@ -21,12 +22,15 @@ class AppRoutes {
   static const String jobDetail = '/jobs/:id';
   static const String apply = '/apply/:id';
   static const String profile = '/profile';
+  static const String profileApplications = '/profile/applications';
+  static const String profileSavedJobs = '/profile/saved-jobs';
   static const String settings = '/profile/settings';
 }
 
-/// Router provider with auth state
+/// Router provider with auth state and theme support
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final settings = ref.watch(settingsProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -40,7 +44,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final isPublicRoute = _isPublicRoute(state.matchedLocation);
 
-      // Handle Splash screen separately or let it fall through
+      // Handle Splash screen
       if (state.matchedLocation == AppRoutes.splash) {
         return authState.maybeWhen(
           initial: () => null,
@@ -112,6 +116,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ProfilePage(),
             routes: [
               GoRoute(
+                path: 'applications',
+                name: 'profileApplications',
+                builder: (context, state) => const _ApplicationsPlaceholder(),
+              ),
+              GoRoute(
+                path: 'saved-jobs',
+                name: 'profileSavedJobs',
+                builder: (context, state) => const _SavedJobsPlaceholder(),
+              ),
+              GoRoute(
                 path: 'settings',
                 name: 'settings',
                 builder: (context, state) => const SettingsPage(),
@@ -124,6 +138,40 @@ final routerProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => ErrorScreen(error: state.error),
   );
 });
+
+/// Placeholder for Applications page (to be implemented)
+class _ApplicationsPlaceholder extends StatelessWidget {
+  const _ApplicationsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Applications'),
+      ),
+      body: const Center(
+        child: Text('Applications page - coming soon'),
+      ),
+    );
+  }
+}
+
+/// Placeholder for Saved Jobs page (to be implemented)
+class _SavedJobsPlaceholder extends StatelessWidget {
+  const _SavedJobsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Saved Jobs'),
+      ),
+      body: const Center(
+        child: Text('Saved Jobs page - coming soon'),
+      ),
+    );
+  }
+}
 
 bool _isPublicRoute(String location) {
   final publicRoutes = [
@@ -155,28 +203,52 @@ class SplashScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.work, size: 80, color: Colors.blue),
-            const SizedBox(height: 24),
-            const Text(
-              'Smart Job',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.work,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            Text(
+              'Smart Job',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'AI-Powered Job Matching',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  ),
+            ),
+            const SizedBox(height: 48),
             authState.maybeWhen(
               error: (message) => Column(
                 children: [
-                  Text('Error: $message', style: const TextStyle(color: Colors.red)),
+                  Text(
+                    'Error: $message',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () => ref.read(authStateProvider.notifier).checkAuthStatus(),
-                    child: const Text('Retry'),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
                   ),
                 ],
               ),
-              orElse: () => const LoadingWidget(),
+              orElse: () => const LoadingWidget(message: 'Loading...'),
             ),
           ],
         ),
@@ -198,16 +270,22 @@ class ErrorScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            Icon(
+              Icons.error_outline,
+              size: 60,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text(
               error?.message ?? 'Page not found',
-              style: const TextStyle(fontSize: 18),
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            ElevatedButton.icon(
               onPressed: () => context.go(AppRoutes.jobs),
-              child: const Text('Go to Jobs'),
+              icon: const Icon(Icons.home),
+              label: const Text('Go to Jobs'),
             ),
           ],
         ),
