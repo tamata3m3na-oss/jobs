@@ -149,6 +149,7 @@ export interface IJobRepository {
   updateStatus(id: string, status: JobStatus): Promise<JobWithEmployerResult>;
   delete(id: string): Promise<void>;
   incrementViews(id: string): Promise<void>;
+  incrementApplications(id: string): Promise<void>;
   countApplications(id: string): Promise<number>;
   updateApplicationsCount(id: string, count: number): Promise<void>;
   existsBySlug(slug: string): Promise<boolean>;

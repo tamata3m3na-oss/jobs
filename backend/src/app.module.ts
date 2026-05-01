@@ -4,6 +4,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { ApplicationsModule } from './modules/applications/applications.module';
 import { MatchingModule } from './modules/matching/matching.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
@@ -29,6 +30,7 @@ import configuration from './config/configuration';
     AuthModule,
     UsersModule,
     JobsModule,
+    ApplicationsModule,
     MatchingModule,
     AdminModule,
     AnalyticsModule,

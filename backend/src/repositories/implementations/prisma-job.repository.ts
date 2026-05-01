@@ -386,6 +386,13 @@ export class PrismaJobRepository implements IJobRepository {
     });
   }
 
+  async incrementApplications(id: string): Promise<void> {
+    await this.prisma.job.update({
+      where: { id },
+      data: { applicationsCount: { increment: 1 } },
+    });
+  }
+
   async countApplications(id: string): Promise<number> {
     return this.prisma.application.count({
       where: { jobId: id },
