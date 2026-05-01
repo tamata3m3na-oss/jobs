@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_router.dart';
 import '../../../shared/widgets/loading_widget.dart';
-import '../../shared/models/job_model.dart';
+import '../../../../shared/models/job_model.dart';
 import '../providers/jobs_provider.dart';
 
 /// Jobs list page with Riverpod state management

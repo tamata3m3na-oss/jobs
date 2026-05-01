@@ -1,11 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/models/user_model.dart';
-import '../../../core/network/services/auth_service.dart';
-import '../../../core/di/injection.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/network/services/auth_service.dart';
+import '../../../../shared/models/user_model.dart';
 
-/// Authentication state
-enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
+/// Authentication status enum
+enum AuthStatus {
+  initial,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+}
 
 /// Authentication state data
 class AuthState {
@@ -38,7 +44,7 @@ class AuthState {
 
 /// Auth service provider
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(apiClient: ref.read(apiClientProvider));
+  return AuthService(apiClient: apiClientProvider());
 });
 
 /// Main auth state provider
@@ -129,7 +135,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       await _authService.logout();
       state = const AsyncValue.data(AuthState(status: AuthStatus.unauthenticated));
     } catch (e) {
-      // Still log out even if API call fails
       state = const AsyncValue.data(AuthState(status: AuthStatus.unauthenticated));
     }
   }
@@ -141,19 +146,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         status: AuthStatus.authenticated,
         user: user,
       ));
-    } catch (e) {
+    } catch (_) {
       // Keep current state if refresh fails
     }
   }
 
   String _formatError(dynamic error) {
-    if (error.toString().contains('401')) {
+    final errorStr = error.toString();
+    if (errorStr.contains('401')) {
       return 'Invalid email or password';
     }
-    if (error.toString().contains('network')) {
+    if (errorStr.contains('network')) {
       return 'Network error. Please check your connection.';
     }
-    return error.toString();
+    return errorStr;
   }
 }
 

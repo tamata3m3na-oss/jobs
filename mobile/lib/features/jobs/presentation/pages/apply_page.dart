@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/network/services/applications_service.dart';
-import '../../../core/di/injection.dart';
-import '../../shared/widgets/loading_widget.dart';
+import '../../../../core/network/services/applications_service.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../shared/widgets/loading_widget.dart';
 
 /// Apply to job page
 class ApplyPage extends ConsumerStatefulWidget {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/di/injection.dart';
-import '../../../shared/models/user_model.dart';
-import '../../../core/network/services/profile_service.dart';
+import '../../../../core/di/injection.dart';
+import '../../../../core/network/services/profile_service.dart';
+import '../../../../shared/models/user_model.dart';
 
 /// Settings state
 class SettingsState {

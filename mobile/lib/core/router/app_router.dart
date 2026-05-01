@@ -3,14 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/widgets/loading_widget.dart';
-import '../features/auth/presentation/pages/login_page.dart';
-import '../features/auth/presentation/pages/register_page.dart';
-import '../features/auth/presentation/providers/auth_provider.dart';
-import '../features/jobs/presentation/pages/job_detail_page.dart';
-import '../features/jobs/presentation/pages/jobs_list_page.dart';
-import '../features/jobs/presentation/pages/apply_page.dart';
-import '../features/profile/presentation/pages/profile_page.dart';
-import '../features/profile/presentation/pages/settings_page.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/jobs/presentation/pages/job_detail_page.dart';
+import '../../features/jobs/presentation/pages/jobs_list_page.dart';
+import '../../features/jobs/presentation/pages/apply_page.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 
 /// Route names for type-safe navigation
 class AppRoutes {
@@ -33,8 +33,9 @@ final routerProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     refreshListenable: _RouterRefreshNotifier(authState),
     redirect: (context, state) {
-      final isLoggedIn = authState.maybeMap(
-        authenticated: (_) => true,
+      // Extract auth status from AsyncValue
+      final isLoggedIn = authState.maybeWhen(
+        data: (data) => data.status == AuthStatus.authenticated,
         orElse: () => false,
       );
 
@@ -125,26 +126,17 @@ bool _isPublicRoute(String location) {
 
 /// Helper to refresh router when auth state changes
 class _RouterRefreshNotifier extends ChangeNotifier {
-  _RouterRefreshNotifier(this.authState) {
-    authState.maybeWhen(
-      data: (state) => state.when(
-        authenticated: (_) {},
-        unauthenticated: () {},
-        loading: () {},
-      ),
-      orElse: () {},
-    );
+  _RouterRefreshNotifier(AsyncValue<AuthState> authState) {
+    authState.whenData((state) {
+      // Use AuthState data
+    });
   }
-
-  final AsyncValue<AuthState> authState;
 
   @override
-  void dispose() {
-    authState.whenData((_) {}).maybeWhen(
-          orElse: () {},
-        );
-    super.dispose();
-  }
+  int get hashCode => 0;
+
+  @override
+  bool operator ==(Object other) => false;
 }
 
 /// Splash screen shown on app start

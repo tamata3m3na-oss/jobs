@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/di/injection.dart';
+import '../../../../core/network/services/jobs_service.dart';
 import '../../../../shared/models/job_model.dart';
-import '../../../core/network/services/jobs_service.dart';
-import '../../../core/di/injection.dart';
 
 /// Jobs list state
 class JobsState {
