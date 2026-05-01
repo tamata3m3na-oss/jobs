@@ -18,7 +18,8 @@ const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
 
     const animationClasses = {
       pulse: 'animate-pulse bg-muted',
-      shimmer: 'animate-shimmer bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%]',
+      shimmer:
+        'animate-shimmer bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%]',
       none: 'bg-muted',
     };
 
@@ -82,10 +83,7 @@ function SkeletonCard({
   ...props
 }: SkeletonCardProps) {
   return (
-    <div
-      className={cn('rounded-lg border bg-card p-4 space-y-4', className)}
-      {...props}
-    >
+    <div className={cn('rounded-lg border bg-card p-4 space-y-4', className)} {...props}>
       {showImage && <Skeleton variant="rectangular" height={160} className="w-full" />}
       {showAvatar && (
         <div className="flex items-center gap-3">
@@ -106,12 +104,7 @@ export interface SkeletonTableProps extends React.HTMLAttributes<HTMLDivElement>
   columns?: number;
 }
 
-function SkeletonTable({
-  rows = 5,
-  columns = 4,
-  className,
-  ...props
-}: SkeletonTableProps) {
+function SkeletonTable({ rows = 5, columns = 4, className, ...props }: SkeletonTableProps) {
   return (
     <div className={cn('space-y-3', className)} {...props}>
       <div className="flex gap-4 pb-3 border-b">

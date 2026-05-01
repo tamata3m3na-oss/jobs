@@ -25,17 +25,20 @@ const variantClasses = {
 };
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({
-    className,
-    value = 0,
-    max = 100,
-    size = 'md',
-    variant = 'default',
-    showValue = false,
-    animated = false,
-    label,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      value = 0,
+      max = 100,
+      size = 'md',
+      variant = 'default',
+      showValue = false,
+      animated = false,
+      label,
+      ...props
+    },
+    ref
+  ) => {
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
     const progressId = React.useId();
 
@@ -49,9 +52,7 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
               </label>
             )}
             {showValue && (
-              <span className="text-muted-foreground font-medium">
-                {Math.round(percentage)}%
-              </span>
+              <span className="text-muted-foreground font-medium">{Math.round(percentage)}%</span>
             )}
           </div>
         )}
@@ -75,7 +76,8 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
               'h-full transition-all duration-300 ease-out rounded-full',
               variantClasses[variant],
               animated && 'relative overflow-hidden',
-              animated && 'after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent after:animate-progress-shimmer'
+              animated &&
+                'after:absolute after:inset-0 after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent after:animate-progress-shimmer'
             )}
             style={{ width: `${percentage}%` }}
           />

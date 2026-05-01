@@ -14,34 +14,41 @@ export interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, '
 
 const variantConfig: Record<AlertVariant, { container: string; icon: React.ElementType }> = {
   success: {
-    container: 'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
+    container:
+      'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
     icon: CheckCircle,
   },
   error: {
-    container: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
+    container:
+      'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
     icon: AlertCircle,
   },
   warning: {
-    container: 'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
+    container:
+      'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
     icon: AlertTriangle,
   },
   info: {
-    container: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
+    container:
+      'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
     icon: Info,
   },
 };
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({
-    className,
-    variant = 'info',
-    icon = true,
-    dismissible = false,
-    onDismiss,
-    title,
-    children,
-    ...props
-  }, ref) => {
+  (
+    {
+      className,
+      variant = 'info',
+      icon = true,
+      dismissible = false,
+      onDismiss,
+      title,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const [isVisible, setIsVisible] = React.useState(true);
     const { container, icon: Icon } = variantConfig[variant];
 
@@ -66,20 +73,10 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         )}
         {...props}
       >
-        {icon && (
-          <Icon className="h-5 w-5 shrink-0 mt-0.5" aria-hidden="true" />
-        )}
+        {icon && <Icon className="h-5 w-5 shrink-0 mt-0.5" aria-hidden="true" />}
         <div className="flex-1 min-w-0">
-          {title && (
-            <h5 className="text-sm font-semibold mb-1">
-              {title}
-            </h5>
-          )}
-          {children && (
-            <div className="text-sm opacity-90 [&>p]:m-0">
-              {children}
-            </div>
-          )}
+          {title && <h5 className="text-sm font-semibold mb-1">{title}</h5>}
+          {children && <div className="text-sm opacity-90 [&>p]:m-0">{children}</div>}
         </div>
         {dismissible && (
           <button

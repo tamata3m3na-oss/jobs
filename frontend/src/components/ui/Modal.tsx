@@ -1,6 +1,14 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody, DialogFooter } from './Dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+} from './Dialog';
 import { X } from 'lucide-react';
 
 export interface ModalProps {
@@ -57,16 +65,10 @@ function ModalContent({
       className={cn('flex flex-col', className)}
       {...props}
     >
-      {showHeader && (
-        <div className="flex items-center justify-between pr-8">
-          {children}
-        </div>
-      )}
+      {showHeader && <div className="flex items-center justify-between pr-8">{children}</div>}
       {!showHeader && children}
       {showFooter && footerContent && (
-        <div className="flex-shrink-0 border-t mt-4 pt-4">
-          {footerContent}
-        </div>
+        <div className="flex-shrink-0 border-t mt-4 pt-4">{footerContent}</div>
       )}
     </DialogContent>
   );
@@ -75,56 +77,33 @@ function ModalContent({
 export interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function ModalHeader({ className, ...props }: ModalHeaderProps) {
-  return (
-    <DialogHeader
-      className={cn('flex-1', className)}
-      {...props}
-    />
-  );
+  return <DialogHeader className={cn('flex-1', className)} {...props} />;
 }
 
 export interface ModalTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
 
 function ModalTitle({ className, ...props }: ModalTitleProps) {
-  return (
-    <DialogTitle
-      className={cn('text-lg font-semibold', className)}
-      {...props}
-    />
-  );
+  return <DialogTitle className={cn('text-lg font-semibold', className)} {...props} />;
 }
 
 export interface ModalDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 
 function ModalDescription({ className, ...props }: ModalDescriptionProps) {
   return (
-    <DialogDescription
-      className={cn('text-sm text-muted-foreground', className)}
-      {...props}
-    />
+    <DialogDescription className={cn('text-sm text-muted-foreground', className)} {...props} />
   );
 }
 
 export interface ModalBodyProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function ModalBody({ className, ...props }: ModalBodyProps) {
-  return (
-    <DialogBody
-      className={cn('flex-1 min-h-0 py-4', className)}
-      {...props}
-    />
-  );
+  return <DialogBody className={cn('flex-1 min-h-0 py-4', className)} {...props} />;
 }
 
 export interface ModalFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function ModalFooter({ className, ...props }: ModalFooterProps) {
-  return (
-    <DialogFooter
-      className={cn('mt-auto pt-4 border-t', className)}
-      {...props}
-    />
-  );
+  return <DialogFooter className={cn('mt-auto pt-4 border-t', className)} {...props} />;
 }
 
 export interface ModalCloseProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
@@ -144,4 +123,14 @@ function ModalClose({ className, children, ...props }: ModalCloseProps) {
   );
 }
 
-export { Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalFooter, ModalClose };
+export {
+  Modal,
+  ModalTrigger,
+  ModalContent,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalBody,
+  ModalFooter,
+  ModalClose,
+};

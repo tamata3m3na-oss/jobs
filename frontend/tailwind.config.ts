@@ -97,7 +97,7 @@ const config: Config = {
         'fade-in': 'fade-in 0.2s ease-out',
         'slide-in-from-top': 'slide-in-from-top 0.3s ease-out',
         'scale-in-95': 'scale-in-95 0.2s ease-out',
-        'shimmer': 'shimmer 1.5s infinite linear',
+        shimmer: 'shimmer 1.5s infinite linear',
         'progress-shimmer': 'progress-shimmer 1s infinite linear',
         spin: 'spin 1s infinite linear',
       },

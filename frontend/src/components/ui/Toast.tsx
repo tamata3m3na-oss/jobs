@@ -15,34 +15,32 @@ export interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, '
 
 const variantStyles: Record<ToastVariant, { container: string; icon: React.ElementType }> = {
   success: {
-    container: 'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
+    container:
+      'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
     icon: CheckCircle,
   },
   error: {
-    container: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
+    container:
+      'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
     icon: AlertCircle,
   },
   warning: {
-    container: 'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
+    container:
+      'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
     icon: AlertTriangle,
   },
   info: {
-    container: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
+    container:
+      'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
     icon: Info,
   },
 };
 
 const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
-  ({
-    id,
-    variant = 'info',
-    title,
-    description,
-    duration = 5000,
-    onDismiss,
-    className,
-    ...props
-  }, ref) => {
+  (
+    { id, variant = 'info', title, description, duration = 5000, onDismiss, className, ...props },
+    ref
+  ) => {
     const [isVisible, setIsVisible] = React.useState(true);
     const [progress, setProgress] = React.useState(100);
     const { container, icon: Icon } = variantStyles[variant];
@@ -126,13 +124,9 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
       >
         <Icon className="h-5 w-5 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="flex-1 min-w-0">
-          {title && (
-            <p className="text-sm font-semibold">{title}</p>
-          )}
+          {title && <p className="text-sm font-semibold">{title}</p>}
           {description && (
-            <p className={cn('text-sm mt-1 opacity-90', title && 'mt-1')}>
-              {description}
-            </p>
+            <p className={cn('text-sm mt-1 opacity-90', title && 'mt-1')}>{description}</p>
           )}
         </div>
         <button
@@ -196,28 +190,31 @@ export interface ToastProviderProps {
   maxToasts?: number;
 }
 
-export function ToastProvider({ children, position = 'top-right', maxToasts = 5 }: ToastProviderProps) {
+export function ToastProvider({
+  children,
+  position = 'top-right',
+  maxToasts = 5,
+}: ToastProviderProps) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
-  const addToast = React.useCallback((toast: Omit<ToastItem, 'id'>) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    setToasts((prev) => {
-      const newToasts = [{ ...toast, id }, ...prev];
-      return newToasts.slice(0, maxToasts);
-    });
-    return id;
-  }, [maxToasts]);
+  const addToast = React.useCallback(
+    (toast: Omit<ToastItem, 'id'>) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      setToasts((prev) => {
+        const newToasts = [{ ...toast, id }, ...prev];
+        return newToasts.slice(0, maxToasts);
+      });
+      return id;
+    },
+    [maxToasts]
+  );
 
   const removeToast = React.useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
   const updateToast = React.useCallback((id: string, updates: Partial<ToastItem>) => {
-    setToasts((prev) =>
-      prev.map((toast) =>
-        toast.id === id ? { ...toast, ...updates } : toast
-      )
-    );
+    setToasts((prev) => prev.map((toast) => (toast.id === id ? { ...toast, ...updates } : toast)));
   }, []);
 
   const positionClasses: Record<ToastPosition, string> = {

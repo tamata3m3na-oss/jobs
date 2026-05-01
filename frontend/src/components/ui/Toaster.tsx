@@ -39,19 +39,23 @@ export function useToaster() {
 
 const variantStyles: Record<ToastVariant, { container: string; icon: React.ElementType }> = {
   success: {
-    container: 'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
+    container:
+      'bg-green-50 dark:bg-green-950/50 border-green-200 dark:border-green-800 text-green-900 dark:text-green-100',
     icon: CheckCircle,
   },
   error: {
-    container: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
+    container:
+      'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800 text-red-900 dark:text-red-100',
     icon: AlertCircle,
   },
   warning: {
-    container: 'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
+    container:
+      'bg-yellow-50 dark:bg-yellow-950/50 border-yellow-200 dark:border-yellow-800 text-yellow-900 dark:text-yellow-100',
     icon: AlertTriangle,
   },
   info: {
-    container: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
+    container:
+      'bg-blue-50 dark:bg-blue-950/50 border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-100',
     icon: Info,
   },
 };
@@ -68,7 +72,10 @@ interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>
 }
 
 const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
-  ({ id, variant = 'info', title, description, duration = 5000, onDismiss, className, ...props }, ref) => {
+  (
+    { id, variant = 'info', title, description, duration = 5000, onDismiss, className, ...props },
+    ref
+  ) => {
     const [isVisible, setIsVisible] = React.useState(true);
     const [progress, setProgress] = React.useState(100);
     const { container, icon: Icon } = variantStyles[variant];
@@ -153,7 +160,9 @@ const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
         <Icon className="h-5 w-5 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           {title && <p className="text-sm font-semibold">{title}</p>}
-          {description && <p className={cn('text-sm mt-1 opacity-90', title && 'mt-1')}>{description}</p>}
+          {description && (
+            <p className={cn('text-sm mt-1 opacity-90', title && 'mt-1')}>{description}</p>
+          )}
         </div>
         <button
           type="button"
@@ -196,53 +205,84 @@ interface ToasterProviderProps {
   maxToasts?: number;
 }
 
-export function ToasterProvider({ children, position = 'top-right', maxToasts = 5 }: ToasterProviderProps) {
+export function ToasterProvider({
+  children,
+  position = 'top-right',
+  maxToasts = 5,
+}: ToasterProviderProps) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
 
-  const addToast = React.useCallback((toast: Omit<ToastItem, 'id'>) => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    setToasts((prev) => {
-      const newToasts = [{ ...toast, id }, ...prev];
-      return newToasts.slice(0, maxToasts);
-    });
-    return id;
-  }, [maxToasts]);
+  const addToast = React.useCallback(
+    (toast: Omit<ToastItem, 'id'>) => {
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      setToasts((prev) => {
+        const newToasts = [{ ...toast, id }, ...prev];
+        return newToasts.slice(0, maxToasts);
+      });
+      return id;
+    },
+    [maxToasts]
+  );
 
   const removeToast = React.useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const promise = React.useCallback(<T,>(
-    promiseValue: Promise<T>,
-    callbacks: {
-      loading: React.ReactNode;
-      success: React.ReactNode | ((data: T) => React.ReactNode);
-      error: React.ReactNode | ((error: Error) => React.ReactNode);
+  const promise = React.useCallback(
+    <T,>(
+      promiseValue: Promise<T>,
+      callbacks: {
+        loading: React.ReactNode;
+        success: React.ReactNode | ((data: T) => React.ReactNode);
+        error: React.ReactNode | ((error: Error) => React.ReactNode);
+      },
+      config?: { duration?: number }
+    ) => {
+      const loadingId = addToast({ variant: 'info', title: callbacks.loading, duration: Infinity });
+      promiseValue
+        .then((data) => {
+          removeToast(loadingId);
+          const successMessage =
+            typeof callbacks.success === 'function' ? callbacks.success(data) : callbacks.success;
+          addToast({ variant: 'success', title: successMessage, duration: config?.duration });
+        })
+        .catch((error) => {
+          removeToast(loadingId);
+          const errorMessage =
+            typeof callbacks.error === 'function' ? callbacks.error(error) : callbacks.error;
+          addToast({ variant: 'error', title: errorMessage, duration: config?.duration });
+        });
     },
-    config?: { duration?: number }
-  ) => {
-    const loadingId = addToast({ variant: 'info', title: callbacks.loading, duration: Infinity });
-    promiseValue
-      .then((data) => {
-        removeToast(loadingId);
-        const successMessage = typeof callbacks.success === 'function' ? callbacks.success(data) : callbacks.success;
-        addToast({ variant: 'success', title: successMessage, duration: config?.duration });
-      })
-      .catch((error) => {
-        removeToast(loadingId);
-        const errorMessage = typeof callbacks.error === 'function' ? callbacks.error(error) : callbacks.error;
-        addToast({ variant: 'error', title: errorMessage, duration: config?.duration });
-      });
-  }, [addToast, removeToast]);
+    [addToast, removeToast]
+  );
 
-  const contextValue = React.useMemo(() => ({ toasts, addToast, removeToast, promise }), [toasts, addToast, removeToast, promise]);
+  const contextValue = React.useMemo(
+    () => ({ toasts, addToast, removeToast, promise }),
+    [toasts, addToast, removeToast, promise]
+  );
 
   return (
     <ToasterContext.Provider value={contextValue}>
       {children}
-      <div role="region" aria-label="Notifications" className={cn('fixed z-50 flex flex-col gap-2 pointer-events-none', positionClasses[position])}>
+      <div
+        role="region"
+        aria-label="Notifications"
+        className={cn(
+          'fixed z-50 flex flex-col gap-2 pointer-events-none',
+          positionClasses[position]
+        )}
+      >
         {toasts.map((toast) => (
-          <Toast key={toast.id} id={toast.id} variant={toast.variant} title={toast.title} description={toast.description} duration={toast.duration} onDismiss={removeToast} className="pointer-events-auto" />
+          <Toast
+            key={toast.id}
+            id={toast.id}
+            variant={toast.variant}
+            title={toast.title}
+            description={toast.description}
+            duration={toast.duration}
+            onDismiss={removeToast}
+            className="pointer-events-auto"
+          />
         ))}
       </div>
     </ToasterContext.Provider>
@@ -257,9 +297,25 @@ export function ToasterStandalone({ position = 'top-right' }: ToasterStandaloneP
   const { toasts, removeToast } = useToaster();
 
   return (
-    <div role="region" aria-label="Notifications" className={cn('fixed z-50 flex flex-col gap-2 pointer-events-none', positionClasses[position])}>
+    <div
+      role="region"
+      aria-label="Notifications"
+      className={cn(
+        'fixed z-50 flex flex-col gap-2 pointer-events-none',
+        positionClasses[position]
+      )}
+    >
       {toasts.map((toast) => (
-        <Toast key={toast.id} id={toast.id} variant={toast.variant} title={toast.title} description={toast.description} duration={toast.duration} onDismiss={removeToast} className="pointer-events-auto" />
+        <Toast
+          key={toast.id}
+          id={toast.id}
+          variant={toast.variant}
+          title={toast.title}
+          description={toast.description}
+          duration={toast.duration}
+          onDismiss={removeToast}
+          className="pointer-events-auto"
+        />
       ))}
     </div>
   );

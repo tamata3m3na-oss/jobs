@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 
-export type BadgeVariant = 
-  | 'default' 
-  | 'secondary' 
-  | 'destructive' 
-  | 'outline' 
-  | 'success' 
-  | 'warning' 
+export type BadgeVariant =
+  | 'default'
+  | 'secondary'
+  | 'destructive'
+  | 'outline'
+  | 'success'
+  | 'warning'
   | 'info';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
@@ -26,8 +26,10 @@ const variantStyles: Record<BadgeVariant, string> = {
   destructive:
     'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
   outline: 'text-foreground border-current',
-  success: 'border-transparent bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 hover:bg-green-100/80 dark:hover:bg-green-900/50',
-  warning: 'border-transparent bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 hover:bg-yellow-100/80 dark:hover:bg-yellow-900/50',
+  success:
+    'border-transparent bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 hover:bg-green-100/80 dark:hover:bg-green-900/50',
+  warning:
+    'border-transparent bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 hover:bg-yellow-100/80 dark:hover:bg-yellow-900/50',
   info: 'border-transparent bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 hover:bg-blue-100/80 dark:hover:bg-blue-900/50',
 };
 
@@ -47,15 +49,15 @@ const dotColors: Record<BadgeVariant, string> = {
   info: 'bg-blue-500',
 };
 
-function Badge({ 
-  className, 
-  variant = 'default', 
+function Badge({
+  className,
+  variant = 'default',
   size = 'md',
   icon,
   dot = false,
   dotColor,
   children,
-  ...props 
+  ...props
 }: BadgeProps) {
   return (
     <span
@@ -68,11 +70,8 @@ function Badge({
       {...props}
     >
       {dot && (
-        <span 
-          className={cn(
-            'h-1.5 w-1.5 rounded-full',
-            dotColor || dotColors[variant]
-          )}
+        <span
+          className={cn('h-1.5 w-1.5 rounded-full', dotColor || dotColors[variant])}
           aria-hidden="true"
         />
       )}
@@ -100,17 +99,8 @@ function BadgeDot({ color = 'default', className, ...props }: BadgeDotProps) {
   };
 
   return (
-    <Badge
-      className={cn('px-2 py-1', className)}
-      {...props}
-    >
-      <span 
-        className={cn(
-          'h-2 w-2 rounded-full',
-          colorMap[color]
-        )}
-        aria-hidden="true"
-      />
+    <Badge className={cn('px-2 py-1', className)} {...props}>
+      <span className={cn('h-2 w-2 rounded-full', colorMap[color])} aria-hidden="true" />
       {props.children}
     </Badge>
   );
@@ -136,10 +126,13 @@ function StatusBadge({ status, className, ...props }: StatusBadgeProps) {
     <Badge
       dot
       dotColor={
-        status === 'active' || status === 'online' ? 'bg-green-500' :
-        status === 'inactive' || status === 'offline' ? 'bg-gray-400' :
-        status === 'pending' ? 'bg-yellow-500' :
-        'bg-red-500'
+        status === 'active' || status === 'online'
+          ? 'bg-green-500'
+          : status === 'inactive' || status === 'offline'
+            ? 'bg-gray-400'
+            : status === 'pending'
+              ? 'bg-yellow-500'
+              : 'bg-red-500'
       }
       className={className}
       {...props}

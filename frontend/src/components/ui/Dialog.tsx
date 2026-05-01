@@ -30,10 +30,13 @@ function Dialog({ open = false, onOpenChange, children }: DialogProps) {
     setIsOpen(open);
   }, [open]);
 
-  const setOpen = React.useCallback((newOpen: boolean) => {
-    setIsOpen(newOpen);
-    onOpenChange?.(newOpen);
-  }, [onOpenChange]);
+  const setOpen = React.useCallback(
+    (newOpen: boolean) => {
+      setIsOpen(newOpen);
+      onOpenChange?.(newOpen);
+    },
+    [onOpenChange]
+  );
 
   React.useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
@@ -59,9 +62,7 @@ function Dialog({ open = false, onOpenChange, children }: DialogProps) {
   }, [isOpen]);
 
   return (
-    <DialogContext.Provider value={{ open: isOpen, setOpen }}>
-      {children}
-    </DialogContext.Provider>
+    <DialogContext.Provider value={{ open: isOpen, setOpen }}>{children}</DialogContext.Provider>
   );
 }
 
@@ -222,33 +223,20 @@ export interface DialogTitleProps extends React.HTMLAttributes<HTMLHeadingElemen
 
 function DialogTitle({ className, ...props }: DialogTitleProps) {
   return (
-    <h2
-      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
-      {...props}
-    />
+    <h2 className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
   );
 }
 
 export interface DialogDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
 
 function DialogDescription({ className, ...props }: DialogDescriptionProps) {
-  return (
-    <p
-      className={cn('text-sm text-muted-foreground', className)}
-      {...props}
-    />
-  );
+  return <p className={cn('text-sm text-muted-foreground', className)} {...props} />;
 }
 
 export interface DialogBodyProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function DialogBody({ className, ...props }: DialogBodyProps) {
-  return (
-    <div
-      className={cn('flex-1 overflow-y-auto py-4', className)}
-      {...props}
-    />
-  );
+  return <div className={cn('flex-1 overflow-y-auto py-4', className)} {...props} />;
 }
 
 export interface DialogFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -265,4 +253,13 @@ function DialogFooter({ className, ...props }: DialogFooterProps) {
   );
 }
 
-export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody, DialogFooter };
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogBody,
+  DialogFooter,
+};

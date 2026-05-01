@@ -1,6 +1,13 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './Dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from './Dialog';
 import { Button } from './Button';
 
 export interface ConfirmDialogProps {
@@ -58,12 +65,7 @@ function ConfirmDialog({
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <DialogFooter className="mt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={loading}
-          >
+          <Button type="button" variant="outline" onClick={handleCancel} disabled={loading}>
             {cancelLabel}
           </Button>
           <Button

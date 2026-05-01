@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from './Button';
-import {
-  Search,
-  FileX,
-  Inbox,
-  AlertTriangle,
-  RefreshCw,
-} from 'lucide-react';
+import { Search, FileX, Inbox, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export type EmptyStateVariant = 'no-results' | 'no-data' | 'error' | 'loading';
 
@@ -56,16 +50,19 @@ const actionAlignmentClasses = {
 };
 
 const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
-  ({
-    variant = 'no-data',
-    icon,
-    title,
-    description,
-    action,
-    actionAlign = 'center',
-    className,
-    ...props
-  }, ref) => {
+  (
+    {
+      variant = 'no-data',
+      icon,
+      title,
+      description,
+      action,
+      actionAlign = 'center',
+      className,
+      ...props
+    },
+    ref
+  ) => {
     const { icon: IconComponent, iconClass } = variantConfig[variant];
     const defaultIcon = <IconComponent className={cn('h-12 w-12', iconClass)} aria-hidden="true" />;
 
@@ -80,25 +77,14 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
         role="status"
         {...props}
       >
-        <div className="flex-shrink-0">
-          {icon || defaultIcon}
-        </div>
+        <div className="flex-shrink-0">{icon || defaultIcon}</div>
         <div className="space-y-2 max-w-md">
-          <h3 className="text-lg font-semibold text-foreground">
-            {title}
-          </h3>
-          {description && (
-            <p className="text-sm text-muted-foreground">
-              {description}
-            </p>
-          )}
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
         {action && (
           <div className={cn('flex mt-2', actionAlignmentClasses[actionAlign])}>
-            <Button
-              onClick={action.onClick}
-              variant={action.variant || 'default'}
-            >
+            <Button onClick={action.onClick} variant={action.variant || 'default'}>
               {action.label}
             </Button>
           </div>
@@ -109,21 +95,23 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
 );
 EmptyState.displayName = 'EmptyState';
 
-export interface EmptyStateNoResultsProps extends Omit<EmptyStateProps, 'variant' | 'title' | 'icon'> {
+export interface EmptyStateNoResultsProps extends Omit<
+  EmptyStateProps,
+  'variant' | 'title' | 'icon'
+> {
   searchQuery?: string;
 }
 
-function EmptyStateNoResults({
-  searchQuery,
-  ...props
-}: EmptyStateNoResultsProps) {
+function EmptyStateNoResults({ searchQuery, ...props }: EmptyStateNoResultsProps) {
   return (
     <EmptyState
       variant="no-results"
       title={searchQuery ? `No results for "${searchQuery}"` : 'No results found'}
-      description={searchQuery
-        ? 'Try adjusting your search or filters to find what you\'re looking for.'
-        : 'There are no items to display at this time.'}
+      description={
+        searchQuery
+          ? "Try adjusting your search or filters to find what you're looking for."
+          : 'There are no items to display at this time.'
+      }
       icon={<Search className="h-12 w-12 text-muted-foreground" aria-hidden="true" />}
       {...props}
     />
@@ -156,11 +144,7 @@ export interface EmptyStateErrorProps extends Omit<EmptyStateProps, 'variant' | 
   onRetry?: () => void;
 }
 
-function EmptyStateError({
-  error,
-  onRetry,
-  ...props
-}: EmptyStateErrorProps) {
+function EmptyStateError({ error, onRetry, ...props }: EmptyStateErrorProps) {
   const errorMessage = error instanceof Error ? error.message : error;
 
   return (
