@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Link } from '@/navigation';
 import { cn } from '../../lib/utils';
-import { Facebook, Twitter, Linkedin, Instagram, Github } from 'lucide-react';
 
 interface FooterProps {
   className?: string;
@@ -23,18 +22,30 @@ export function Footer({ className }: FooterProps) {
               experience.
             </p>
             <div className="mt-6 flex space-x-4 rtl:space-x-reverse">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter size={20} />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Linkedin size={20} />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook size={20} />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Github size={20} />
-              </Link>
+              <span
+                className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                title="Twitter/X"
+              >
+                𝕏
+              </span>
+              <span
+                className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                title="LinkedIn"
+              >
+                in
+              </span>
+              <span
+                className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                title="Facebook"
+              >
+                f
+              </span>
+              <span
+                className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                title="GitHub"
+              >
+                ⌘
+              </span>
             </div>
           </div>
 
