@@ -1,32 +1,53 @@
+import * as shared from '@smartjob/shared';
+import type { IUserRepository } from '../../repositories/interfaces/i-user.repository';
+
+type RegisterJobSeeker = shared.RegisterJobSeeker;
+type RegisterEmployer = shared.RegisterEmployer;
+type UserRole = shared.UserRole;
+type AuthTokens = shared.AuthTokens;
+
 import {
   Injectable,
   ConflictException,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../database/prisma.service';
-import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
-import {
-  RegisterJobSeeker,
-  RegisterEmployer,
-  UserRole,
-} from '@smartjob/shared';
+import { TokenService, TokenPair } from './services/token.service';
+
+const BCRYPT_SALT_ROUNDS = 12;
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  role: UserRole;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AuthResponse {
+  user: AuthenticatedUser;
+  tokens: AuthTokens;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly prisma: PrismaService,
-    private jwtService: JwtService,
+    private readonly tokenService: TokenService,
   ) {}
 
-  async registerJobSeeker(data: RegisterJobSeeker): Promise<Record<string, unknown>> {
+  async registerJobSeeker(
+    data: RegisterJobSeeker,
+  ): Promise<AuthResponse> {
     const exists = await this.userRepository.existsByEmail(data.email);
     if (exists) {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
     const profile = {
       skills: [],
       experience: [],
@@ -36,7 +57,7 @@ export class AuthService {
       preferredLocations: [],
     };
 
-    return this.userRepository.create({
+    const user = await this.userRepository.create({
       email: data.email,
       password: hashedPassword,
       firstName: data.firstName,
@@ -45,16 +66,40 @@ export class AuthService {
       phone: data.phone ?? null,
       profile: profile,
     });
+
+    const tokens = await this.tokenService.createTokenPair(
+      user.id as string,
+      user.email as string,
+      user.role as UserRole,
+    );
+
+    return {
+      user: {
+        id: user.id as string,
+        email: user.email as string,
+        role: user.role as UserRole,
+        firstName: user.firstName as string,
+        lastName: user.lastName as string,
+      },
+      tokens,
+    };
   }
 
-  async registerEmployer(data: RegisterEmployer): Promise<Record<string, unknown>> {
+  async registerEmployer(data: RegisterEmployer): Promise<AuthResponse> {
     const exists = await this.userRepository.existsByEmail(data.email);
     if (exists) {
       throw new ConflictException('Email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    const { companyName, companySize, companyType, industry, headquarters, ...userData } = data;
+    const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS);
+    const {
+      companyName,
+      companySize,
+      companyType,
+      industry,
+      headquarters,
+      ...userData
+    } = data;
 
     const profile = {
       companyName,
@@ -67,7 +112,7 @@ export class AuthService {
       verified: false,
     };
 
-    return this.userRepository.create({
+    const user = await this.userRepository.create({
       email: userData.email,
       password: hashedPassword,
       firstName: userData.firstName,
@@ -76,9 +121,29 @@ export class AuthService {
       phone: userData.phone ?? null,
       profile: profile,
     });
+
+    const tokens = await this.tokenService.createTokenPair(
+      user.id as string,
+      user.email as string,
+      user.role as UserRole,
+    );
+
+    return {
+      user: {
+        id: user.id as string,
+        email: user.email as string,
+        role: user.role as UserRole,
+        firstName: user.firstName as string,
+        lastName: user.lastName as string,
+      },
+      tokens,
+    };
   }
 
-  async validateUser(email: string, pass: string): Promise<Record<string, unknown> | null> {
+  async validateUser(
+    email: string,
+    pass: string,
+  ): Promise<AuthenticatedUser | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -89,33 +154,76 @@ export class AuthService {
         firstName: true,
         lastName: true,
         status: true,
-        createdAt: true,
-        updatedAt: true,
-        phone: true,
-        avatarUrl: true,
-        verifiedAt: true,
-        profile: true,
       },
     });
 
     if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password: _password, ...result } = user;
-      return result as Record<string, unknown>;
-    }
-    return null;
-  }
-
-  async login(user: Record<string, unknown>) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    return {
-      accessToken: this.jwtService.sign(payload),
-      user: {
+      return {
         id: user.id,
         email: user.email,
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
+      };
+    }
+    return null;
+  }
+
+  async login(user: AuthenticatedUser): Promise<AuthResponse> {
+    const tokens = await this.tokenService.createTokenPair(
+      user.id,
+      user.email,
+      user.role,
+    );
+
+    return {
+      user,
+      tokens,
+    };
+  }
+
+  async refreshTokens(refreshToken: string): Promise<TokenPair> {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+
+    try {
+      const newTokens = await this.tokenService.rotateRefreshToken(
+        'user-placeholder',
+        refreshToken,
+      );
+      return newTokens;
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  async logout(userId: string): Promise<void> {
+    await this.tokenService.revokeAllUserTokens(userId);
+  }
+
+  async getUserById(userId: string): Promise<AuthenticatedUser | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        firstName: true,
+        lastName: true,
       },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
     };
   }
 }
