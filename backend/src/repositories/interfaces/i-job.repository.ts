@@ -142,7 +142,10 @@ export interface IJobRepository {
   findByIdWithEmployer(id: string): Promise<JobWithEmployerResult | null>;
   findBySlug(slug: string): Promise<JobWithEmployerResult | null>;
   findBySlugWithEmployer(slug: string): Promise<JobWithEmployerResult | null>;
-  findAll(filter: JobFilterInput, pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }): Promise<JobListResult>;
+  findAll(
+    filter: JobFilterInput,
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }
+  ): Promise<JobListResult>;
   search(filters: JobSearchFilters): Promise<JobListResult>;
   paginate(page: number, limit: number, filters?: JobFilterInput): Promise<JobListResult>;
   update(id: string, data: UpdateJobInput): Promise<JobWithEmployerResult>;
@@ -153,7 +156,10 @@ export interface IJobRepository {
   countApplications(id: string): Promise<number>;
   updateApplicationsCount(id: string, count: number): Promise<void>;
   existsBySlug(slug: string): Promise<boolean>;
-  findByEmployer(employerId: string, pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }): Promise<JobListResult>;
+  findByEmployer(
+    employerId: string,
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }
+  ): Promise<JobListResult>;
   findFeaturedJobs(limit?: number): Promise<JobWithEmployerResult[]>;
   getJobStats(jobId: string): Promise<JobStats>;
 }

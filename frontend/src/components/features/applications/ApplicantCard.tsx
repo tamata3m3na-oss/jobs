@@ -3,7 +3,17 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { SkillGapAnalysis } from '@shared/schemas/ai.schema';
+
+interface SkillGapAnalysis {
+  missing_skills: string[];
+  matching_skills: string[];
+  recommendations: Array<{
+    skill: string;
+    recommendation: string;
+    platform: string;
+  }>;
+  match_percentage: number;
+}
 
 interface ApplicantCardProps {
   applicant: {
@@ -18,9 +28,16 @@ interface ApplicantCardProps {
   isBlindMode?: boolean;
 }
 
-export const ApplicantCard = ({ applicant, matchScore, skillGap, isBlindMode }: ApplicantCardProps) => {
-  const displayName = isBlindMode ? `Candidate ${applicant.id.substring(0, 8)}` : `${applicant.firstName} ${applicant.lastName}`;
-  
+export const ApplicantCard = ({
+  applicant,
+  matchScore,
+  skillGap,
+  isBlindMode,
+}: ApplicantCardProps) => {
+  const displayName = isBlindMode
+    ? `Candidate ${applicant.id.substring(0, 8)}`
+    : `${applicant.firstName} ${applicant.lastName}`;
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-6">
@@ -37,7 +54,11 @@ export const ApplicantCard = ({ applicant, matchScore, skillGap, isBlindMode }: 
               <h3 className="font-bold text-lg">{displayName}</h3>
               {!isBlindMode && <p className="text-sm text-gray-500">{applicant.email}</p>}
               <div className="mt-2 flex gap-2">
-                <Badge variant={matchScore > 75 ? 'success' : matchScore > 50 ? 'warning' : 'danger'}>
+                <Badge
+                  variant={
+                    matchScore > 75 ? 'success' : matchScore > 50 ? 'warning' : 'destructive'
+                  }
+                >
                   {matchScore}% AI Match
                 </Badge>
               </div>
@@ -52,8 +73,12 @@ export const ApplicantCard = ({ applicant, matchScore, skillGap, isBlindMode }: 
               <div>
                 <p className="text-xs text-gray-500 uppercase font-bold">Matching Skills</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {skillGap.matching_skills.map(skill => (
-                    <Badge key={skill} variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  {skillGap.matching_skills.map((skill: string) => (
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className="bg-green-50 text-green-700 border-green-200"
+                    >
                       {skill}
                     </Badge>
                   ))}
@@ -62,22 +87,35 @@ export const ApplicantCard = ({ applicant, matchScore, skillGap, isBlindMode }: 
               <div>
                 <p className="text-xs text-gray-500 uppercase font-bold">Missing Skills</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {skillGap.missing_skills.map(skill => (
-                    <Badge key={skill} variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                  {skillGap.missing_skills.map((skill: string) => (
+                    <Badge
+                      key={skill}
+                      variant="outline"
+                      className="bg-red-50 text-red-700 border-red-200"
+                    >
                       {skill}
                     </Badge>
                   ))}
                 </div>
               </div>
             </div>
-            
+
             {skillGap.recommendations.length > 0 && (
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-xs font-bold text-blue-800">Learning Recommendations:</p>
                 <ul className="text-xs text-blue-700 mt-1 list-disc list-inside">
-                  {skillGap.recommendations.slice(0, 2).map((rec, i) => (
-                    <li key={i}>{rec.recommendation} ({rec.platform})</li>
-                  ))}
+                  {skillGap.recommendations
+                    .slice(0, 2)
+                    .map(
+                      (
+                        rec: { skill: string; recommendation: string; platform: string },
+                        i: number
+                      ) => (
+                        <li key={i}>
+                          {rec.recommendation} ({rec.platform})
+                        </li>
+                      )
+                    )}
                 </ul>
               </div>
             )}

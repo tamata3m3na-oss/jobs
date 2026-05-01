@@ -7,16 +7,17 @@ import { LoggerService } from './logger.service';
   imports: [
     PinoLoggerModule.forRoot({
       pinoHttp: {
-        transport: process.env.NODE_ENV !== 'production'
-          ? {
-              target: 'pino-pretty',
-              options: {
-                colorize: true,
-                levelFirst: true,
-                translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l o',
-              },
-            }
-          : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? {
+                target: 'pino-pretty',
+                options: {
+                  colorize: true,
+                  levelFirst: true,
+                  translateTime: 'UTC:yyyy-mm-dd HH:MM:ss.l o',
+                },
+              }
+            : undefined,
         level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
         redact: ['req.headers.authorization', 'req.headers.cookie'],
       },

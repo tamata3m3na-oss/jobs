@@ -75,15 +75,17 @@ export const ApplicationSchema = z.object({
     .optional(),
   interviews: z.array(InterviewSchema).default([]),
   notes: z.string().max(2000).optional(),
-  employerNotes: z.array(
-    z.object({
-      id: z.string().uuid(),
-      authorId: z.string().uuid(),
-      authorName: z.string(),
-      content: z.string().max(1000),
-      createdAt: z.coerce.date(),
-    })
-  ).default([]),
+  employerNotes: z
+    .array(
+      z.object({
+        id: z.string().uuid(),
+        authorId: z.string().uuid(),
+        authorName: z.string(),
+        content: z.string().max(1000),
+        createdAt: z.coerce.date(),
+      })
+    )
+    .default([]),
   rejectionReason: z.string().max(500).optional(),
   offeredSalary: z
     .object({
@@ -94,7 +96,15 @@ export const ApplicationSchema = z.object({
     .optional(),
   source: z
     .object({
-      type: z.enum(['DIRECT', 'REFERRAL', 'LINKEDIN', 'INDEED', 'OTHER_JOB_BOARD', 'SOCIAL_MEDIA', 'EMAIL']),
+      type: z.enum([
+        'DIRECT',
+        'REFERRAL',
+        'LINKEDIN',
+        'INDEED',
+        'OTHER_JOB_BOARD',
+        'SOCIAL_MEDIA',
+        'EMAIL',
+      ]),
       referralId: z.string().uuid().optional(),
       utmData: z
         .object({
@@ -146,7 +156,15 @@ export const CreateApplicationSchema = z.object({
   portfolioUrls: z.array(z.string().url()).default([]),
   source: z
     .object({
-      type: z.enum(['DIRECT', 'REFERRAL', 'LINKEDIN', 'INDEED', 'OTHER_JOB_BOARD', 'SOCIAL_MEDIA', 'EMAIL']),
+      type: z.enum([
+        'DIRECT',
+        'REFERRAL',
+        'LINKEDIN',
+        'INDEED',
+        'OTHER_JOB_BOARD',
+        'SOCIAL_MEDIA',
+        'EMAIL',
+      ]),
       referralId: z.string().uuid().optional(),
       utmData: z
         .object({

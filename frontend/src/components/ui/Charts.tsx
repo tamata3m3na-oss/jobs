@@ -31,13 +31,7 @@ export function LineChartComponent({ data, xKey, yKey, color = '#3b82f6' }: Base
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey={xKey}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12 }}
-            dy={10}
-          />
+          <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
           <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
           <Tooltip
             contentStyle={{
@@ -66,13 +60,7 @@ export function BarChartComponent({ data, xKey, yKey, color = '#3b82f6' }: BaseC
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey={xKey}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12 }}
-            dy={10}
-          />
+          <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
           <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
           <Tooltip
             contentStyle={{
@@ -92,7 +80,18 @@ interface PieChartProps {
   data: { name: string; value: number }[];
 }
 
+interface PieLabelProps {
+  name?: string;
+  percent?: number;
+}
+
 export function PieChartComponent({ data }: PieChartProps) {
+  const renderLabel = (props: PieLabelProps) => {
+    const name = props.name ?? '';
+    const percent = props.percent ?? 0;
+    return `${name} ${(percent * 100).toFixed(0)}%`;
+  };
+
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -105,7 +104,7 @@ export function PieChartComponent({ data }: PieChartProps) {
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            label={renderLabel}
           >
             {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />

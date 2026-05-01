@@ -70,7 +70,8 @@ export default function EmployerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'SHORTLISTED')?.count || 0}
+              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'SHORTLISTED')
+                ?.count || 0}
             </div>
           </CardContent>
         </Card>
@@ -81,7 +82,8 @@ export default function EmployerDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'REJECTED')?.count || 0}
+              {stats?.applicationsByStatus?.find((a: AppStatus) => a.status === 'REJECTED')
+                ?.count || 0}
             </div>
           </CardContent>
         </Card>

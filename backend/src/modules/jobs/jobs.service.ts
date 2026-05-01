@@ -1,23 +1,8 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { IJobRepository, JobFilterInput } from '../../repositories/interfaces/i-job.repository';
 import { CacheService } from '../../common/cache/cache.service';
-import {
-  CreateJob,
-  UpdateJob,
-  JobSearchFilters,
-  JobStatus,
-} from '@smartjob/shared';
-import {
-  JobResponse,
-  toJobResponse,
-  JobSearchQueryDto,
-  PaginationQueryDto,
-} from './dto';
+import { CreateJob, UpdateJob, JobSearchFilters, JobStatus } from '@smartjob/shared';
+import { JobResponse, toJobResponse, JobSearchQueryDto, PaginationQueryDto } from './dto';
 
 interface AuthenticatedRequest {
   user: {
@@ -59,7 +44,7 @@ export class JobsService {
 
   constructor(
     private readonly jobRepository: IJobRepository,
-    private readonly cacheService: CacheService,
+    private readonly cacheService: CacheService
   ) {}
 
   async createJob(employerId: string, data: CreateJob): Promise<JobResponse> {
@@ -168,11 +153,7 @@ export class JobsService {
     return response;
   }
 
-  async updateJob(
-    jobId: string,
-    employerId: string,
-    data: UpdateJob,
-  ): Promise<JobResponse> {
+  async updateJob(jobId: string, employerId: string, data: UpdateJob): Promise<JobResponse> {
     const existingJob = await this.jobRepository.findById(jobId);
 
     if (!existingJob) {
@@ -276,7 +257,7 @@ export class JobsService {
 
   async listEmployerJobs(
     employerId: string,
-    pagination: PaginationQueryDto,
+    pagination: PaginationQueryDto
   ): Promise<JobListResponse> {
     const result = await this.jobRepository.findByEmployer(employerId, {
       page: pagination.page,
@@ -393,7 +374,7 @@ export class JobsService {
 
   async getAllJobsForAdmin(
     pagination: PaginationQueryDto,
-    filters?: { status?: JobStatus; jobType?: string },
+    filters?: { status?: JobStatus; jobType?: string }
   ): Promise<JobListResponse> {
     const filterInput: JobFilterInput = {};
     if (filters?.status) filterInput.status = filters.status;

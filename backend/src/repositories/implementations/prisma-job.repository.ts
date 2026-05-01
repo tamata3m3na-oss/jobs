@@ -121,7 +121,7 @@ export class PrismaJobRepository implements IJobRepository {
 
   async findAll(
     filter: JobFilterInput,
-    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string },
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }
   ): Promise<JobListResult> {
     const where: Record<string, unknown> = {};
 
@@ -279,11 +279,7 @@ export class PrismaJobRepository implements IJobRepository {
     };
   }
 
-  async paginate(
-    page: number,
-    limit: number,
-    filters?: JobFilterInput,
-  ): Promise<JobListResult> {
+  async paginate(page: number, limit: number, filters?: JobFilterInput): Promise<JobListResult> {
     return this.findAll(filters ?? {}, { page, limit });
   }
 
@@ -309,8 +305,10 @@ export class PrismaJobRepository implements IJobRepository {
     if (data.salaryNegotiable !== undefined) updateData.salaryNegotiable = data.salaryNegotiable;
     if (data.salaryCompetitive !== undefined) updateData.salaryCompetitive = data.salaryCompetitive;
     if (data.benefits !== undefined) updateData.benefits = data.benefits;
-    if (data.applicationQuestions !== undefined) updateData.applicationQuestions = data.applicationQuestions;
-    if (data.applicationDeadline !== undefined) updateData.applicationDeadline = data.applicationDeadline;
+    if (data.applicationQuestions !== undefined)
+      updateData.applicationQuestions = data.applicationQuestions;
+    if (data.applicationDeadline !== undefined)
+      updateData.applicationDeadline = data.applicationDeadline;
     if (data.startDate !== undefined) updateData.startDate = data.startDate;
     if (data.openings !== undefined) updateData.openings = data.openings;
     if (data.status !== undefined) updateData.status = data.status;
@@ -318,7 +316,8 @@ export class PrismaJobRepository implements IJobRepository {
     if (data.publishedAt !== undefined) updateData.publishedAt = data.publishedAt;
     if (data.expiresAt !== undefined) updateData.expiresAt = data.expiresAt;
     if (data.closedAt !== undefined) updateData.closedAt = data.closedAt;
-    if (data.aiGeneratedDescription !== undefined) updateData.aiGeneratedDescription = data.aiGeneratedDescription;
+    if (data.aiGeneratedDescription !== undefined)
+      updateData.aiGeneratedDescription = data.aiGeneratedDescription;
     if (data.screeningCriteria !== undefined) updateData.screeningCriteria = data.screeningCriteria;
     if (data.matchSettings !== undefined) updateData.matchSettings = data.matchSettings;
 
@@ -416,7 +415,7 @@ export class PrismaJobRepository implements IJobRepository {
 
   async findByEmployer(
     employerId: string,
-    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string },
+    pagination: { page: number; limit: number; sortBy?: string; sortOrder?: string }
   ): Promise<JobListResult> {
     return this.findAll({ employerId }, pagination);
   }
@@ -511,23 +510,20 @@ export class PrismaJobRepository implements IJobRepository {
     };
   }
 
-  private buildOrderBy(
-    sortBy?: string,
-    sortOrder?: string,
-  ): Record<string, string> {
+  private buildOrderBy(sortBy?: string, sortOrder?: string): Record<string, string> {
     const validSortFields = ['createdAt', 'updatedAt', 'title', 'views', 'applicationsCount'];
     const order = sortOrder === 'asc' ? 'asc' : 'desc';
-    
+
     if (sortBy && validSortFields.includes(sortBy)) {
       return { [sortBy]: order };
     }
-    
+
     return { createdAt: 'desc' };
   }
 
   private buildSearchOrderBy(
     sortBy?: 'relevance' | 'date' | 'salary' | 'distance',
-    sortOrder?: 'asc' | 'desc',
+    sortOrder?: 'asc' | 'desc'
   ): Record<string, string> {
     const order = sortOrder === 'asc' ? 'asc' : 'desc';
 

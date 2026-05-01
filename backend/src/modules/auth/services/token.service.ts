@@ -33,14 +33,10 @@ export class TokenService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
-  async generateAccessToken(
-    userId: string,
-    email: string,
-    role: UserRole,
-  ): Promise<string> {
+  async generateAccessToken(userId: string, email: string, role: UserRole): Promise<string> {
     const payload: AccessTokenPayload = {
       sub: userId,
       email,
@@ -122,10 +118,7 @@ export class TokenService {
     return bcrypt.hashSync(token, BCRYPT_SALT_ROUNDS);
   }
 
-  async rotateRefreshToken(
-    userId: string,
-    oldRefreshToken: string,
-  ): Promise<TokenPair> {
+  async rotateRefreshToken(userId: string, oldRefreshToken: string): Promise<TokenPair> {
     const payload = await this.verifyRefreshToken(oldRefreshToken);
 
     const hashedOldToken = this.hashToken(oldRefreshToken);
@@ -139,7 +132,7 @@ export class TokenService {
     const newAccessToken = await this.generateAccessToken(
       userId,
       (await this.getUserEmail(userId)) ?? '',
-      (await this.getUserRole(userId)) ?? 'JOB_SEEKER',
+      (await this.getUserRole(userId)) ?? 'JOB_SEEKER'
     );
 
     const newRefreshToken = await this.generateRefreshToken(userId);
@@ -154,11 +147,7 @@ export class TokenService {
     };
   }
 
-  async createTokenPair(
-    userId: string,
-    email: string,
-    role: UserRole,
-  ): Promise<TokenPair> {
+  async createTokenPair(userId: string, email: string, role: UserRole): Promise<TokenPair> {
     const accessToken = await this.generateAccessToken(userId, email, role);
     const refreshToken = await this.generateRefreshToken(userId);
 

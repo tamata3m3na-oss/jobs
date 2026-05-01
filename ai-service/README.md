@@ -5,9 +5,11 @@ This service provides semantic matching and text embeddings using the `sentence-
 ## Integration Points
 
 ### POST /api/v1/match
+
 Matches a query string against a list of jobs.
 
 **Request:**
+
 ```json
 {
   "query": "software engineer with node.js experience",
@@ -22,6 +24,7 @@ Matches a query string against a list of jobs.
 ```
 
 **Response:**
+
 ```json
 {
   "results": [
@@ -34,9 +37,11 @@ Matches a query string against a list of jobs.
 ```
 
 ### POST /api/v1/similarity
+
 Calculates the cosine similarity between two texts.
 
 **Request:**
+
 ```json
 {
   "text1": "text one",
@@ -45,6 +50,7 @@ Calculates the cosine similarity between two texts.
 ```
 
 **Response:**
+
 ```json
 {
   "score": 0.75
@@ -52,9 +58,11 @@ Calculates the cosine similarity between two texts.
 ```
 
 ### POST /api/v1/embedding
+
 Returns the vector embedding for a given text.
 
 **Request:**
+
 ```json
 {
   "text": "sample text"
@@ -62,6 +70,7 @@ Returns the vector embedding for a given text.
 ```
 
 **Response:**
+
 ```json
 {
   "embedding": [0.1, 0.2, ...]
@@ -69,6 +78,7 @@ Returns the vector embedding for a given text.
 ```
 
 ## Performance & Caching
+
 - **Redis Caching:** Match results are cached for 1 hour based on the MD5 hash of the query and job IDs.
 - **GPU Acceleration:** The service automatically uses CUDA if available.
 - **Multilingual Support:** Uses `paraphrase-multilingual-MiniLM-L12-v2` model.

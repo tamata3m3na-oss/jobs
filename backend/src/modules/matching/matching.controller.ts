@@ -24,7 +24,7 @@ export class MatchingController {
   @Post('jobs')
   @ApiOperation({ summary: 'Match jobs based on a query string' })
   async matchJobs(
-    @Body() data: { query: string; jobs: Array<{ id: string; title: string; description: string }> },
+    @Body() data: { query: string; jobs: Array<{ id: string; title: string; description: string }> }
   ): Promise<Array<{ id: string; score: number }>> {
     return this.matchingService.matchJobs(data.query, data.jobs);
   }
@@ -32,7 +32,11 @@ export class MatchingController {
   @Post('candidates')
   @ApiOperation({ summary: 'Match candidates based on a job description' })
   async matchCandidates(
-    @Body() data: { jobDescription: string; candidates: Array<{ id: string; skills: string[]; experience: string; bio: string }> },
+    @Body()
+    data: {
+      jobDescription: string;
+      candidates: Array<{ id: string; skills: string[]; experience: string; bio: string }>;
+    }
   ): Promise<Array<{ id: string; score: number }>> {
     return this.matchingService.matchCandidates(data.jobDescription, data.candidates);
   }
@@ -41,7 +45,7 @@ export class MatchingController {
   @ApiOperation({ summary: 'Calculate similarity between two texts' })
   async getSimilarity(
     @Query('text1') text1: string,
-    @Query('text2') text2: string,
+    @Query('text2') text2: string
   ): Promise<number> {
     return this.matchingService.getSimilarity(text1, text2);
   }
@@ -49,7 +53,7 @@ export class MatchingController {
   @Post('skill-gap')
   @ApiOperation({ summary: 'Analyze skill gap between candidate and job' })
   async analyzeSkillGap(
-    @Body() data: { candidateSkills: string[]; requiredSkills: string[] },
+    @Body() data: { candidateSkills: string[]; requiredSkills: string[] }
   ): Promise<SkillGapAnalysis | null> {
     return this.matchingService.analyzeSkillGap(data.candidateSkills, data.requiredSkills);
   }
@@ -57,7 +61,7 @@ export class MatchingController {
   @Post('screening/generate')
   @ApiOperation({ summary: 'Generate screening questions' })
   async generateQuestions(
-    @Body() data: { jobDescription: string; skills: string[] },
+    @Body() data: { jobDescription: string; skills: string[] }
   ): Promise<PreScreeningQuestionsResponse | null> {
     return this.matchingService.generateScreeningQuestions(data.jobDescription, data.skills);
   }
@@ -65,15 +69,19 @@ export class MatchingController {
   @Post('screening/evaluate')
   @ApiOperation({ summary: 'Evaluate screening answer' })
   async evaluateAnswer(
-    @Body() data: { question: string; answer: string; expectedKeywords?: string[] },
+    @Body() data: { question: string; answer: string; expectedKeywords?: string[] }
   ): Promise<ScreeningEvaluation | null> {
-    return this.matchingService.evaluateScreeningAnswer(data.question, data.answer, data.expectedKeywords);
+    return this.matchingService.evaluateScreeningAnswer(
+      data.question,
+      data.answer,
+      data.expectedKeywords
+    );
   }
 
   @Post('parser')
   @ApiOperation({ summary: 'Parse a resume file (PDF/DOCX)' })
   async parseResume(
-    @Body() data: { file: string; filename: string },
+    @Body() data: { file: string; filename: string }
   ): Promise<ResumeParserResponse | null> {
     const buffer = Buffer.from(data.file, 'base64');
     return this.matchingService.parseResume(buffer, data.filename);

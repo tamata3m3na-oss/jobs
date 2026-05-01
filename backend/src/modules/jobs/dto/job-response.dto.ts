@@ -140,9 +140,24 @@ export function toJobResponse(job: JobResponseInput): JobResponse {
     applicationsCount: job.applicationsCount || 0,
     createdAt: job.createdAt instanceof Date ? job.createdAt : new Date(job.createdAt),
     updatedAt: job.updatedAt instanceof Date ? job.updatedAt : new Date(job.updatedAt),
-    publishedAt: job.publishedAt instanceof Date ? job.publishedAt : (job.publishedAt ? new Date(job.publishedAt as unknown as string) : null),
-    expiresAt: job.expiresAt instanceof Date ? job.expiresAt : (job.expiresAt ? new Date(job.expiresAt as unknown as string) : null),
-    closedAt: job.closedAt instanceof Date ? job.closedAt : (job.closedAt ? new Date(job.closedAt as unknown as string) : null),
+    publishedAt:
+      job.publishedAt instanceof Date
+        ? job.publishedAt
+        : job.publishedAt
+          ? new Date(job.publishedAt as unknown as string)
+          : null,
+    expiresAt:
+      job.expiresAt instanceof Date
+        ? job.expiresAt
+        : job.expiresAt
+          ? new Date(job.expiresAt as unknown as string)
+          : null,
+    closedAt:
+      job.closedAt instanceof Date
+        ? job.closedAt
+        : job.closedAt
+          ? new Date(job.closedAt as unknown as string)
+          : null,
     aiGeneratedDescription: job.aiGeneratedDescription || false,
     screeningCriteria: job.screeningCriteria || [],
     matchSettings: job.matchSettings,

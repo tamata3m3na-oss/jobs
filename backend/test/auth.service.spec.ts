@@ -69,8 +69,9 @@ describe('AuthService', () => {
   describe('registerJobSeeker', () => {
     it('should throw ConflictException if email exists', async () => {
       mockUserRepository.existsByEmail.mockResolvedValue(true);
-      await expect(service.registerJobSeeker({ email: 'test@example.com' } as any))
-        .rejects.toThrow(ConflictException);
+      await expect(service.registerJobSeeker({ email: 'test@example.com' } as any)).rejects.toThrow(
+        ConflictException
+      );
     });
 
     it('should create a user and return tokens', async () => {

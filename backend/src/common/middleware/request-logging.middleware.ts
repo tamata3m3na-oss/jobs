@@ -15,18 +15,15 @@ export class RequestLoggingMiddleware implements NestMiddleware {
       const { statusCode } = res;
       const duration = Date.now() - start;
 
-      this.logger.log(
-        `${method} ${originalUrl} ${statusCode} ${duration}ms - ${userAgent} ${ip}`,
-        {
-          context: 'HTTP',
-          method,
-          url: originalUrl,
-          statusCode,
-          duration,
-          ip,
-          userAgent,
-        },
-      );
+      this.logger.log(`${method} ${originalUrl} ${statusCode} ${duration}ms - ${userAgent} ${ip}`, {
+        context: 'HTTP',
+        method,
+        url: originalUrl,
+        statusCode,
+        duration,
+        ip,
+        userAgent,
+      });
     });
 
     next();

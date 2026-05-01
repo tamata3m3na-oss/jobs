@@ -90,7 +90,11 @@ export class PrismaUserRepository implements IUserRepository {
     };
   }
 
-  async paginate(page: number, limit: number, search?: string): Promise<PaginatedResult<Record<string, unknown>>> {
+  async paginate(
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<PaginatedResult<Record<string, unknown>>> {
     const where: Prisma.UserWhereInput = {};
 
     if (search) {
@@ -161,7 +165,10 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
-  async updateProfile(id: string, profile: Record<string, unknown>): Promise<Record<string, unknown>> {
+  async updateProfile(
+    id: string,
+    profile: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
     const user = await this.prisma.user.update({
       where: { id },
       data: { profile: profile as unknown },

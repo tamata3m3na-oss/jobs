@@ -22,7 +22,7 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Stripe webhook handler' })
   async handleWebhook(
     @Headers('stripe-signature') sig: string,
-    @Req() req: RawBodyRequest<Request>,
+    @Req() req: RawBodyRequest<Request>
   ) {
     if (!sig) {
       throw new BadRequestException('Missing stripe-signature header');
@@ -34,10 +34,7 @@ export class PaymentsController {
     }
 
     try {
-      const event = await this.paymentsService.constructEventFromPayload(
-        sig,
-        rawBody,
-      );
+      const event = await this.paymentsService.constructEventFromPayload(sig, rawBody);
 
       this.logger.log(`Received stripe event: ${event.type}`);
 

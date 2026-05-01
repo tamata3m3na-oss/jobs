@@ -41,7 +41,7 @@ async function bootstrap() {
       noSniff: true,
       referrerPolicy: { policy: 'no-referrer' },
       xssFilter: true,
-    }),
+    })
   );
 
   // Trust proxy for production (Heroku, AWS ELB, etc.)
@@ -57,12 +57,7 @@ async function bootstrap() {
     origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-CSRF-Token',
-      'X-API-Key',
-    ],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-API-Key'],
     exposedHeaders: ['set-cookie'],
   });
 
@@ -83,7 +78,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
-    }),
+    })
   );
 
   // Global filters

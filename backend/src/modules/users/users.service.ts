@@ -1,24 +1,22 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { IUserRepository, PaginatedResult } from '../../repositories/interfaces/i-user.repository';
-import { 
-  UpdateJobSeekerProfile, 
-  UpdateEmployerProfile, 
-  UserRole, 
+import {
+  UpdateJobSeekerProfile,
+  UpdateEmployerProfile,
+  UserRole,
   UserStatus,
-  BaseUser
+  BaseUser,
 } from '@smartjob/shared';
-import { 
-  CreateUserDto, 
-  UpdateUserDto, 
-  PaginationQueryDto,
-  UserResponseDto 
-} from './dto';
+import { CreateUserDto, UpdateUserDto, PaginationQueryDto, UserResponseDto } from './dto';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly userRepository: IUserRepository,
-  ) {}
+  constructor(private readonly userRepository: IUserRepository) {}
 
   async createUser(data: CreateUserDto): Promise<UserResponseDto> {
     const exists = await this.userRepository.existsByEmail(data.email);
@@ -75,7 +73,7 @@ export class UsersService {
 
     return {
       ...result,
-      data: result.data.map(user => this.mapToResponse(user)),
+      data: result.data.map((user) => this.mapToResponse(user)),
     };
   }
 
@@ -87,7 +85,10 @@ export class UsersService {
     return (user as unknown as { profile?: Record<string, unknown> }).profile || {};
   }
 
-  async updateJobSeekerProfile(userId: string, data: UpdateJobSeekerProfile): Promise<UserResponseDto> {
+  async updateJobSeekerProfile(
+    userId: string,
+    data: UpdateJobSeekerProfile
+  ): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -113,7 +114,10 @@ export class UsersService {
     return (user as unknown as { profile?: Record<string, unknown> }).profile || {};
   }
 
-  async updateEmployerProfile(userId: string, data: UpdateEmployerProfile): Promise<UserResponseDto> {
+  async updateEmployerProfile(
+    userId: string,
+    data: UpdateEmployerProfile
+  ): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');

@@ -9,7 +9,7 @@ export class AdminService {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly jobRepository: IJobRepository,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {}
 
   async getUsers(page = 1, limit = 10) {

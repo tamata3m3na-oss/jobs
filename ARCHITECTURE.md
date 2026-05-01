@@ -6,15 +6,15 @@ This document defines the Clean Architecture guidelines and patterns for the Sma
 
 ## Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Backend** | NestJS + TypeScript | REST API, WebSocket handlers, business logic |
-| **Frontend** | Next.js + TypeScript | Web application, SSR, SSG |
-| **Mobile** | Flutter + Dart | Cross-platform mobile application |
-| **AI Service** | Python FastAPI | ML inference, semantic matching |
-| **Database** | PostgreSQL + PostGIS | Primary data store with geospatial support |
-| **Cache** | Redis | Session, cache, real-time pub/sub |
-| **Auth** | JWT | Stateless authentication |
+| Layer          | Technology           | Purpose                                      |
+| -------------- | -------------------- | -------------------------------------------- |
+| **Backend**    | NestJS + TypeScript  | REST API, WebSocket handlers, business logic |
+| **Frontend**   | Next.js + TypeScript | Web application, SSR, SSG                    |
+| **Mobile**     | Flutter + Dart       | Cross-platform mobile application            |
+| **AI Service** | Python FastAPI       | ML inference, semantic matching              |
+| **Database**   | PostgreSQL + PostGIS | Primary data store with geospatial support   |
+| **Cache**      | Redis                | Session, cache, real-time pub/sub            |
+| **Auth**       | JWT                  | Stateless authentication                     |
 
 ## Directory Structure
 
@@ -142,41 +142,41 @@ smartjob/
 
 ### TypeScript
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Files | kebab-case | `user-profile.service.ts` |
-| Classes | PascalCase | `UserService` |
-| Interfaces | PascalCase + prefix | `IUserRepository` |
-| Types | PascalCase | `UserProfile` |
-| Enums | PascalCase | `UserRole` |
-| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| Variables | camelCase | `userProfile` |
-| Functions | camelCase | `getUserById` |
-| Private methods | camelCase + prefix | `_validateInput` |
-| Angular/NestJS modules | PascalCase | `AuthModule` |
-| DTOs | PascalCase + suffix | `CreateUserDto` |
+| Type                   | Convention          | Example                   |
+| ---------------------- | ------------------- | ------------------------- |
+| Files                  | kebab-case          | `user-profile.service.ts` |
+| Classes                | PascalCase          | `UserService`             |
+| Interfaces             | PascalCase + prefix | `IUserRepository`         |
+| Types                  | PascalCase          | `UserProfile`             |
+| Enums                  | PascalCase          | `UserRole`                |
+| Constants              | UPPER_SNAKE_CASE    | `MAX_RETRY_COUNT`         |
+| Variables              | camelCase           | `userProfile`             |
+| Functions              | camelCase           | `getUserById`             |
+| Private methods        | camelCase + prefix  | `_validateInput`          |
+| Angular/NestJS modules | PascalCase          | `AuthModule`              |
+| DTOs                   | PascalCase + suffix | `CreateUserDto`           |
 
 ### Python (AI Service)
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Files | snake_case | `user_repository.py` |
-| Classes | PascalCase | `UserRepository` |
-| Functions | snake_case | `get_user_by_id` |
-| Variables | snake_case | `user_profile` |
-| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| Private | prefix `_` | `_internal_method` |
+| Type      | Convention       | Example              |
+| --------- | ---------------- | -------------------- |
+| Files     | snake_case       | `user_repository.py` |
+| Classes   | PascalCase       | `UserRepository`     |
+| Functions | snake_case       | `get_user_by_id`     |
+| Variables | snake_case       | `user_profile`       |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`    |
+| Private   | prefix `_`       | `_internal_method`   |
 
 ### Database
 
-| Object | Convention | Example |
-|--------|------------|---------|
-| Tables | snake_case, plural | `user_profiles` |
-| Columns | snake_case | `created_at` |
-| Primary Keys | `id` | `id UUID PRIMARY KEY` |
-| Foreign Keys | `*_id` | `user_id` |
-| Indexes | `idx_*` | `idx_users_email` |
-| Constraints | `chk_*` | `chk_users_email_valid` |
+| Object       | Convention         | Example                 |
+| ------------ | ------------------ | ----------------------- |
+| Tables       | snake_case, plural | `user_profiles`         |
+| Columns      | snake_case         | `created_at`            |
+| Primary Keys | `id`               | `id UUID PRIMARY KEY`   |
+| Foreign Keys | `*_id`             | `user_id`               |
+| Indexes      | `idx_*`            | `idx_users_email`       |
+| Constraints  | `chk_*`            | `chk_users_email_valid` |
 
 ## TypeScript Strict Mode Configuration
 
