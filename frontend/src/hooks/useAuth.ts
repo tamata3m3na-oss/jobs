@@ -65,6 +65,15 @@ export function useRegister() {
   });
 }
 
+// Hook for forgot password mutation
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: async (email: string) => {
+      return api.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    },
+  });
+}
+
 interface RegisterData {
   email: string;
   password: string;

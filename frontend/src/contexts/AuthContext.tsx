@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/navigation';
 import { useAuthStore, AppUser } from '@/stores/useAuthStore';
 import { api } from '@/lib/api-client';
 import { API_ENDPOINTS } from '@/lib/constants';

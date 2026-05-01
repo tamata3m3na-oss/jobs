@@ -6,7 +6,62 @@
     "search": "بحث",
     "login": "تسجيل الدخول",
     "register": "إنشاء حساب",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "back": "رجوع"
+  },
+  "Auth": {
+    "login": {
+      "title": "مرحباً بك مجدداً",
+      "description": "قم بتسجيل الدخول إلى حسابك للمتابعة",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "rememberMe": "تذكرني",
+      "forgotPassword": "هل نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "dontHaveAccount": "ليس لديك حساب؟",
+      "registerLink": "إنشاء حساب جديد",
+      "roleJobSeeker": "باحث عن عمل",
+      "roleEmployer": "صاحب عمل",
+      "socialLogin": "أو المتابعة باستخدام",
+      "error": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+    },
+    "register": {
+      "title": "إنشاء حساب جديد",
+      "description": "انضم إلى آلاف الباحثين عن عمل وأصحاب العمل",
+      "firstNameLabel": "الاسم الأول",
+      "lastNameLabel": "الاسم الأخير",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "confirmPasswordLabel": "تأكيد كلمة المرور",
+      "roleLabel": "أنا أرغب في",
+      "roleJobSeeker": "البحث عن وظيفة",
+      "roleEmployer": "توظيف المواهب",
+      "termsLabel": "أوافق على الشروط والأحكام",
+      "submit": "إنشاء الحساب",
+      "alreadyHaveAccount": "لديك حساب بالفعل؟",
+      "loginLink": "تسجيل الدخول من هنا",
+      "passwordStrength": {
+        "weak": "كلمة مرور ضعيفة",
+        "medium": "كلمة مرور متوسطة",
+        "strong": "كلمة مرور قوية"
+      },
+      "error": "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى."
+    },
+    "forgotPassword": {
+      "title": "نسيت كلمة المرور",
+      "description": "أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور",
+      "emailLabel": "البريد الإلكتروني",
+      "submit": "إرسال رابط إعادة التعيين",
+      "backToLogin": "العودة لتسجيل الدخول",
+      "successMessage": "إذا كان هناك حساب مسجل بـ {email}، فستتلقى رابطاً لإعادة تعيين كلمة المرور قريباً.",
+      "instructions": "اتبع التعليمات الموجودة في البريد الإلكتروني لإعادة تعيين كلمة المرور."
+    }
   },
   "Navigation": {
     "jobs": "الوظائف",
