@@ -2,35 +2,28 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
-import { Request } from 'express';
-
-const CSRF_HEADER_NAME = 'x-csrf-token';
-const CSRF_COOKIE_NAME = 'csrf_token';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class CsrfGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request>();
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const method = request.method;
 
-    if (request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS') {
+    // Skip CSRF check for safe methods
+    if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
       return true;
     }
 
-    const csrfTokenFromHeader = request.headers[CSRF_HEADER_NAME] as string | undefined;
-    const csrfTokenFromCookie = request.cookies?.[CSRF_COOKIE_NAME] as string | undefined;
+    const csrfToken = request.headers['x-csrf-token'];
+    const csrfCookie = request.cookies['XSRF-TOKEN'];
 
-    if (!csrfTokenFromCookie) {
-      throw new BadRequestException('CSRF token cookie missing');
-    }
-
-    if (!csrfTokenFromHeader) {
-      throw new BadRequestException('CSRF token header missing');
-    }
-
-    if (csrfTokenFromHeader !== csrfTokenFromCookie) {
-      throw new BadRequestException('Invalid CSRF token');
+    if (!csrfToken || !csrfCookie || csrfToken !== csrfCookie) {
+      throw new ForbiddenException('Invalid or missing CSRF token');
     }
 
     return true;

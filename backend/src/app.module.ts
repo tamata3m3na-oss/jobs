@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -10,8 +10,13 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule } from './common/cache/cache.module';
+import { LoggerModule } from './common/logger/logger.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware';
+import { AuditLoggingInterceptor } from './common/middleware/audit-logging.interceptor';
+import { CsrfGuard } from './common/guards/csrf.guard';
 import configuration from './config/configuration';
 
 @Module({
@@ -26,6 +31,8 @@ import configuration from './config/configuration';
         limit: 100,
       },
     ]),
+    LoggerModule,
+    AuditModule,
     DatabaseModule,
     AuthModule,
     UsersModule,
@@ -41,6 +48,18 @@ import configuration from './config/configuration';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditLoggingInterceptor,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggingMiddleware).forRoutes('*');
+  }
+}
