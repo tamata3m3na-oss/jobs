@@ -1,221 +1,192 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../../core/di/injection.dart';
-import '../../../../core/network/services/jobs_service.dart';
+import '../../../../shared/models/application_model.dart';
 import '../../../../shared/models/job_model.dart';
+import '../../../../shared/utils/api_result.dart';
+import '../../domain/repositories/job_repository.dart';
 
-/// Jobs list state
-class JobsState {
-  final List<JobModel> jobs;
-  final bool isLoading;
-  final String? errorMessage;
-  final int currentPage;
-  final bool hasMore;
-
-  const JobsState({
-    this.jobs = const [],
-    this.isLoading = false,
-    this.errorMessage,
-    this.currentPage = 1,
-    this.hasMore = true,
-  });
-
-  JobsState copyWith({
-    List<JobModel>? jobs,
-    bool? isLoading,
-    String? errorMessage,
-    int? currentPage,
-    bool? hasMore,
-  }) {
-    return JobsState(
-      jobs: jobs ?? this.jobs,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
-      currentPage: currentPage ?? this.currentPage,
-      hasMore: hasMore ?? this.hasMore,
-    );
-  }
-}
-
-/// Jobs service provider
-final jobsServiceProvider = Provider<JobsService>((ref) {
-  return JobsService(apiClient: ref.read(apiClientProvider));
-});
-
-/// Jobs list provider
-final jobsProvider = StateNotifierProvider<JobsNotifier, JobsState>((ref) {
-  return JobsNotifier(ref.read(jobsServiceProvider));
-});
-
-/// Jobs state notifier for managing job listings
-class JobsNotifier extends StateNotifier<JobsState> {
-  final JobsService _jobsService;
-
-  JobsNotifier(this._jobsService) : super(const JobsState());
-
-  Future<void> loadJobs({bool refresh = false}) async {
-    if (state.isLoading) return;
-
-    final page = refresh ? 1 : state.currentPage;
-
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: null,
-      currentPage: page,
-    );
-
-    try {
-      final jobs = await _jobsService.getJobs(
-        page: page,
-        limit: 20,
-      );
-
-      final updatedJobs = refresh ? jobs : [...state.jobs, ...jobs];
-
-      state = state.copyWith(
-        jobs: updatedJobs,
-        isLoading: false,
-        currentPage: page + 1,
-        hasMore: jobs.length >= 20,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: _formatError(e),
-      );
-    }
-  }
-
-  Future<void> loadNearbyJobs({
-    required double latitude,
-    required double longitude,
-    double radius = 10.0,
-    bool refresh = false,
-  }) async {
-    if (state.isLoading) return;
-
-    final page = refresh ? 1 : state.currentPage;
-
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: null,
-      currentPage: page,
-    );
-
-    try {
-      final jobs = await _jobsService.getNearbyJobs(
-        latitude: latitude,
-        longitude: longitude,
-        radius: radius,
-        page: page,
-        limit: 20,
-      );
-
-      final updatedJobs = refresh ? jobs : [...state.jobs, ...jobs];
-
-      state = state.copyWith(
-        jobs: updatedJobs,
-        isLoading: false,
-        currentPage: page + 1,
-        hasMore: jobs.length >= 20,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: _formatError(e),
-      );
-    }
-  }
-
-  Future<void> searchJobs(String query) async {
-    if (state.isLoading) return;
-
-    state = state.copyWith(
-      isLoading: true,
-      errorMessage: null,
-      currentPage: 1,
-    );
-
-    try {
-      final jobs = await _jobsService.getJobs(
-        query: query,
-        page: 1,
-        limit: 20,
-      );
-
-      state = state.copyWith(
-        jobs: jobs,
-        isLoading: false,
-        currentPage: 2,
-        hasMore: jobs.length >= 20,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: _formatError(e),
-      );
-    }
-  }
-
-  Future<void> refresh() => loadJobs(refresh: true);
-
-  void clearJobs() {
-    state = const JobsState();
-  }
-
-  String _formatError(dynamic error) {
-    if (error.toString().contains('network')) {
-      return 'Network error. Please check your connection.';
-    }
-    return 'Failed to load jobs. Please try again.';
-  }
-}
-
-/// Single job detail provider family
-final jobDetailProvider = FutureProvider.family<JobModel, String>((ref, jobId) async {
-  final jobsService = ref.read(jobsServiceProvider);
-  return jobsService.getJob(jobId);
-});
-
-/// Recommended jobs provider
-final recommendedJobsProvider = FutureProvider<List<JobModel>>((ref) async {
-  final jobsService = ref.read(jobsServiceProvider);
-  return jobsService.getRecommendedJobs();
-});
-
-/// Saved jobs provider
-final savedJobsProvider = FutureProvider<List<JobModel>>((ref) async {
-  final jobsService = ref.read(jobsServiceProvider);
-  return jobsService.getSavedJobs();
+/// Job repository provider
+final jobRepositoryProvider = Provider<JobRepository>((ref) {
+  return sl<JobRepository>();
 });
 
 /// Job search query provider
 final jobSearchQueryProvider = StateProvider<String>((ref) => '');
 
-/// Job type filter provider
+/// Job filters provider
 final jobTypeFilterProvider = StateProvider<JobType?>((ref) => null);
+final jobLocationFilterProvider = StateProvider<String?>((ref) => null);
 
-/// Filtered jobs based on search and filters
-final filteredJobsProvider = Provider<List<JobModel>>((ref) {
-  final jobsState = ref.watch(jobsProvider);
-  final query = ref.watch(jobSearchQueryProvider).toLowerCase();
-  final typeFilter = ref.watch(jobTypeFilterProvider);
+/// Jobs list state
+class JobsState {
+  final List<JobModel> jobs;
+  final bool isLoadingMore;
+  final int currentPage;
+  final bool hasMore;
+  final String? error;
 
-  var filtered = jobsState.jobs;
+  JobsState({
+    this.jobs = const [],
+    this.isLoadingMore = false,
+    this.currentPage = 1,
+    this.hasMore = true,
+    this.error,
+  });
 
-  // Filter by search query
-  if (query.isNotEmpty) {
-    filtered = filtered.where((job) {
-      return job.title.toLowerCase().contains(query) ||
-          job.companyName.toLowerCase().contains(query) ||
-          job.description.toLowerCase().contains(query);
-    }).toList();
+  JobsState copyWith({
+    List<JobModel>? jobs,
+    bool? isLoadingMore,
+    int? currentPage,
+    bool? hasMore,
+    String? error,
+  }) {
+    return JobsState(
+      jobs: jobs ?? this.jobs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      currentPage: currentPage ?? this.currentPage,
+      hasMore: hasMore ?? this.hasMore,
+      error: error,
+    );
+  }
+}
+
+/// Jobs list notifier
+class JobsNotifier extends AutoDisposeAsyncNotifier<JobsState> {
+  @override
+  Future<JobsState> build() async {
+    final query = ref.watch(jobSearchQueryProvider);
+    final type = ref.watch(jobTypeFilterProvider);
+    final location = ref.watch(jobLocationFilterProvider);
+    
+    return _fetchJobs(page: 1, query: query, type: type, location: location);
   }
 
-  // Filter by job type
-  if (typeFilter != null) {
-    filtered = filtered.where((job) => job.type == typeFilter).toList();
+  Future<JobsState> _fetchJobs({
+    required int page,
+    String? query,
+    JobType? type,
+    String? location,
+  }) async {
+    final repository = ref.read(jobRepositoryProvider);
+    final result = await repository.getJobs(
+      page: page,
+      query: query?.isEmpty ?? true ? null : query,
+      jobType: type?.name,
+      location: location,
+    );
+
+    return result.when(
+      success: (jobs, _, __) {
+        return JobsState(
+          jobs: jobs,
+          currentPage: page,
+          hasMore: jobs.length >= 20,
+        );
+      },
+      failure: (failure, _) {
+        throw failure.message;
+      },
+      loading: () => JobsState(),
+      initial: () => JobsState(),
+    );
   }
 
-  return filtered;
+  Future<void> loadMore() async {
+    final currentState = state.value;
+    if (currentState == null || currentState.isLoadingMore || !currentState.hasMore) {
+      return;
+    }
+
+    state = AsyncValue.data(currentState.copyWith(isLoadingMore: true));
+
+    final nextPage = currentState.currentPage + 1;
+    final query = ref.read(jobSearchQueryProvider);
+    final type = ref.read(jobTypeFilterProvider);
+    final location = ref.read(jobLocationFilterProvider);
+
+    final repository = ref.read(jobRepositoryProvider);
+    final result = await repository.getJobs(
+      page: nextPage,
+      query: query.isEmpty ? null : query,
+      jobType: type?.name,
+      location: location,
+    );
+
+    state = AsyncValue.data(result.when(
+      success: (jobs, _, __) {
+        return currentState.copyWith(
+          jobs: [...currentState.jobs, ...jobs],
+          isLoadingMore: false,
+          currentPage: nextPage,
+          hasMore: jobs.length >= 20,
+        );
+      },
+      failure: (failure, _) {
+        return currentState.copyWith(
+          isLoadingMore: false,
+          error: failure.message,
+        );
+      },
+      loading: () => currentState,
+      initial: () => currentState,
+    ));
+  }
+
+  Future<void> refresh() async {
+    // This will trigger build() to run again because we use ref.invalidate
+    ref.invalidateSelf();
+  }
+}
+
+final jobsProvider = AsyncNotifierProvider.autoDispose<JobsNotifier, JobsState>(() {
+  return JobsNotifier();
+});
+
+/// Job detail provider
+final jobDetailProvider = FutureProvider.autoDispose.family<JobModel, String>((ref, id) async {
+  final repository = ref.read(jobRepositoryProvider);
+  final result = await repository.getJobById(id);
+  return result.when(
+    success: (job, _, __) => job,
+    failure: (failure, _) => throw failure.message,
+    loading: () => throw 'Loading',
+    initial: () => throw 'Initial',
+  );
+});
+
+/// Apply to job state
+final applyToJobProvider = StateNotifierProvider.autoDispose<ApplyToJobNotifier, ApiResult<ApplicationModel>>((ref) {
+  return ApplyToJobNotifier(ref.read(jobRepositoryProvider));
+});
+
+class ApplyToJobNotifier extends StateNotifier<ApiResult<ApplicationModel>> {
+  final JobRepository _repository;
+
+  ApplyToJobNotifier(this._repository) : super(const ApiResult.initial());
+
+  Future<void> apply({
+    required String jobId,
+    String? coverLetter,
+    List<String>? answers,
+  }) async {
+    state = const ApiResult.loading();
+    final result = await _repository.applyToJob(
+      jobId: jobId,
+      coverLetter: coverLetter,
+      answers: answers,
+    );
+    state = result;
+  }
+}
+
+/// My applications provider
+final myApplicationsProvider = FutureProvider.autoDispose<List<ApplicationModel>>((ref) async {
+  final repository = ref.read(jobRepositoryProvider);
+  final result = await repository.getMyApplications();
+  return result.when(
+    success: (apps, _, __) => apps,
+    failure: (failure, _) => throw failure.message,
+    loading: () => [],
+    initial: () => [],
+  );
 });
