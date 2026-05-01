@@ -48,6 +48,25 @@ class ApplicationsService {
     return response.data['data']['applied'] as bool;
   }
 
+  /// Get applications for the current user
+  Future<List<ApplicationModel>> getMyApplications({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final response = await _apiClient.dio.get(
+      '/applications/me',
+      queryParameters: {
+        'page': page,
+        'limit': limit,
+      },
+    );
+
+    final data = response.data['data'] as List<dynamic>;
+    return data
+        .map((json) => ApplicationModel.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
   /// Get application timeline/events
   Future<List<ApplicationEvent>> getApplicationTimeline(
       String applicationId) async {

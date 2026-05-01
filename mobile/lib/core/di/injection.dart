@@ -8,6 +8,8 @@ import '../network/interceptors/logging_interceptor.dart';
 import '../network/services/auth_service.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/jobs/domain/repositories/job_repository.dart';
+import '../../features/jobs/data/repositories/job_repository_impl.dart';
 import '../network/services/jobs_service.dart';
 import '../network/services/applications_service.dart';
 import '../network/services/profile_service.dart';
@@ -55,6 +57,12 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<ApplicationsService>(
     () => ApplicationsService(apiClient: sl<ApiClient>()),
+  );
+  sl.registerLazySingleton<JobRepository>(
+    () => JobRepositoryImpl(
+      jobsService: sl<JobsService>(),
+      applicationsService: sl<ApplicationsService>(),
+    ),
   );
   sl.registerLazySingleton<ProfileService>(
     () => ProfileService(apiClient: sl<ApiClient>()),
