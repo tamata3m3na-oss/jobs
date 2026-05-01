@@ -187,5 +187,69 @@
     "destructiveAction": "هذا إجراء مدمر",
     "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك وجميع البيانات المرتبطة بشكل دائم.",
     "typeDeleteToConfirm": "اكتب DELETE للتأكيد"
+  },
+  "admin": {
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "users": "المستخدمين",
+      "jobs": "الوظائف",
+      "settings": "الإعدادات",
+      "moderation": "الإشراف"
+    },
+    "dashboard": {
+      "title": "لوحة تحكم المسؤول",
+      "subtitle": "نظرة عامة على النظام والإحصائيات",
+      "totalUsers": "إجمالي المستخدمين",
+      "totalJobs": "إجمالي الوظائف",
+      "totalApplications": "إجمالي الطلبات",
+      "systemHealth": "صحة النظام",
+      "healthy": "سليم",
+      "unhealthy": "تم اكتشاف مشكلات",
+      "recentRegistrations": "التسجيلات الأخيرة",
+      "flaggedContent": "المحتوى المبلغ عنه",
+      "quickActions": "إجراءات سريعة",
+      "userGrowth": "نمو المستخدمين",
+      "jobPostingsTrend": "اتجاة نشر الوظائف"
+    },
+    "users": {
+      "title": "إدارة المستخدمين",
+      "subtitle": "إدارة مستخدمي النظام وصلاحياتهم",
+      "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني...",
+      "allUsers": "كل المستخدمين",
+      "active": "نشط",
+      "suspended": "معلق",
+      "deleted": "محذوف",
+      "role": "الدور",
+      "status": "الحالة",
+      "joinedDate": "تاريخ الانضمام",
+      "actions": "الإجراءات",
+      "viewProfile": "عرض الملف الشخصي",
+      "editUser": "تعديل المستخدم",
+      "suspendUser": "تعليق المستخدم",
+      "reactivateUser": "إعادة تفعيل المستخدم",
+      "deleteUser": "حذف المستخدم",
+      "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "jobs": {
+      "title": "الإشراف على الوظائف",
+      "subtitle": "الموافقة على منشورات الوظائف أو رفضها",
+      "pendingApproval": "في انتظار الموافقة",
+      "flagged": "مبلغ عنه",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "reasonForRejection": "سبب الرفض",
+      "rejectionNotes": "ملاحظات الرفض",
+      "employerInfo": "معلومات صاحب العمل",
+      "moderationHistory": "تاريخ الإشراف"
+    },
+    "settings": {
+      "title": "إعدادات المسؤول",
+      "subtitle": "تكوين النظام وقواعد الإشراف",
+      "systemConfig": "تكوين النظام",
+      "emailTemplates": "قوالب البريد الإلكتروني",
+      "moderationRules": "قواعد الإشراف",
+      "featureFlags": "ميزات تجريبية",
+      "apiKeys": "إدارة مفاتيح API"
+    }
   }
 }

@@ -187,5 +187,69 @@
     "destructiveAction": "This is a destructive action",
     "deleteAccountConfirmation": "This will permanently delete your account and all associated data.",
     "typeDeleteToConfirm": "Type DELETE to confirm"
+  },
+  "admin": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "jobs": "Jobs",
+      "settings": "Settings",
+      "moderation": "Moderation"
+    },
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "System overview and statistics",
+      "totalUsers": "Total Users",
+      "totalJobs": "Total Jobs",
+      "totalApplications": "Total Applications",
+      "systemHealth": "System Health",
+      "healthy": "Healthy",
+      "unhealthy": "Issues Detected",
+      "recentRegistrations": "Recent Registrations",
+      "flaggedContent": "Flagged Content",
+      "quickActions": "Quick Actions",
+      "userGrowth": "User Growth",
+      "jobPostingsTrend": "Job Postings Trend"
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "Manage system users and their permissions",
+      "searchPlaceholder": "Search by name or email...",
+      "allUsers": "All Users",
+      "active": "Active",
+      "suspended": "Suspended",
+      "deleted": "Deleted",
+      "role": "Role",
+      "status": "Status",
+      "joinedDate": "Joined Date",
+      "actions": "Actions",
+      "viewProfile": "View Profile",
+      "editUser": "Edit User",
+      "suspendUser": "Suspend User",
+      "reactivateUser": "Reactivate User",
+      "deleteUser": "Delete User",
+      "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone."
+    },
+    "jobs": {
+      "title": "Job Moderation",
+      "subtitle": "Approve or reject job postings",
+      "pendingApproval": "Pending Approval",
+      "flagged": "Flagged",
+      "approve": "Approve",
+      "reject": "Reject",
+      "reasonForRejection": "Reason for Rejection",
+      "rejectionNotes": "Rejection Notes",
+      "employerInfo": "Employer Information",
+      "moderationHistory": "Moderation History"
+    },
+    "settings": {
+      "title": "Admin Settings",
+      "subtitle": "System configuration and moderation rules",
+      "systemConfig": "System Configuration",
+      "emailTemplates": "Email Templates",
+      "moderationRules": "Moderation Rules",
+      "featureFlags": "Feature Flags",
+      "apiKeys": "API Keys Management"
+    }
   }
 }

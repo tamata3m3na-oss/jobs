@@ -3,10 +3,23 @@
 import { Link } from '@/navigation';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const t = useTranslations('Navigation');
   const ct = useTranslations('Common');
+  const pathname = usePathname();
+
+  // Hide navbar on admin and auth pages
+  const isHideNavbar =
+    pathname.includes('/admin') ||
+    pathname.includes('/login') ||
+    pathname.includes('/register') ||
+    pathname.includes('/forgot-password');
+
+  if (isHideNavbar) {
+    return null;
+  }
 
   return (
     <nav className="bg-white shadow-md">
