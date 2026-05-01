@@ -11,6 +11,8 @@ import {
   PaginatedResult,
 } from '../interfaces/i-user.repository';
 
+type JsonValue = string | number | boolean | object | null;
+
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -23,9 +25,9 @@ export class PrismaUserRepository implements IUserRepository {
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role,
-        phone: data.phone ?? null,
-        avatarUrl: data.avatarUrl ?? null,
-        profile: data.profile ?? null,
+        phone: data.phone ?? Prisma.DbNull,
+        avatarUrl: data.avatarUrl ?? Prisma.DbNull,
+        profile: data.profile != null ? (data.profile as Prisma.InputJsonValue) : Prisma.JsonNull,
         status: 'PENDING_VERIFICATION',
       },
     });
@@ -134,7 +136,7 @@ export class PrismaUserRepository implements IUserRepository {
         avatarUrl: data.avatarUrl === undefined ? undefined : data.avatarUrl,
         status: data.status,
         verifiedAt: data.verifiedAt === undefined ? undefined : data.verifiedAt,
-        profile: data.profile === undefined ? undefined : data.profile,
+        profile: data.profile as Prisma.InputJsonValue | undefined,
       },
     });
 
@@ -171,7 +173,7 @@ export class PrismaUserRepository implements IUserRepository {
   ): Promise<Record<string, unknown>> {
     const user = await this.prisma.user.update({
       where: { id },
-      data: { profile: profile as unknown },
+      data: { profile: profile as Prisma.InputJsonValue },
     });
 
     return user as Record<string, unknown>;

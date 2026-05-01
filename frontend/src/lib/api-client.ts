@@ -78,23 +78,31 @@ const createApiClient = (): AxiosInstance => {
         isRefreshing = true;
 
         try {
-          const refreshToken = useAuthStore.getState().token;
-          if (!refreshToken) {
+          const refreshTokenValue = useAuthStore.getState().refreshToken;
+          if (!refreshTokenValue) {
             throw new Error('No refresh token available');
           }
 
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}${API_ENDPOINTS.AUTH.REFRESH}`,
-            {},
+            { refreshToken: refreshTokenValue },
             {
               headers: {
-                Authorization: `Bearer ${refreshToken}`,
+                'Content-Type': 'application/json',
               },
+              withCredentials: true,
             }
           );
 
-          const { accessToken } = response.data;
-          useAuthStore.getState().setAuth(useAuthStore.getState().user!, accessToken);
+          const { accessToken, refreshToken: newRefreshToken } =
+            response.data.tokens || response.data;
+          useAuthStore
+            .getState()
+            .setAuth(
+              useAuthStore.getState().user!,
+              accessToken,
+              newRefreshToken || refreshTokenValue
+            );
           onTokenRefreshed(accessToken);
           isRefreshing = false;
 
