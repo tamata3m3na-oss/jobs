@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import '../network/api_client.dart';
@@ -5,6 +6,8 @@ import '../network/interceptors/auth_interceptor.dart';
 import '../network/interceptors/error_interceptor.dart';
 import '../network/interceptors/logging_interceptor.dart';
 import '../network/services/auth_service.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../network/services/jobs_service.dart';
 import '../network/services/applications_service.dart';
 import '../network/services/profile_service.dart';
@@ -14,11 +17,13 @@ final sl = GetIt.instance;
 /// Initialize dependency injection
 Future<void> init() async {
   // External
-  // Pre-configured external dependencies
+  sl.registerLazySingleton<FlutterSecureStorage>(
+    () => const FlutterSecureStorage(),
+  );
 
   // Interceptors
   sl.registerLazySingleton<AuthInterceptor>(
-    () => AuthInterceptor(),
+    () => AuthInterceptor(secureStorage: sl<FlutterSecureStorage>()),
   );
   sl.registerLazySingleton<LoggingInterceptor>(
     () => LoggingInterceptor(),
@@ -39,6 +44,11 @@ Future<void> init() async {
   // Services
   sl.registerLazySingleton<AuthService>(
     () => AuthService(apiClient: sl<ApiClient>()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(sl<AuthService>()),
   );
   sl.registerLazySingleton<JobsService>(
     () => JobsService(apiClient: sl<ApiClient>()),

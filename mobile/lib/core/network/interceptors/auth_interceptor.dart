@@ -10,6 +10,7 @@ class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage _secureStorage;
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _userIdKey = 'user_id';
 
   AuthInterceptor({FlutterSecureStorage? secureStorage})
       : _secureStorage = secureStorage ?? const FlutterSecureStorage();
@@ -127,18 +128,27 @@ class AuthInterceptor extends Interceptor {
   Future<void> saveTokens({
     required String accessToken,
     required String refreshToken,
+    String? userId,
   }) async {
     await _secureStorage.write(key: _accessTokenKey, value: accessToken);
     await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
+    if (userId != null) {
+      await _secureStorage.write(key: _userIdKey, value: userId);
+    }
   }
 
   Future<void> clearTokens() async {
     await _secureStorage.delete(key: _accessTokenKey);
     await _secureStorage.delete(key: _refreshTokenKey);
+    await _secureStorage.delete(key: _userIdKey);
   }
 
   Future<String?> getAccessToken() async {
     return _secureStorage.read(key: _accessTokenKey);
+  }
+
+  Future<String?> getUserId() async {
+    return _secureStorage.read(key: _userIdKey);
   }
 
   Future<bool> hasValidToken() async {

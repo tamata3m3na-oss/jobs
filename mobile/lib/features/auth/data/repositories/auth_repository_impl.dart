@@ -1,53 +1,101 @@
-import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
+import '../../../../core/network/services/auth_service.dart';
+import '../../../../shared/models/user_model.dart' as shared_user;
+import '../../../../shared/utils/api_result.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user.dart';
+import '../../domain/models/auth_models.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
-import '../models/user_model.dart';
 
+@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
+  final AuthService _authService;
 
-  AuthRepositoryImpl({required this.remoteDataSource});
+  AuthRepositoryImpl(this._authService);
 
   @override
-  Future<Either<Failure, User>> login(String email, String password) async {
+  Future<ApiResult<AuthResult>> login(LoginRequest request) async {
     try {
-      final userModel = await remoteDataSource.login(email, password);
-      return Right(userModel.toEntity());
+      final data = await _authService.login(
+        email: request.email,
+        password: request.password,
+      );
+      
+      final userModel = shared_user.UserModel.fromJson(data['user']);
+      final authResult = AuthResult(
+        user: _mapUserModelToEntity(userModel),
+        accessToken: data['accessToken'],
+        refreshToken: data['refreshToken'],
+      );
+      
+      return ApiResult.success(data: authResult);
+    } on DioException catch (e) {
+      return ApiResult.failure(failure: e.toFailure());
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return ApiResult.failure(failure: Failure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, User>> register({
-    required String email,
-    required String password,
-    required String fullName,
-    required String role,
-  }) async {
+  Future<ApiResult<AuthResult>> register(RegisterRequest request) async {
     try {
-      final userModel = await remoteDataSource.register(
-        email: email,
-        password: password,
-        fullName: fullName,
-        role: role,
+      final data = await _authService.register(
+        email: request.email,
+        password: request.password,
+        fullName: request.fullName,
+        role: request.role,
+        phone: request.phone,
       );
-      return Right(userModel.toEntity());
+      
+      final userModel = shared_user.UserModel.fromJson(data['user']);
+      final authResult = AuthResult(
+        user: _mapUserModelToEntity(userModel),
+        accessToken: data['accessToken'],
+        refreshToken: data['refreshToken'],
+      );
+      
+      return ApiResult.success(data: authResult);
+    } on DioException catch (e) {
+      return ApiResult.failure(failure: e.toFailure());
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return ApiResult.failure(failure: Failure(message: e.toString()));
     }
   }
 
   @override
   Future<void> logout() async {
-    // Clear tokens from secure storage
+    await _authService.logout();
   }
 
   @override
-  Future<Either<Failure, User>> getCurrentUser() async {
-    // Check tokens and fetch user profile
-    throw UnimplementedError();
+  Future<ApiResult<User>> getCurrentUser() async {
+    try {
+      final userModel = await _authService.getCurrentUser();
+      return ApiResult.success(data: _mapUserModelToEntity(userModel));
+    } on DioException catch (e) {
+      return ApiResult.failure(failure: e.toFailure());
+    } catch (e) {
+      return ApiResult.failure(failure: Failure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<bool> refreshToken() async {
+    try {
+      await _authService.refreshToken();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  User _mapUserModelToEntity(shared_user.UserModel model) {
+    return User(
+      id: model.id,
+      email: model.email,
+      fullName: model.fullName,
+      role: model.role,
+    );
   }
 }

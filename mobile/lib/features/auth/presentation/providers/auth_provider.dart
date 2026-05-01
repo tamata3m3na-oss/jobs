@@ -1,182 +1,105 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../../../core/di/injection.dart';
-import '../../../../core/network/services/auth_service.dart';
-import '../../../../shared/models/user_model.dart';
+import '../../domain/entities/user.dart';
+import '../../domain/models/auth_models.dart';
+import '../../domain/repositories/auth_repository.dart';
 
-/// Authentication status enum
-enum AuthStatus {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
+part 'auth_provider.freezed.dart';
+
+@freezed
+class AuthState with _$AuthState {
+  const factory AuthState.initial() = _Initial;
+  const factory AuthState.loading() = _Loading;
+  const factory AuthState.authenticated(User user) = _Authenticated;
+  const factory AuthState.unauthenticated() = _Unauthenticated;
+  const factory AuthState.error(String message) = _Error;
 }
 
-/// Authentication state data
-class AuthState {
-  final AuthStatus status;
-  final UserModel? user;
-  final String? errorMessage;
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return GetIt.I<AuthRepository>();
+});
 
-  const AuthState({
-    this.status = AuthStatus.initial,
-    this.user,
-    this.errorMessage,
-  });
+final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+  return AuthNotifier(ref.read(authRepositoryProvider));
+});
 
-  bool get isAuthenticated => status == AuthStatus.authenticated;
-  bool get isLoading => status == AuthStatus.loading;
-  bool get hasError => status == AuthStatus.error;
+class AuthNotifier extends StateNotifier<AuthState> {
+  final AuthRepository _authRepository;
 
-  AuthState copyWith({
-    AuthStatus? status,
-    UserModel? user,
-    String? errorMessage,
-  }) {
-    return AuthState(
-      status: status ?? this.status,
-      user: user ?? this.user,
-      errorMessage: errorMessage,
+  AuthNotifier(this._authRepository) : super(const AuthState.initial()) {
+    checkAuthStatus();
+  }
+
+  Future<void> checkAuthStatus() async {
+    state = const AuthState.loading();
+    final result = await _authRepository.getCurrentUser();
+    result.when(
+      success: (user, _, __) {
+        state = AuthState.authenticated(user);
+      },
+      failure: (failure, _) {
+        state = const AuthState.unauthenticated();
+      },
+      loading: () => state = const AuthState.loading(),
+      initial: () => state = const AuthState.initial(),
     );
   }
-}
 
-/// Auth service provider
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(apiClient: apiClientProvider());
-});
-
-/// Main auth state provider
-final authStateProvider =
-    StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
-  return AuthNotifier(ref.read(authServiceProvider));
-});
-
-/// Auth state notifier for managing authentication
-class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
-  final AuthService _authService;
-
-  AuthNotifier(this._authService) : super(const AsyncValue.data(AuthState())) {
-    _checkAuthStatus();
+  Future<void> login(String email, String password) async {
+    state = const AuthState.loading();
+    final result = await _authRepository.login(LoginRequest(email: email, password: password));
+    result.when(
+      success: (authResult, _, __) {
+        state = AuthState.authenticated(authResult.user);
+      },
+      failure: (failure, _) {
+        state = AuthState.error(failure.message);
+      },
+      loading: () => state = const AuthState.loading(),
+      initial: () => state = const AuthState.initial(),
+    );
   }
 
-  Future<void> _checkAuthStatus() async {
-    state = const AsyncValue.loading();
-    try {
-      final isAuth = await _authService.isAuthenticated();
-      if (isAuth) {
-        final user = await _authService.getCurrentUser();
-        state = AsyncValue.data(AuthState(
-          status: AuthStatus.authenticated,
-          user: user,
-        ));
-      } else {
-        state = const AsyncValue.data(AuthState(status: AuthStatus.unauthenticated));
-      }
-    } catch (e) {
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.unauthenticated,
-        errorMessage: e.toString(),
-      ));
-    }
-  }
-
-  Future<void> login({
-    required String email,
-    required String password,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      final user = await _authService.login(email: email, password: password);
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-      ));
-    } catch (e) {
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.error,
-        errorMessage: _formatError(e),
-      ));
-    }
-  }
-
-  Future<void> register({
-    required String email,
-    required String password,
-    required String fullName,
-    required String role,
-    String? phone,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      final user = await _authService.register(
-        email: email,
-        password: password,
-        fullName: fullName,
-        role: role,
-        phone: phone,
-      );
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-      ));
-    } catch (e) {
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.error,
-        errorMessage: _formatError(e),
-      ));
-    }
+  Future<void> register(RegisterRequest request) async {
+    state = const AuthState.loading();
+    final result = await _authRepository.register(request);
+    result.when(
+      success: (authResult, _, __) {
+        state = AuthState.authenticated(authResult.user);
+      },
+      failure: (failure, _) {
+        state = AuthState.error(failure.message);
+      },
+      loading: () => state = const AuthState.loading(),
+      initial: () => state = const AuthState.initial(),
+    );
   }
 
   Future<void> logout() async {
-    state = const AsyncValue.loading();
-    try {
-      await _authService.logout();
-      state = const AsyncValue.data(AuthState(status: AuthStatus.unauthenticated));
-    } catch (e) {
-      state = const AsyncValue.data(AuthState(status: AuthStatus.unauthenticated));
-    }
+    state = const AuthState.loading();
+    await _authRepository.logout();
+    state = const AuthState.unauthenticated();
   }
 
-  Future<void> refreshUser() async {
-    try {
-      final user = await _authService.getCurrentUser();
-      state = AsyncValue.data(AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-      ));
-    } catch (_) {
-      // Keep current state if refresh fails
-    }
-  }
-
-  String _formatError(dynamic error) {
-    final errorStr = error.toString();
-    if (errorStr.contains('401')) {
-      return 'Invalid email or password';
-    }
-    if (errorStr.contains('network')) {
-      return 'Network error. Please check your connection.';
-    }
-    return errorStr;
+  Future<bool> refreshToken() async {
+    return await _authRepository.refreshToken();
   }
 }
 
-/// Current user provider (convenience accessor)
-final currentUserProvider = Provider<UserModel?>((ref) {
+final currentUserProvider = Provider<User?>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.maybeWhen(
-    data: (state) => state.user,
+    authenticated: (user) => user,
     orElse: () => null,
   );
 });
 
-/// Auth status provider (convenience accessor)
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.maybeWhen(
-    data: (state) => state.isAuthenticated,
+    authenticated: (_) => true,
     orElse: () => false,
   );
 });

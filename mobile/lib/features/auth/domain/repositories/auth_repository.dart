@@ -1,15 +1,11 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
+import '../../../../shared/utils/api_result.dart';
 import '../entities/user.dart';
+import '../models/auth_models.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, User>> login(String email, String password);
-  Future<Either<Failure, User>> register({
-    required String email,
-    required String password,
-    required String fullName,
-    required String role,
-  });
+  Future<ApiResult<AuthResult>> login(LoginRequest request);
+  Future<ApiResult<AuthResult>> register(RegisterRequest request);
   Future<void> logout();
-  Future<Either<Failure, User>> getCurrentUser();
+  Future<ApiResult<User>> getCurrentUser();
+  Future<bool> refreshToken();
 }
