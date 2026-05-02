@@ -33,10 +33,19 @@ const onRefreshFailed = () => {
   useAuthStore.getState().logout();
 };
 
+const getBaseUrl = () => {
+  const publicUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+  if (typeof window === 'undefined' && publicUrl.startsWith('/')) {
+    // On the server (SSR), proxy relative URLs to the backend service directly
+    return `http://backend:3000${publicUrl}`;
+  }
+  return publicUrl;
+};
+
 // Create axios instance with configuration
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
+    baseURL: getBaseUrl(),
     headers: {
       'Content-Type': 'application/json',
     },
@@ -46,6 +55,12 @@ const createApiClient = (): AxiosInstance => {
   // Request interceptor
   client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+      // Fix for baseURL and url both having leading/trailing slashes
+      // If url starts with / and baseURL is set, we want to append instead of replace
+      if (config.baseURL && config.url?.startsWith('/')) {
+        config.url = config.url.substring(1);
+      }
+
       const token = useAuthStore.getState().token;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -84,7 +99,7 @@ const createApiClient = (): AxiosInstance => {
           }
 
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}${API_ENDPOINTS.AUTH.REFRESH}`,
+            `${getBaseUrl()}${API_ENDPOINTS.AUTH.REFRESH}`,
             { refreshToken: refreshTokenValue },
             {
               headers: {
