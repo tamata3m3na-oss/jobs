@@ -27,10 +27,11 @@ const nextConfig = {
     ],
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || 'http://backend:3000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://backend:3000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

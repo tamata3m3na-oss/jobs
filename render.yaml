@@ -1,0 +1,94 @@
+databases:
+  - name: smartjob-db
+    plan: starter
+    databaseName: smartjob_db
+    user: smartjob
+
+services:
+  # Redis Service
+  - type: redis
+    name: smartjob-redis
+    plan: starter
+    ipAllowList: []
+
+  # Backend Service
+  - type: web
+    name: smartjob-backend
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build -w shared && npm run prisma:generate -w backend && npm run build -w backend
+    startCommand: npm run prisma:deploy -w backend && npm run start:prod -w backend
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smartjob-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: smartjob-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://smartjob-frontend.onrender.com
+      - key: AI_SERVICE_URL
+        value: http://smartjob-ai-service:8000
+      - key: CORS_ORIGIN
+        value: https://smartjob-frontend.onrender.com
+
+  # Frontend Service
+  - type: web
+    name: smartjob-frontend
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build -w shared && npm run build -w frontend
+    startCommand: npm run start -w frontend
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: NEXT_PUBLIC_API_URL
+        value: /api/v1
+      - key: BACKEND_INTERNAL_URL
+        value: http://smartjob-backend:3000
+
+  # AI Service
+  - type: web
+    name: smartjob-ai-service
+    runtime: python
+    plan: starter
+    rootDirectory: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    healthCheckPath: /health
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: smartjob-redis
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: smartjob-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: smartjob-redis
+          property: port
+      - key: REDIS_PASSWORD
+        fromService:
+          type: redis
+          name: smartjob-redis
+          property: password

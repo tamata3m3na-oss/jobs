@@ -37,7 +37,8 @@ const getBaseUrl = () => {
   const publicUrl = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
   if (typeof window === 'undefined' && publicUrl.startsWith('/')) {
     // On the server (SSR), proxy relative URLs to the backend service directly
-    return `http://backend:3000${publicUrl}`;
+    const internalUrl = process.env.BACKEND_INTERNAL_URL || 'http://backend:3000';
+    return `${internalUrl}${publicUrl}`;
   }
   return publicUrl;
 };

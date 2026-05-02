@@ -14,18 +14,27 @@ export class CacheService implements OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.redis = new Redis({
-      host: this.configService.get<string>('redis.host', 'localhost'),
-      port: this.configService.get<number>('redis.port', 6379),
-      retryStrategy: (times) => {
-        if (times > 3) {
-          this.logger.warn('Redis connection failed, caching disabled');
-          return null;
-        }
-        return Math.min(times * 200, 2000);
-      },
-    });
+    const redisUrl = this.configService.get<string>('redis.url');
+    const retryStrategy = (times: number) => {
+      if (times > 3) {
+        this.logger.warn('Redis connection failed, caching disabled');
+        return null;
+      }
+      return Math.min(times * 200, 2000);
+    };
 
+    const redisOptions = redisUrl 
+      ? { url: redisUrl, retryStrategy }
+      : {
+          host: this.configService.get<string>('redis.host', 'localhost'),
+          port: this.configService.get<number>('redis.port', 6379),
+          password: this.configService.get<string>('redis.password'),
+          retryStrategy,
+        };
+
+    // If using URL, ioredis can take it as first arg or in options
+    this.redis = redisUrl ? new Redis(redisUrl, { retryStrategy }) : new Redis(redisOptions as any);
+    
     this.redis.on('error', (err) => {
       this.logger.warn(`Redis error: ${err.message}`);
     });
