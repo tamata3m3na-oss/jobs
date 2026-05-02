@@ -11,13 +11,15 @@ import {
   PaginatedResult,
 } from '../interfaces/i-user.repository';
 
-type JsonValue = string | number | boolean | object | null;
-
 @Injectable()
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUserInput): Promise<Record<string, unknown>> {
+    const profileValue = data.profile != null
+      ? (data.profile as Prisma.InputJsonValue)
+      : Prisma.JsonNull;
+
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
@@ -27,7 +29,7 @@ export class PrismaUserRepository implements IUserRepository {
         role: data.role,
         phone: data.phone ?? null,
         avatarUrl: data.avatarUrl ?? null,
-        profile: data.profile != null ? (data.profile as unknown as object) : Prisma.JsonNull,
+        profile: profileValue,
         status: 'PENDING_VERIFICATION',
       },
     });
@@ -55,7 +57,7 @@ export class PrismaUserRepository implements IUserRepository {
     filter: UserFilterInput,
     pagination: PaginationInput
   ): Promise<PaginatedResult<Record<string, unknown>>> {
-    const where: Record<string, unknown> = {};
+    const where: Prisma.UserWhereInput = {};
 
     if (filter.role) {
       where.role = filter.role;
@@ -127,17 +129,23 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async update(id: string, data: UpdateUserInput): Promise<Record<string, unknown>> {
+    const updateData: Prisma.UserUpdateInput = {};
+
+    if (data.firstName !== undefined) updateData.firstName = data.firstName;
+    if (data.lastName !== undefined) updateData.lastName = data.lastName;
+    if (data.phone !== undefined) updateData.phone = data.phone ?? null;
+    if (data.avatarUrl !== undefined) updateData.avatarUrl = data.avatarUrl ?? null;
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.verifiedAt !== undefined) updateData.verifiedAt = data.verifiedAt ?? null;
+    if (data.profile !== undefined) {
+      updateData.profile = data.profile != null
+        ? (data.profile as Prisma.InputJsonValue)
+        : Prisma.JsonNull;
+    }
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.phone === undefined ? undefined : data.phone,
-        avatarUrl: data.avatarUrl === undefined ? undefined : data.avatarUrl,
-        status: data.status,
-        verifiedAt: data.verifiedAt === undefined ? undefined : data.verifiedAt,
-        profile: data.profile as unknown as object | undefined,
-      },
+      data: updateData,
     });
 
     return user as Record<string, unknown>;
@@ -173,7 +181,7 @@ export class PrismaUserRepository implements IUserRepository {
   ): Promise<Record<string, unknown>> {
     const user = await this.prisma.user.update({
       where: { id },
-      data: { profile: profile as unknown as object },
+      data: { profile: profile as Prisma.InputJsonValue },
     });
 
     return user as Record<string, unknown>;
