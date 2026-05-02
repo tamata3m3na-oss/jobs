@@ -20,12 +20,18 @@ class MatchingService:
         # Initialize Redis
         self.redis_client: Optional[redis.Redis] = None
         try:
-            self.redis_client = redis.Redis(
-                host=settings.REDIS_HOST,
-                port=settings.REDIS_PORT,
-                password=settings.REDIS_PASSWORD,
-                decode_responses=True
-            )
+            if settings.REDIS_URL:
+                self.redis_client = redis.Redis.from_url(
+                    settings.REDIS_URL,
+                    decode_responses=True
+                )
+            else:
+                self.redis_client = redis.Redis(
+                    host=settings.REDIS_HOST,
+                    port=settings.REDIS_PORT,
+                    password=settings.REDIS_PASSWORD,
+                    decode_responses=True
+                )
         except Exception as e:
             print(f"Failed to connect to Redis: {e}")
 
