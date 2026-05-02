@@ -53,6 +53,8 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./frontend/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./public
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
@@ -72,6 +74,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001 || exit 1
 
 # Start Next.js production server using the standalone server
-# We work from the frontend directory so Next.js can find the .next and public folders correctly
-WORKDIR /app/frontend
-CMD ["node", "server.js"]
+# We work from the root so Next.js can find the .next and public folders correctly
+CMD ["node", "frontend/server.js"]

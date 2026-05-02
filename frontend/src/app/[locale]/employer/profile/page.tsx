@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
+import { useTranslations } from 'next-intl';
 import {
   Building,
   Globe,
@@ -21,6 +22,8 @@ import {
 import { useToast } from '@/components/ui/Toast';
 
 export default function EmployerProfilePage() {
+  const t = useTranslations('EmployerProfile');
+  const commonT = useTranslations('Common');
   const { profile, isLoading, updateProfile, isUpdating } = useEmployerProfile();
   const [formData, setFormData] = React.useState<any>(null);
   const { addToast } = useToast();
@@ -32,7 +35,7 @@ export default function EmployerProfilePage() {
   }, [profile]);
 
   if (isLoading || !formData)
-    return <div className="p-8 text-center">Loading company profile...</div>;
+    return <div className="p-8 text-center">{commonT('loading')}</div>;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -57,21 +60,21 @@ export default function EmployerProfilePage() {
     try {
       await updateProfile(formData);
       addToast({
-        title: 'Success',
-        description: 'Profile updated successfully!',
+        title: commonT('success'),
+        description: t('success'),
         variant: 'success',
       });
     } catch (error) {
       addToast({
-        title: 'Error',
-        description: 'Failed to update profile.',
+        title: commonT('error'),
+        description: t('error'),
         variant: 'error',
       });
     }
   };
 
   const addBenefit = () => {
-    const benefit = prompt('Enter a company benefit:');
+    const benefit = prompt(t('addBenefit') + ':');
     if (benefit) {
       setFormData((prev: any) => ({
         ...prev,
@@ -91,14 +94,14 @@ export default function EmployerProfilePage() {
     <div className="p-8 space-y-6 max-w-5xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Company Profile</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">
-            Manage your company public information and branding.
+            {t('description')}
           </p>
         </div>
         {profile?.isVerified && (
           <Badge variant="success" className="h-8 px-3 gap-1">
-            <ShieldCheck className="h-4 w-4" /> Verified Company
+            <ShieldCheck className="h-4 w-4" /> {t('verified')}
           </Badge>
         )}
       </div>
@@ -108,12 +111,12 @@ export default function EmployerProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
+                <CardTitle>{t('basicInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Company Name</label>
+                    <label className="text-sm font-medium">{t('companyName')}</label>
                     <input
                       name="companyName"
                       value={formData.companyName}
@@ -123,7 +126,7 @@ export default function EmployerProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Industry</label>
+                    <label className="text-sm font-medium">{t('industry')}</label>
                     <input
                       name="industry"
                       value={formData.industry || ''}
@@ -133,7 +136,7 @@ export default function EmployerProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Company Size</label>
+                    <label className="text-sm font-medium">{t('companySize')}</label>
                     <select
                       name="companySize"
                       value={formData.companySize || ''}
@@ -150,7 +153,7 @@ export default function EmployerProfilePage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Website URL</label>
+                    <label className="text-sm font-medium">{t('website')}</label>
                     <input
                       name="website"
                       value={formData.website || ''}
@@ -162,13 +165,13 @@ export default function EmployerProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
+                  <label className="text-sm font-medium">{t('companyDescription')}</label>
                   <textarea
                     name="description"
                     value={formData.description || ''}
                     onChange={handleChange}
                     className="w-full p-2 border rounded h-32"
-                    placeholder="Tell candidates about your company..."
+                    placeholder="..."
                   />
                 </div>
               </CardContent>
@@ -176,25 +179,25 @@ export default function EmployerProfilePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Company Culture & Benefits</CardTitle>
+                <CardTitle>{t('cultureBenefits')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Culture & Values</label>
+                  <label className="text-sm font-medium">{t('cultureValues')}</label>
                   <textarea
                     name="culture"
                     value={formData.culture || ''}
                     onChange={handleChange}
                     className="w-full p-2 border rounded h-24"
-                    placeholder="Our values include innovation, collaboration..."
+                    placeholder="..."
                   />
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Employee Benefits</label>
+                    <label className="text-sm font-medium">{t('employeeBenefits')}</label>
                     <Button type="button" variant="outline" size="sm" onClick={addBenefit}>
-                      <Plus className="mr-2 h-4 w-4" /> Add Benefit
+                      <Plus className="mr-2 h-4 w-4" /> {t('addBenefit')}
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -219,7 +222,7 @@ export default function EmployerProfilePage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Branding</CardTitle>
+                <CardTitle>{t('branding')}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col items-center space-y-4">
                 <Avatar className="h-32 w-32">
@@ -229,17 +232,14 @@ export default function EmployerProfilePage() {
                   </AvatarFallback>
                 </Avatar>
                 <Button variant="outline" size="sm">
-                  Change Logo
+                  {t('changeLogo')}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  Recommended size: 400x400px. Max file size: 2MB.
-                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Social Media</CardTitle>
+                <CardTitle>{t('socialMedia')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -283,7 +283,7 @@ export default function EmployerProfilePage() {
 
             <div className="flex gap-4">
               <Button type="submit" className="w-full" disabled={isUpdating}>
-                {isUpdating ? 'Saving...' : 'Save Changes'}
+                {isUpdating ? t('saving') : t('saveChanges')}
               </Button>
             </div>
           </div>
