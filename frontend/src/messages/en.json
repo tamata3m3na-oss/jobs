@@ -62,6 +62,8 @@
         "medium": "Medium strength",
         "strong": "Strong password"
       },
+      "passwordMismatch": "Passwords don't match",
+      "termsRequired": "You must agree to the terms and conditions",
       "termsLabel": "I agree to the Terms and Conditions",
       "submit": "Create Account",
       "socialLogin": "Or register with",
