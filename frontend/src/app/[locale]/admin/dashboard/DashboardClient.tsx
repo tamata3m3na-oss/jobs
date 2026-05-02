@@ -101,20 +101,26 @@ export default function AdminDashboardPage() {
           <CardContent className="space-y-2">
             <Button asChild className="w-full justify-start" variant="outline">
               <Link href={`/${locale}/admin/users`}>
-                <UserPlus className="mr-2 h-4 w-4" />
-                {t('totalUsers')}
+                <span className="flex items-center">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  {t('totalUsers')}
+                </span>
               </Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
               <Link href={`/${locale}/admin/jobs`}>
-                <ShieldAlert className="mr-2 h-4 w-4" />
-                {t('flaggedContent')}
+                <span className="flex items-center">
+                  <ShieldAlert className="mr-2 h-4 w-4" />
+                  {t('flaggedContent')}
+                </span>
               </Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
               <Link href={`/${locale}/admin/settings`}>
-                <Activity className="mr-2 h-4 w-4" />
-                {t('systemHealth')}
+                <span className="flex items-center">
+                  <Activity className="mr-2 h-4 w-4" />
+                  {t('systemHealth')}
+                </span>
               </Link>
             </Button>
           </CardContent>

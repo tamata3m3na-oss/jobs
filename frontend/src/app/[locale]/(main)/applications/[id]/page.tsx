@@ -167,8 +167,10 @@ export default function ApplicationDetailPage({ params }: { params: Promise<{ id
             href="/applications"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {t('backToApplications')}
+            <span className="inline-flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {t('backToApplications')}
+            </span>
           </Link>
 
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">

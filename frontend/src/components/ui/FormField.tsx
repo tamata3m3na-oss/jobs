@@ -28,9 +28,12 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
     },
     ref
   ) => {
-    const child = React.Children.only(children);
+    const childrenArray = React.Children.toArray(children);
+    const firstChild = childrenArray[0];
+    const restChildren = childrenArray.slice(1);
+
     const childId =
-      id || (React.isValidElement(child) ? (child.props as { id?: string }).id : undefined);
+      id || (React.isValidElement(firstChild) ? (firstChild.props as { id?: string }).id : undefined);
     const errorId = childId ? `${childId}-error` : undefined;
     const helperId = childId ? `${childId}-helper` : undefined;
 
@@ -39,13 +42,13 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
         .filter(Boolean)
         .join(' ') || undefined;
 
-    const childWithAria = React.isValidElement(child)
-      ? React.cloneElement(child, {
+    const childWithAria = React.isValidElement(firstChild)
+      ? React.cloneElement(firstChild as React.ReactElement, {
           id: childId,
           'aria-describedby': describedBy,
           'aria-invalid': error ? 'true' : undefined,
         } as React.HTMLAttributes<HTMLElement>)
-      : child;
+      : firstChild;
 
     return (
       <div ref={ref} className={cn('space-y-2', className)} {...props}>
@@ -55,6 +58,7 @@ const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
           </Label>
         )}
         {childWithAria}
+        {restChildren}
         {error && (
           <FormMessage variant="error" id={errorId}>
             {error}

@@ -27,6 +27,12 @@
     "allRightsReserved": "SmartJob Platform. All rights reserved.",
     "madeWithLove": "Made with ❤️ for recruiters and job seekers."
   },
+  "Home": {
+    "jobsTitle": "Jobs",
+    "jobsDescription": "Explore the latest job opportunities and apply today.",
+    "postJobTitle": "Post a Job",
+    "postJobDescription": "Find the best talent for your company and grow your team."
+  },
   "Auth": {
     "login": {
       "title": "Welcome Back",
