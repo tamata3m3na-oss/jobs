@@ -90,8 +90,10 @@ export default function ForgotPasswordPage() {
           href="/login"
           className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 inline-flex items-center"
         >
-          <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180 rtl:mr-0 rtl:ml-2" />
-          {t('backToLogin')}
+          <span className="inline-flex items-center">
+            <ArrowLeft className="mr-2 h-4 w-4 rtl:rotate-180 rtl:mr-0 rtl:ml-2" />
+            {t('backToLogin')}
+          </span>
         </Link>
       </CardFooter>
     </Card>

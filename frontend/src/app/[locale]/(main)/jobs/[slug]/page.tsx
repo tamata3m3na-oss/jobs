@@ -198,8 +198,10 @@ export default function JobDetailPage({
             href="/jobs"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {t('backToJobs')}
+            <span className="inline-flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {t('backToJobs')}
+            </span>
           </Link>
 
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
