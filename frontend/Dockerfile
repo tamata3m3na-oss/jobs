@@ -26,15 +26,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy all configuration and source code
-COPY package.json package-lock.json tsconfig.base.json ./
-# Copy all package.json files to ensure npm workspace resolution works
-COPY --from=deps /app/shared/package.json ./shared/package.json
-COPY --from=deps /app/frontend/package.json ./frontend/package.json
-COPY --from=deps /app/backend/package.json ./backend/package.json
+# Copy all node_modules from deps stage (includes hoisted and workspace-specific)
+COPY --from=deps /app ./
 
 # Copy source code for building
 COPY shared/ ./shared/
@@ -55,21 +48,11 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Copy package.json files and configuration for workspaces
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nextjs:nodejs /app/shared/package.json ./shared/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/package.json ./frontend/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/backend/package.json ./backend/package.json
-COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.base.json ./tsconfig.base.json
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/next.config.js ./frontend/next.config.js
-
-# Copy built artifacts and public files
-COPY --from=builder --chown=nextjs:nodejs /app/shared/dist ./shared/dist
-COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next ./frontend/.next
+# Copy standalone build and static files
+# Next.js standalone output includes everything needed to run the server
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./frontend/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
-
-# Copy node_modules (keep permissions intact)
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Set ownership
 RUN chown -R nextjs:nodejs /app
@@ -82,10 +65,11 @@ EXPOSE 3001
 # Environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001 || exit 1
 
-# Start Next.js production server
-CMD ["node_modules/.bin/next", "start", "frontend", "-p", "3001"]
+# Start Next.js production server using the standalone server
+CMD ["node", "frontend/server.js"]

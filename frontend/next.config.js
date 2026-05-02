@@ -3,6 +3,7 @@ const withNextIntl = require('next-intl/plugin')();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   transpilePackages: ['@smartjob/shared'],
   swcMinify: true,
   compiler: {
