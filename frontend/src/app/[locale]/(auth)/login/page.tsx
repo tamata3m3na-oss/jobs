@@ -94,7 +94,7 @@ export default function LoginPage() {
               href="/forgot-password"
               className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
             >
-              {t('forgotPassword')}
+              <span>{t('forgotPassword')}</span>
             </Link>
           </div>
           <Button type="submit" fullWidth isLoading={loginMutation.isPending}>
@@ -128,7 +128,7 @@ export default function LoginPage() {
           href="/register"
           className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
         >
-          {t('registerLink')}
+          <span>{t('registerLink')}</span>
         </Link>
       </CardFooter>
     </Card>

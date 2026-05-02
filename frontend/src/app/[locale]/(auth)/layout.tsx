@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="w-full p-6 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
           <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-            {t('title')}
+            <span>{t('title')}</span>
           </span>
         </Link>
         <LanguageSwitcher />

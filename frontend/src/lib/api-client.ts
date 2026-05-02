@@ -36,7 +36,7 @@ const onRefreshFailed = () => {
 // Create axios instance with configuration
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -84,7 +84,7 @@ const createApiClient = (): AxiosInstance => {
           }
 
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}${API_ENDPOINTS.AUTH.REFRESH}`,
+            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}${API_ENDPOINTS.AUTH.REFRESH}`,
             { refreshToken: refreshTokenValue },
             {
               headers: {

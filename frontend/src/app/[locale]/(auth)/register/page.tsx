@@ -269,7 +269,7 @@ export default function RegisterPage() {
           href="/login"
           className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
         >
-          {t('loginLink')}
+          <span>{t('loginLink')}</span>
         </Link>
       </CardFooter>
     </Card>
