@@ -61,8 +61,10 @@ export default function EmployerJobsPage() {
           href={`/employer/jobs/${job.id}/applications`}
           className="flex items-center gap-1 text-primary hover:underline"
         >
-          <Users className="h-4 w-4" />
-          {job.applicationsCount}
+          <span className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            {job.applicationsCount}
+          </span>
         </Link>
       ),
     },
@@ -126,8 +128,10 @@ export default function EmployerJobsPage() {
         </div>
         <Button asChild>
           <Link href="/employer/jobs/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Post New Job
+            <span className="flex items-center">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Post New Job
+            </span>
           </Link>
         </Button>
       </div>

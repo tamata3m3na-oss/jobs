@@ -9,6 +9,7 @@ import { Briefcase, Users, CheckCircle, XCircle, PlusCircle, ArrowRight } from '
 import { DataTable } from '@/components/ui/DataTable';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { useTranslations } from 'next-intl';
 
 interface AppStatus {
   status: string;
@@ -32,6 +33,9 @@ interface RecentApplication {
 }
 
 export default function EmployerDashboardPage() {
+  const t = useTranslations('EmployerDashboard');
+  const commonT = useTranslations('Common');
+  
   const { data: stats, isLoading } = useQuery({
     queryKey: ['employer-stats'],
     queryFn: async () => {
@@ -40,7 +44,7 @@ export default function EmployerDashboardPage() {
     },
   });
 
-  if (isLoading) return <div className="p-8 text-center">Loading dashboard...</div>;
+  if (isLoading) return <div className="p-8 text-center">{commonT('loading')}</div>;
 
   const appStatusData =
     stats?.applicationsByStatus?.map((item: AppStatus) => ({
@@ -52,18 +56,20 @@ export default function EmployerDashboardPage() {
     <div className="p-8 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Employer Dashboard</h1>
-          <p className="text-muted-foreground">Manage your job postings and candidates.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <div className="flex gap-2">
           <Button asChild>
             <Link href="/employer/jobs/new">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Post New Job
+              <span className="flex items-center">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                {t('postNewJob')}
+              </span>
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link href="/employer/applications">View Applications</Link>
+            <Link href="/employer/applications">{t('viewApplications')}</Link>
           </Button>
         </div>
       </div>
@@ -71,7 +77,7 @@ export default function EmployerDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('activeJobs')}</CardTitle>
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -80,7 +86,7 @@ export default function EmployerDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('totalApplications')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -89,7 +95,7 @@ export default function EmployerDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Shortlisted</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('shortlisted')}</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -101,7 +107,7 @@ export default function EmployerDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('rejected')}</CardTitle>
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
@@ -116,7 +122,7 @@ export default function EmployerDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-4">
           <CardHeader>
-            <CardTitle>Application Pipeline</CardTitle>
+            <CardTitle>{t('applicationPipeline')}</CardTitle>
           </CardHeader>
           <CardContent>
             <BarChartComponent data={appStatusData} xKey="name" yKey="value" color="#10b981" />
@@ -124,7 +130,7 @@ export default function EmployerDashboardPage() {
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
+            <CardTitle>{t('recentApplications')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -147,7 +153,7 @@ export default function EmployerDashboardPage() {
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent applications
+                  {t('noRecentApplications')}
                 </p>
               )}
             </div>
@@ -157,17 +163,17 @@ export default function EmployerDashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Job Performance</CardTitle>
+          <CardTitle>{t('jobPerformance')}</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable
             data={stats?.jobPerformance || []}
             columns={[
-              { header: 'Job Title', accessorKey: 'title' },
-              { header: 'Views', accessorKey: 'views' },
-              { header: 'Applications', accessorKey: 'applicationsCount' },
+              { header: t('jobTitle'), accessorKey: 'title' },
+              { header: t('views'), accessorKey: 'views' },
+              { header: t('applications'), accessorKey: 'applicationsCount' },
               {
-                header: 'Conversion Rate',
+                header: t('conversionRate'),
                 accessorKey: 'id',
                 cell: (job: JobPerformance) => (
                   <span>
