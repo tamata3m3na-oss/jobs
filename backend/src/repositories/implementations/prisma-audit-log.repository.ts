@@ -13,6 +13,13 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateAuditLogInput): Promise<AuditLog> {
+    const changesValue = data.changes != null
+      ? (data.changes as Prisma.InputJsonValue)
+      : Prisma.JsonNull;
+    const metadataValue = data.metadata != null
+      ? (data.metadata as Prisma.InputJsonValue)
+      : Prisma.JsonNull;
+
     const auditLog = await this.prisma.auditLog.create({
       data: {
         entityType: data.entityType,
@@ -20,15 +27,26 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
         action: data.action,
         userId: data.userId ?? null,
         userEmail: data.userEmail ?? null,
-        changes: data.changes != null ? (data.changes as unknown as object) : Prisma.JsonNull,
-        metadata:
-          data.metadata != null ? (data.metadata as unknown as object) : Prisma.JsonNull,
+        changes: changesValue,
+        metadata: metadataValue,
         ipAddress: data.ipAddress ?? null,
         userAgent: data.userAgent ?? null,
       },
     });
 
-    return auditLog as AuditLog;
+    return {
+      id: auditLog.id,
+      entityType: auditLog.entityType,
+      entityId: auditLog.entityId,
+      action: auditLog.action,
+      userId: auditLog.userId,
+      userEmail: auditLog.userEmail,
+      changes: auditLog.changes as AuditLog['changes'],
+      metadata: auditLog.metadata as AuditLog['metadata'],
+      ipAddress: auditLog.ipAddress,
+      userAgent: auditLog.userAgent,
+      createdAt: auditLog.createdAt,
+    };
   }
 
   async findById(id: string): Promise<AuditLog | null> {
@@ -36,7 +54,21 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
       where: { id },
     });
 
-    return auditLog as AuditLog | null;
+    if (!auditLog) return null;
+
+    return {
+      id: auditLog.id,
+      entityType: auditLog.entityType,
+      entityId: auditLog.entityId,
+      action: auditLog.action,
+      userId: auditLog.userId,
+      userEmail: auditLog.userEmail,
+      changes: auditLog.changes as AuditLog['changes'],
+      metadata: auditLog.metadata as AuditLog['metadata'],
+      ipAddress: auditLog.ipAddress,
+      userAgent: auditLog.userAgent,
+      createdAt: auditLog.createdAt,
+    };
   }
 
   async findAll(
@@ -49,7 +81,7 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
     limit: number;
     totalPages: number;
   }> {
-    const where: Record<string, unknown> = {};
+    const where: Prisma.AuditLogWhereInput = {};
 
     if (filter.entityType) {
       where.entityType = filter.entityType;
@@ -70,10 +102,10 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
     if (filter.startDate || filter.endDate) {
       where.createdAt = {};
       if (filter.startDate) {
-        (where.createdAt as Record<string, unknown>).gte = filter.startDate;
+        where.createdAt.gte = filter.startDate;
       }
       if (filter.endDate) {
-        (where.createdAt as Record<string, unknown>).lte = filter.endDate;
+        where.createdAt.lte = filter.endDate;
       }
     }
 
@@ -88,7 +120,19 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
     ]);
 
     return {
-      data: auditLogs as AuditLog[],
+      data: auditLogs.map((log) => ({
+        id: log.id,
+        entityType: log.entityType,
+        entityId: log.entityId,
+        action: log.action,
+        userId: log.userId,
+        userEmail: log.userEmail,
+        changes: log.changes as AuditLog['changes'],
+        metadata: log.metadata as AuditLog['metadata'],
+        ipAddress: log.ipAddress,
+        userAgent: log.userAgent,
+        createdAt: log.createdAt,
+      })),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -102,7 +146,19 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return auditLogs as AuditLog[];
+    return auditLogs.map((log) => ({
+      id: log.id,
+      entityType: log.entityType,
+      entityId: log.entityId,
+      action: log.action,
+      userId: log.userId,
+      userEmail: log.userEmail,
+      changes: log.changes as AuditLog['changes'],
+      metadata: log.metadata as AuditLog['metadata'],
+      ipAddress: log.ipAddress,
+      userAgent: log.userAgent,
+      createdAt: log.createdAt,
+    }));
   }
 
   async findByUser(
@@ -126,7 +182,19 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
     ]);
 
     return {
-      data: auditLogs as AuditLog[],
+      data: auditLogs.map((log) => ({
+        id: log.id,
+        entityType: log.entityType,
+        entityId: log.entityId,
+        action: log.action,
+        userId: log.userId,
+        userEmail: log.userEmail,
+        changes: log.changes as AuditLog['changes'],
+        metadata: log.metadata as AuditLog['metadata'],
+        ipAddress: log.ipAddress,
+        userAgent: log.userAgent,
+        createdAt: log.createdAt,
+      })),
       total,
       page: pagination.page,
       limit: pagination.limit,

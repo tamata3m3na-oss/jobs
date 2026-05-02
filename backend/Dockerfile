@@ -18,6 +18,9 @@ RUN npm ci
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 
+# Generate Prisma client before building (required for TypeScript types)
+RUN npm run prisma:generate --workspace=@smartjob/backend
+
 # Build shared first (required by backend)
 RUN npm run build --workspace=@smartjob/shared
 
@@ -41,6 +44,12 @@ COPY frontend/package.json ./frontend/
 
 # Install only production dependencies
 RUN npm ci --omit=dev
+
+# Copy source code for Prisma client generation (needed at runtime)
+COPY backend/prisma ./backend/prisma
+
+# Generate Prisma client for production runtime
+RUN npm run prisma:generate --workspace=@smartjob/backend
 
 # Copy built artifacts from builder
 COPY --from=builder /app/shared/dist ./shared/dist

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { ApplicationStatus, ApplicationSearchFilters } from '@smartjob/shared';
 import {
@@ -13,6 +14,37 @@ import {
   EmployerNoteData,
   ApplicationStats,
 } from '../interfaces/i-application.repository';
+
+type ApplicationPrismaResult = Prisma.ApplicationGetPayload<{
+  include: {
+    job: {
+      select: {
+        id: true;
+        title: true;
+        slug: true;
+        status: true;
+        employer: {
+          select: {
+            id: true;
+            firstName: true;
+            lastName: true;
+            email: true;
+            avatarUrl: true;
+          };
+        };
+      };
+    };
+    applicant: {
+      select: {
+        id: true;
+        firstName: true;
+        lastName: true;
+        email: true;
+        avatarUrl: true;
+      };
+    };
+  };
+}>;
 
 @Injectable()
 export class PrismaApplicationRepository implements IApplicationRepository {
@@ -206,7 +238,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -260,7 +292,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -314,7 +346,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -390,7 +422,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -491,7 +523,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page,
       limit,
@@ -548,7 +580,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     ]);
 
     return {
-      data: applications.map((app) => this.mapToApplicationWithRelations(app)),
+      data: applications.map((app: ApplicationPrismaResult) => this.mapToApplicationWithRelations(app)),
       total,
       page,
       limit,
@@ -836,56 +868,7 @@ export class PrismaApplicationRepository implements IApplicationRepository {
     }
   }
 
-  private mapToApplicationWithRelations(application: {
-    id: string;
-    jobId: string;
-    applicantId: string;
-    employerId: string;
-    status: ApplicationStatus;
-    answers: unknown;
-    resumeUrl: string | null;
-    coverLetterUrl: string | null;
-    portfolioUrls: unknown;
-    matchScore: number | null;
-    aiAnalysis: unknown;
-    interviews: unknown;
-    notes: string | null;
-    employerNotes: unknown;
-    rejectionReason: string | null;
-    offeredSalaryAmount: unknown;
-    offeredSalaryCurrency: string | null;
-    offeredSalaryPeriod: string | null;
-    sourceType: string;
-    sourceReferralId: string | null;
-    sourceUtmSource: string | null;
-    sourceUtmMedium: string | null;
-    sourceUtmCampaign: string | null;
-    submittedAt: Date;
-    updatedAt: Date;
-    lastActivityAt: Date;
-    expiresAt: Date | null;
-    createdAt: Date;
-    job?: {
-      id: string;
-      title: string;
-      slug: string;
-      status: string;
-      employer?: {
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        avatarUrl: string | null;
-      } | null;
-    } | null;
-    applicant?: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      avatarUrl: string | null;
-    } | null;
-  }): ApplicationWithRelations {
+  private mapToApplicationWithRelations(application: ApplicationPrismaResult): ApplicationWithRelations {
     const mapJob = (j: typeof application.job): ApplicationWithRelations['job'] => {
       if (!j) return null;
       return {
@@ -924,9 +907,9 @@ export class PrismaApplicationRepository implements IApplicationRepository {
         : []) as string[],
       matchScore: application.matchScore,
       aiAnalysis: application.aiAnalysis as ApplicationWithRelations['aiAnalysis'],
-      interviews: (application.interviews || []) as ApplicationWithRelations['interviews'],
+      interviews: (application.interviews || []) as unknown as ApplicationWithRelations['interviews'],
       notes: application.notes,
-      employerNotes: (application.employerNotes || []) as ApplicationWithRelations['employerNotes'],
+      employerNotes: (application.employerNotes || []) as unknown as ApplicationWithRelations['employerNotes'],
       rejectionReason: application.rejectionReason,
       offeredSalaryAmount: application.offeredSalaryAmount
         ? Number(application.offeredSalaryAmount)
