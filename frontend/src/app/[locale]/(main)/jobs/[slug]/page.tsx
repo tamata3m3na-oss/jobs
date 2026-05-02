@@ -27,7 +27,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-function formatSalary(salary?: JobDetail['salary']) {
+function formatSalary(salary?: any) {
   if (!salary) return null;
   const currency = salary.currency || 'USD';
   const formatter = new Intl.NumberFormat('en-US', {
