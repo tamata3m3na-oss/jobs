@@ -1,14 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
-import { IJobRepository } from '../../repositories/interfaces/i-job.repository';
+import { USER_REPOSITORY } from '../../repositories/interfaces/i-user.repository';
+import { JOB_REPOSITORY } from '../../repositories/interfaces/i-job.repository';
+import type { IUserRepository } from '../../repositories/interfaces/i-user.repository';
+import type { IJobRepository } from '../../repositories/interfaces/i-job.repository';
 import { UserStatus, JobStatus } from '@smartjob/shared';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly jobRepository: IJobRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+    @Inject(JOB_REPOSITORY) private readonly jobRepository: IJobRepository,
     private readonly prisma: PrismaService
   ) {}
 

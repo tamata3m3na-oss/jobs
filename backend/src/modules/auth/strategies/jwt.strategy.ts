@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { UserRole } from '@smartjob/shared';
 
 interface JwtPayload {

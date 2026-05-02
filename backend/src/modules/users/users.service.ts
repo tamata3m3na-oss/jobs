@@ -3,8 +3,10 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
-import { IUserRepository, PaginatedResult } from '../../repositories/interfaces/i-user.repository';
+import { USER_REPOSITORY } from '../../repositories/interfaces/i-user.repository';
+import type { IUserRepository, PaginatedResult } from '../../repositories/interfaces/i-user.repository';
 import {
   UpdateJobSeekerProfile,
   UpdateEmployerProfile,
@@ -16,7 +18,7 @@ import { CreateUserDto, UpdateUserDto, PaginationQueryDto, UserResponseDto } fro
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(@Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository) {}
 
   async createUser(data: CreateUserDto): Promise<UserResponseDto> {
     const exists = await this.userRepository.existsByEmail(data.email);

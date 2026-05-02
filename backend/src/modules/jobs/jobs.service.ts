@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
-import { IJobRepository, JobFilterInput } from '../../repositories/interfaces/i-job.repository';
+import { Injectable, NotFoundException, ForbiddenException, Logger, Inject } from '@nestjs/common';
+import { JOB_REPOSITORY } from '../../repositories/interfaces/i-job.repository';
+import type { IJobRepository, JobFilterInput } from '../../repositories/interfaces/i-job.repository';
 import { CacheService } from '../../common/cache/cache.service';
 import { CreateJob, UpdateJob, JobSearchFilters, JobStatus } from '@smartjob/shared';
 import { JobResponse, toJobResponse, JobSearchQueryDto, PaginationQueryDto } from './dto';
@@ -12,7 +13,7 @@ interface AuthenticatedRequest {
   };
 }
 
-interface JobListResponse {
+export interface JobListResponse {
   data: JobResponse[];
   pagination: {
     page: number;
@@ -24,11 +25,11 @@ interface JobListResponse {
   };
 }
 
-interface JobDetailResponse extends JobResponse {
+export interface JobDetailResponse extends JobResponse {
   isOwner?: boolean;
 }
 
-interface JobStatsResponse {
+export interface JobStatsResponse {
   jobId: string;
   views: number;
   applicationsCount: number;
@@ -43,7 +44,7 @@ export class JobsService {
   private readonly FEATURED_CACHE_TTL = 600;
 
   constructor(
-    private readonly jobRepository: IJobRepository,
+    @Inject(JOB_REPOSITORY) private readonly jobRepository: IJobRepository,
     private readonly cacheService: CacheService
   ) {}
 

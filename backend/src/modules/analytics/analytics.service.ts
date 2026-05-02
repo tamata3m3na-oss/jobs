@@ -72,4 +72,63 @@ export class AnalyticsService {
       ...recentActivity,
     };
   }
+
+  async getAdminStats() {
+    const [userStats, jobStats, recentActivity, systemStats] = await Promise.all([
+      this.getUserStats(),
+      this.getJobStats(),
+      this.getRecentActivity(30),
+      this.getSystemStats(),
+    ]);
+
+    return {
+      ...userStats,
+      ...jobStats,
+      ...recentActivity,
+      systemHealth: systemStats.systemHealth,
+    };
+  }
+
+  async getEmployerStats(employerId: string) {
+    const [totalJobs, activeJobs, totalApplications, recentApplications] = await Promise.all([
+      this.prisma.job.count({ where: { employerId } }),
+      this.prisma.job.count({ where: { employerId, status: 'ACTIVE' } }),
+      this.prisma.application.count({
+        where: { job: { employerId } },
+      }),
+      this.prisma.application.count({
+        where: {
+          job: { employerId },
+          submittedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        },
+      }),
+    ]);
+
+    return {
+      employerId,
+      totalJobs,
+      activeJobs,
+      totalApplications,
+      recentApplications,
+    };
+  }
+
+  async getRevenueStats() {
+    return {
+      totalRevenue: 0,
+      monthlyRevenue: 0,
+      activeSubscriptions: 0,
+    };
+  }
+
+  private async getSystemStats() {
+    const totalUsers = await this.prisma.user.count();
+    const totalJobs = await this.prisma.job.count();
+
+    return {
+      totalUsers,
+      totalJobs,
+      systemHealth: 'healthy',
+    };
+  }
 }

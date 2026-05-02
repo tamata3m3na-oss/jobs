@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from '../../database/prisma.service';
+import { PrismaService } from '../../../database/prisma.service';
 import { UserRole } from '@smartjob/shared';
 
 const BCRYPT_SALT_ROUNDS = 12;

@@ -35,6 +35,11 @@ import {
   JobStatusUpdateDto,
 } from './dto';
 import { UserRole } from '@smartjob/shared';
+import type {
+  JobListResponse,
+  JobDetailResponse,
+  JobStatsResponse,
+} from './jobs.service';
 
 interface AuthenticatedRequest {
   user: {
@@ -62,7 +67,7 @@ export class JobsController {
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page' })
   @ApiQuery({ name: 'sortBy', required: false, description: 'Sort by field' })
   @ApiQuery({ name: 'sortOrder', required: false, description: 'Sort order' })
-  async searchJobs(@Query(new ZodValidationPipe(JobSearchQueryDto)) filters: JobSearchQueryDto) {
+  async searchJobs(@Query(new ZodValidationPipe(JobSearchQueryDto)) filters: JobSearchQueryDto): Promise<JobListResponse> {
     return this.jobsService.searchJobs(filters);
   }
 
@@ -85,7 +90,7 @@ export class JobsController {
   @ApiOperation({ summary: 'Get job by ID' })
   @ApiResponse({ status: 200, description: 'Job retrieved successfully' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async getJobById(@Param('id') id: string, @Request() req?: AuthenticatedRequest) {
+  async getJobById(@Param('id') id: string, @Request() req?: AuthenticatedRequest): Promise<JobDetailResponse> {
     return this.jobsService.getJobById(id, req);
   }
 
@@ -168,7 +173,7 @@ export class JobsController {
   async getMyJobs(
     @Request() req: AuthenticatedRequest,
     @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto
-  ) {
+  ): Promise<JobListResponse> {
     return this.jobsService.listEmployerJobs(req.user.id, pagination);
   }
 
@@ -181,7 +186,7 @@ export class JobsController {
   @ApiResponse({ status: 403, description: 'Forbidden - Not the job owner' })
   @ApiResponse({ status: 404, description: 'Job not found' })
   @ApiParam({ name: 'id', description: 'Job UUID' })
-  async getJobStats(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+  async getJobStats(@Param('id') id: string, @Request() req: AuthenticatedRequest): Promise<JobStatsResponse> {
     return this.jobsService.getJobStats(id, req.user.id);
   }
 }
@@ -203,7 +208,7 @@ export class JobsAdminController {
     @Query(new ZodValidationPipe(PaginationQueryDto)) pagination: PaginationQueryDto,
     @Query('status') status?: string,
     @Query('jobType') jobType?: string
-  ) {
+  ): Promise<JobListResponse> {
     const filters = {
       status: status as
         | 'DRAFT'

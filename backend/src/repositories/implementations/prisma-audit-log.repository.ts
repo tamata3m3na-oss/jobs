@@ -18,13 +18,13 @@ export class PrismaAuditLogRepository implements IAuditLogRepository {
         entityType: data.entityType,
         entityId: data.entityId,
         action: data.action,
-        userId: data.userId ?? Prisma.DbNull,
-        userEmail: data.userEmail ?? Prisma.DbNull,
-        changes: data.changes != null ? (data.changes as Prisma.InputJsonValue) : Prisma.JsonNull,
+        userId: data.userId ?? null,
+        userEmail: data.userEmail ?? null,
+        changes: data.changes != null ? (data.changes as unknown as object) : Prisma.JsonNull,
         metadata:
-          data.metadata != null ? (data.metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-        ipAddress: data.ipAddress ?? Prisma.DbNull,
-        userAgent: data.userAgent ?? Prisma.DbNull,
+          data.metadata != null ? (data.metadata as unknown as object) : Prisma.JsonNull,
+        ipAddress: data.ipAddress ?? null,
+        userAgent: data.userAgent ?? null,
       },
     });
 

@@ -2,17 +2,12 @@ import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
 import { MatchingService } from './matching.service';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import {
-  SkillGapAnalysisSchema,
-  PreScreeningQuestionsResponseSchema,
-  ScreeningEvaluationSchema,
-  ResumeParserResponseSchema,
+import type {
+  SkillGapAnalysis,
+  PreScreeningQuestionsResponse,
+  ScreeningEvaluation,
+  ResumeParserResponse,
 } from '@smartjob/shared';
-
-type SkillGapAnalysis = typeof SkillGapAnalysisSchema.static;
-type PreScreeningQuestionsResponse = typeof PreScreeningQuestionsResponseSchema.static;
-type ScreeningEvaluation = typeof ScreeningEvaluationSchema.static;
-type ResumeParserResponse = typeof ResumeParserResponseSchema.static;
 
 @ApiTags('matching')
 @Controller('matching')

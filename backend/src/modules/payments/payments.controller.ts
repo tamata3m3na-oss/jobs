@@ -3,11 +3,10 @@ import {
   Post,
   Headers,
   Req,
-  RawBodyRequest,
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { PaymentsService } from './payments.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
@@ -22,7 +21,7 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Stripe webhook handler' })
   async handleWebhook(
     @Headers('stripe-signature') sig: string,
-    @Req() req: RawBodyRequest<Request>
+    @Req() req: Request & { rawBody?: Buffer }
   ) {
     if (!sig) {
       throw new BadRequestException('Missing stripe-signature header');
