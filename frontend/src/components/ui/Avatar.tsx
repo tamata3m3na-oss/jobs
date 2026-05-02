@@ -118,4 +118,26 @@ const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
 );
 AvatarGroup.displayName = 'AvatarGroup';
 
-export { Avatar, AvatarGroup };
+export { Avatar, AvatarGroup, AvatarImage, AvatarFallback };
+
+const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
+  ({ className, ...props }, ref) => (
+    <img
+      ref={ref}
+      className={cn('h-full w-full object-cover', className)}
+      {...props}
+    />
+  )
+);
+AvatarImage.displayName = 'AvatarImage';
+
+const AvatarFallback = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
+  ({ className, ...props }, ref) => (
+    <span
+      ref={ref}
+      className={cn('font-medium text-muted-foreground select-none', className)}
+      {...props}
+    />
+  )
+);
+AvatarFallback.displayName = 'AvatarFallback';
