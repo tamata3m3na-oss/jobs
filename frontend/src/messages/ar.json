@@ -6,7 +6,63 @@
     "profile": "الملف الشخصي",
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج",
-    "notifications": "الإشعارات"
+    "notifications": "الإشعارات",
+    "candidates": "المرشحين",
+    "postJob": "نشر وظيفة",
+    "allJobs": "كل الوظائف",
+    "browseJobs": "تصفح الوظائف",
+    "browseCompanies": "تصفح الشركات",
+    "forJobSeekers": "للباحثين عن عمل",
+    "forEmployers": "لأصحاب العمل",
+    "company": "الشركة",
+    "aboutUs": "من نحن",
+    "contact": "اتصل بنا",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfService": "شروط الخدمة",
+    "skipToContent": "تخطي إلى المحتوى",
+    "toggleMenu": "تبديل القائمة",
+    "menu": "القائمة",
+    "footerDescription": "تمكين مستقبل التوظيف من خلال المطابقة المدعومة بالذكاء الاصطناعي وتجربة بحث سلسة عن الوظائف.",
+    "pricingPlans": "خطط الأسعار",
+    "allRightsReserved": "منصة وظائف ذكية. جميع الحقوق محفوظة.",
+    "madeWithLove": "صنع بـ ❤️ للموظفين والباحثين عن عمل."
+  },
+  "Auth": {
+    "login": {
+      "title": "مرحباً بعودتك",
+      "description": "أدخل بياناتك للوصول إلى حسابك",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "rememberMe": "تذكرني",
+      "forgotPassword": "نسيت كلمة المرور؟",
+      "submit": "تسجيل الدخول",
+      "socialLogin": "أو المتابعة باستخدام",
+      "dontHaveAccount": "ليس لديك حساب؟",
+      "registerLink": "إنشاء حساب جديد",
+      "error": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "description": "انضم إلى وظائف ذكية اليوم وابدأ رحلتك",
+      "roleJobSeeker": "باحث عن عمل",
+      "roleEmployer": "صاحب عمل",
+      "firstNameLabel": "الاسم الأول",
+      "lastNameLabel": "اسم العائلة",
+      "emailLabel": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "confirmPasswordLabel": "تأكيد كلمة المرور",
+      "passwordStrength": {
+        "weak": "كلمة مرور ضعيفة",
+        "medium": "قوة متوسطة",
+        "strong": "كلمة مرور قوية"
+      },
+      "termsLabel": "أوافق على الشروط والأحكام",
+      "submit": "إنشاء الحساب",
+      "socialLogin": "أو التسجيل باستخدام",
+      "alreadyHaveAccount": "لديك حساب بالفعل؟",
+      "loginLink": "تسجيل الدخول",
+      "error": "فشل التسجيل. يرجى المحاولة مرة أخرى."
+    }
   },
   "Common": {
     "title": "وظائف ذكية",
@@ -21,7 +77,9 @@
     "loading": "جاري التحميل...",
     "error": "خطأ",
     "success": "نجاح",
-    "viewAll": "عرض الكل"
+    "viewAll": "عرض الكل",
+    "searchPlaceholder": "بحث عن وظائف، مرشحين...",
+    "user": "مستخدم"
   },
   "Jobs": {
     "title": "الوظائف",

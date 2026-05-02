@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/navigation';
 import { cn } from '../../lib/utils';
 import {
@@ -39,6 +40,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ items, user, collapsed, onToggleCollapse, className }: SidebarProps) {
+  const t = useTranslations('Navigation');
+  const commonT = useTranslations('Common');
   const pathname = usePathname();
 
   const filteredItems = items.filter(
@@ -56,7 +59,7 @@ export function Sidebar({ items, user, collapsed, onToggleCollapse, className }:
       <div className="p-6 flex items-center justify-between">
         {!collapsed && (
           <Link href="/" className="font-bold text-xl text-primary truncate">
-            SmartJob
+            {commonT('title')}
           </Link>
         )}
         <Button
@@ -97,7 +100,7 @@ export function Sidebar({ items, user, collapsed, onToggleCollapse, className }:
               className="w-full justify-start mt-4 text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <LogOut className="me-2 h-4 w-4" />
-              Sign out
+              {t('logout')}
             </Button>
           )}
         </div>
@@ -130,7 +133,7 @@ function SidebarItem({
         )}
         title={item.title}
       >
-        {item.icon && <item.icon size={20} />}
+        <span>{item.icon && <item.icon size={20} />}</span>
       </Link>
     );
   }
@@ -152,11 +155,13 @@ function SidebarItem({
           }
         }}
       >
-        {item.icon && <item.icon size={18} />}
-        <span className="flex-1">{item.title}</span>
-        {hasChildren && (
-          <ChevronDown size={16} className={cn('transition-transform', isOpen && 'rotate-180')} />
-        )}
+        <span className="flex items-center gap-3 flex-1">
+          {item.icon && <item.icon size={18} />}
+          <span className="flex-1">{item.title}</span>
+          {hasChildren && (
+            <ChevronDown size={16} className={cn('transition-transform', isOpen && 'rotate-180')} />
+          )}
+        </span>
       </Link>
       {hasChildren && isOpen && (
         <div className="mt-1 ms-9 space-y-1">

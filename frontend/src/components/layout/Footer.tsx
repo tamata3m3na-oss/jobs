@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { cn } from '../../lib/utils';
 
@@ -7,6 +8,8 @@ interface FooterProps {
 }
 
 export function Footer({ className }: FooterProps) {
+  const t = useTranslations('Navigation');
+  const commonT = useTranslations('Common');
   const currentYear = new Date().getFullYear();
 
   return (
@@ -15,11 +18,10 @@ export function Footer({ className }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="text-2xl font-bold text-primary">
-              SmartJob
+              {commonT('title')}
             </Link>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              Empowering the future of recruitment with AI-driven matching and seamless job search
-              experience.
+              {t('footerDescription')}
             </p>
             <div className="mt-6 flex space-x-4 rtl:space-x-reverse">
               <span
@@ -50,14 +52,14 @@ export function Footer({ className }: FooterProps) {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">For Job Seekers</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">{t('forJobSeekers')}</h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
                   href="/jobs"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Browse Jobs
+                  {t('browseJobs')}
                 </Link>
               </li>
               <li>
@@ -65,7 +67,7 @@ export function Footer({ className }: FooterProps) {
                   href="/companies"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Browse Companies
+                  {t('browseCompanies')}
                 </Link>
               </li>
               <li>
@@ -73,21 +75,21 @@ export function Footer({ className }: FooterProps) {
                   href="/applications"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  My Applications
+                  {t('applications')}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">For Employers</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">{t('forEmployers')}</h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
                   href="/employer/post-job"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Post a Job
+                  {t('postJob')}
                 </Link>
               </li>
               <li>
@@ -95,7 +97,7 @@ export function Footer({ className }: FooterProps) {
                   href="/employer/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Employer Dashboard
+                  {t('dashboard')}
                 </Link>
               </li>
               <li>
@@ -103,21 +105,21 @@ export function Footer({ className }: FooterProps) {
                   href="/pricing"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Pricing Plans
+                  {t('pricingPlans')}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider">Company</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">{t('company')}</h3>
             <ul className="mt-4 space-y-2">
               <li>
                 <Link
                   href="/about"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  About Us
+                  {t('aboutUs')}
                 </Link>
               </li>
               <li>
@@ -125,7 +127,7 @@ export function Footer({ className }: FooterProps) {
                   href="/contact"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Contact
+                  {t('contact')}
                 </Link>
               </li>
               <li>
@@ -133,7 +135,7 @@ export function Footer({ className }: FooterProps) {
                   href="/privacy"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Privacy Policy
+                  {t('privacyPolicy')}
                 </Link>
               </li>
               <li>
@@ -141,7 +143,7 @@ export function Footer({ className }: FooterProps) {
                   href="/terms"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Terms of Service
+                  {t('termsOfService')}
                 </Link>
               </li>
             </ul>
@@ -150,10 +152,10 @@ export function Footer({ className }: FooterProps) {
 
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © {currentYear} SmartJob Platform. All rights reserved.
+            © {currentYear} {t('allRightsReserved')}
           </p>
           <div className="flex space-x-6 rtl:space-x-reverse text-xs text-muted-foreground">
-            <span>Made with ❤️ for recruiters and job seekers.</span>
+            <span>{t('madeWithLove')}</span>
           </div>
         </div>
       </div>

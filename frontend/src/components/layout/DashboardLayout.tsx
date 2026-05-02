@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '../../lib/utils';
 import { Sidebar, NavItem } from './Sidebar';
 import { Header } from './Header';
@@ -19,42 +20,45 @@ interface DashboardLayoutProps {
   navItems?: NavItem[];
 }
 
-const defaultNavItems: NavItem[] = [
-  {
-    title: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Jobs',
-    href: '/dashboard/jobs',
-    icon: Briefcase,
-    children: [
-      { title: 'All Jobs', href: '/dashboard/jobs' },
-      { title: 'Post New Job', href: '/dashboard/jobs/new' },
-    ],
-  },
-  {
-    title: 'Candidates',
-    href: '/dashboard/candidates',
-    icon: Users,
-    roles: ['employer', 'admin'],
-  },
-  {
-    title: 'Applications',
-    href: '/dashboard/applications',
-    icon: FileText,
-  },
-  {
-    title: 'Settings',
-    href: '/dashboard/settings',
-    icon: Settings,
-  },
-];
-
 export function DashboardLayout({ children, user, navItems }: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  const t = useTranslations('Navigation');
+  const commonT = useTranslations('Common');
+
+  const defaultNavItems: NavItem[] = [
+    {
+      title: t('dashboard'),
+      href: '/dashboard',
+      icon: LayoutDashboard,
+    },
+    {
+      title: t('jobs'),
+      href: '/dashboard/jobs',
+      icon: Briefcase,
+      children: [
+        { title: t('allJobs'), href: '/dashboard/jobs' },
+        { title: t('postJob'), href: '/dashboard/jobs/new' },
+      ],
+    },
+    {
+      title: t('candidates'),
+      href: '/dashboard/candidates',
+      icon: Users,
+      roles: ['employer', 'admin'],
+    },
+    {
+      title: t('applications'),
+      href: '/dashboard/applications',
+      icon: FileText,
+    },
+    {
+      title: t('settings'),
+      href: '/dashboard/settings',
+      icon: Settings,
+    },
+  ];
 
   const items = navItems || defaultNavItems;
 
@@ -65,7 +69,7 @@ export function DashboardLayout({ children, user, navItems }: DashboardLayoutPro
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-primary focus:text-primary-foreground"
       >
-        Skip to content
+        {t('skipToContent')}
       </a>
 
       {/* Desktop Sidebar */}
@@ -82,7 +86,7 @@ export function DashboardLayout({ children, user, navItems }: DashboardLayoutPro
         <div className="fixed inset-0 z-50 md:hidden bg-background/80 backdrop-blur-sm animate-fade-in">
           <div className="fixed inset-y-0 left-0 w-64 bg-card border-r shadow-xl animate-slide-in-from-top duration-300">
             <div className="p-4 flex items-center justify-between border-b">
-              <span className="font-bold text-xl text-primary">SmartJob</span>
+              <span className="font-bold text-xl text-primary">{commonT('title')}</span>
               <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
                 <X size={20} />
               </Button>
