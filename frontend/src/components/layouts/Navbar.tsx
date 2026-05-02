@@ -28,7 +28,7 @@ export default function Navbar() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="text-2xl font-bold text-indigo-600">
-                {ct('title')}
+                <span>{ct('title')}</span>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8 rtl:space-x-reverse">
@@ -36,13 +36,13 @@ export default function Navbar() {
                 href="/jobs"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                {t('jobs')}
+                <span>{t('jobs')}</span>
               </Link>
               <Link
                 href="/applications"
                 className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
               >
-                {t('applications')}
+                <span>{t('applications')}</span>
               </Link>
             </div>
           </div>
@@ -52,13 +52,13 @@ export default function Navbar() {
               href="/login"
               className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
-              {ct('login')}
+              <span>{ct('login')}</span>
             </Link>
             <Link
               href="/register"
               className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
             >
-              {ct('register')}
+              <span>{ct('register')}</span>
             </Link>
           </div>
         </div>

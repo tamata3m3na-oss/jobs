@@ -68,6 +68,16 @@
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Sign in",
       "error": "Registration failed. Please try again."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your email address and we will send you a link to reset your password",
+      "emailLabel": "Email Address",
+      "submit": "Send Reset Link",
+      "successMessage": "A reset link has been sent to {email}",
+      "instructions": "Please check your inbox and follow the instructions to reset your password.",
+      "backToLogin": "Back to Login",
+      "error": "Failed to send reset link. Please try again."
     }
   },
   "Common": {

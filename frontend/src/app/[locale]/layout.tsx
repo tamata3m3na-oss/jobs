@@ -25,8 +25,10 @@ export default async function LocaleLayout({
         <ErrorBoundary>
           <Providers>
             <NextIntlClientProvider locale={locale} messages={messages}>
-              <Navbar />
-              <main>{children}</main>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main>{children}</main>
+              </div>
             </NextIntlClientProvider>
           </Providers>
         </ErrorBoundary>
