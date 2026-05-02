@@ -63,16 +63,20 @@ function UserMenu({ user }: { user: any }) {
               className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent"
               onClick={() => setIsOpen(false)}
             >
-              <User className="h-4 w-4" />
-              {t('profile')}
+              <span className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                {t('profile')}
+              </span>
             </Link>
             <Link
               href="/settings"
               className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent"
               onClick={() => setIsOpen(false)}
             >
-              <Settings className="h-4 w-4" />
-              {t('settings')}
+              <span className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                {t('settings')}
+              </span>
             </Link>
             <div className="border-t my-1" />
             <button className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent w-full text-left text-destructive">
@@ -107,7 +111,7 @@ function MobileNav({
         )}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          <span className="font-bold text-lg">Menu</span>
+          <span className="font-bold text-lg">{t('menu')}</span>
           <button onClick={onClose} className="p-2 hover:bg-accent rounded-lg">
             <X className="h-5 w-5" />
           </button>
@@ -120,13 +124,15 @@ function MobileNav({
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
               onClick={onClose}
             >
-              {item.icon}
-              <span>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <Badge variant="default" size="sm" className="ml-auto">
-                  {item.badge}
-                </Badge>
-              )}
+              <span className="flex items-center gap-3 w-full">
+                {item.icon}
+                <span>{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <Badge variant="default" size="sm" className="ml-auto">
+                    {item.badge}
+                  </Badge>
+                )}
+              </span>
             </Link>
           ))}
         </nav>
@@ -137,6 +143,7 @@ function MobileNav({
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Navigation');
+  const commonT = useTranslations('Common');
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -161,7 +168,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Menu className="h-5 w-5" />
               </button>
               <Link href="/" className="text-xl font-bold text-primary">
-                JobPlatform
+                {commonT('title')}
               </Link>
             </div>
 
@@ -179,13 +186,15 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
                         : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     )}
                   >
-                    {item.icon}
-                    {item.label}
-                    {item.badge !== undefined && item.badge > 0 && (
-                      <Badge variant="default" size="sm" className="ml-1">
-                        {item.badge}
-                      </Badge>
-                    )}
+                    <span className="flex items-center gap-2">
+                      {item.icon}
+                      {item.label}
+                      {item.badge !== undefined && item.badge > 0 && (
+                        <Badge variant="default" size="sm" className="ml-1">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </span>
                   </Link>
                 );
               })}
@@ -214,17 +223,17 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} JobPlatform. All rights reserved.
+              © {new Date().getFullYear()} {t('allRightsReserved')}
             </p>
             <div className="flex gap-4 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-foreground">
-                Privacy
+                {t('privacyPolicy')}
               </Link>
               <Link href="/terms" className="hover:text-foreground">
-                Terms
+                {t('termsOfService')}
               </Link>
               <Link href="/contact" className="hover:text-foreground">
-                Contact
+                {t('contact')}
               </Link>
             </div>
           </div>

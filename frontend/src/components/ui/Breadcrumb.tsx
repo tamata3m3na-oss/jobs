@@ -72,7 +72,7 @@ const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
             href={item.href}
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center"
           >
-            {item.label}
+            <span>{item.label}</span>
           </Link>
         ) : (
           <span

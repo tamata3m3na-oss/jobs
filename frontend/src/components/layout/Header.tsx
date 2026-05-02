@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/navigation';
 import { cn } from '../../lib/utils';
 import { Search, Bell, Menu, User, Settings, LogOut } from 'lucide-react';
@@ -26,6 +27,9 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, user, className }: HeaderProps) {
+  const t = useTranslations('Navigation');
+  const commonT = useTranslations('Common');
+
   return (
     <header
       className={cn(
@@ -37,14 +41,14 @@ export function Header({ onMenuClick, user, className }: HeaderProps) {
         <div className="flex items-center gap-4 flex-1">
           <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle menu</span>
+            <span className="sr-only">{t('toggleMenu')}</span>
           </Button>
 
           <div className="hidden md:flex flex-1 max-w-md relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search jobs, candidates..."
+              placeholder={commonT('searchPlaceholder')}
               className="pl-9 bg-muted/50 border-none focus-visible:ring-1"
             />
           </div>
@@ -56,7 +60,7 @@ export function Header({ onMenuClick, user, className }: HeaderProps) {
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">{t('notifications')}</span>
           </Button>
 
           <DropdownMenu
@@ -69,18 +73,20 @@ export function Header({ onMenuClick, user, className }: HeaderProps) {
           >
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
+                <p className="text-sm font-medium leading-none">{user?.name || commonT('user')}</p>
                 <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem icon={<User className="mr-2 h-4 w-4" />}>Profile</DropdownMenuItem>
+            <DropdownMenuItem icon={<User className="mr-2 h-4 w-4" />}>
+              {t('profile')}
+            </DropdownMenuItem>
             <DropdownMenuItem icon={<Settings className="mr-2 h-4 w-4" />}>
-              Settings
+              {t('settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" icon={<LogOut className="mr-2 h-4 w-4" />}>
-              Log out
+              {t('logout')}
             </DropdownMenuItem>
           </DropdownMenu>
         </div>

@@ -6,7 +6,63 @@
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "candidates": "Candidates",
+    "postJob": "Post a Job",
+    "allJobs": "All Jobs",
+    "browseJobs": "Browse Jobs",
+    "browseCompanies": "Browse Companies",
+    "forJobSeekers": "For Job Seekers",
+    "forEmployers": "For Employers",
+    "company": "Company",
+    "aboutUs": "About Us",
+    "contact": "Contact",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "skipToContent": "Skip to content",
+    "toggleMenu": "Toggle menu",
+    "menu": "Menu",
+    "footerDescription": "Empowering the future of recruitment with AI-driven matching and seamless job search experience.",
+    "pricingPlans": "Pricing Plans",
+    "allRightsReserved": "SmartJob Platform. All rights reserved.",
+    "madeWithLove": "Made with ❤️ for recruiters and job seekers."
+  },
+  "Auth": {
+    "login": {
+      "title": "Welcome Back",
+      "description": "Enter your credentials to access your account",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "socialLogin": "Or continue with",
+      "dontHaveAccount": "Don't have an account?",
+      "registerLink": "Create an account",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Create an Account",
+      "description": "Join SmartJob today and start your journey",
+      "roleJobSeeker": "Job Seeker",
+      "roleEmployer": "Employer",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "emailLabel": "Email Address",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "passwordStrength": {
+        "weak": "Weak password",
+        "medium": "Medium strength",
+        "strong": "Strong password"
+      },
+      "termsLabel": "I agree to the Terms and Conditions",
+      "submit": "Create Account",
+      "socialLogin": "Or register with",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "error": "Registration failed. Please try again."
+    }
   },
   "Common": {
     "title": "SmartJob",
@@ -21,7 +77,9 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "searchPlaceholder": "Search jobs, candidates...",
+    "user": "User"
   },
   "Jobs": {
     "title": "Jobs",
