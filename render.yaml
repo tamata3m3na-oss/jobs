@@ -77,18 +77,3 @@ services:
           type: redis
           name: smartjob-redis
           property: connectionString
-      - key: REDIS_HOST
-        fromService:
-          type: redis
-          name: smartjob-redis
-          property: host
-      - key: REDIS_PORT
-        fromService:
-          type: redis
-          name: smartjob-redis
-          property: port
-      - key: REDIS_PASSWORD
-        fromService:
-          type: redis
-          name: smartjob-redis
-          property: password

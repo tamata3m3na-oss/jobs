@@ -19,21 +19,14 @@ class MatchingService:
         
         # Initialize Redis
         self.redis_client: Optional[redis.Redis] = None
-        try:
-            if settings.REDIS_URL:
+        if settings.REDIS_URL:
+            try:
                 self.redis_client = redis.Redis.from_url(
                     settings.REDIS_URL,
                     decode_responses=True
                 )
-            else:
-                self.redis_client = redis.Redis(
-                    host=settings.REDIS_HOST,
-                    port=settings.REDIS_PORT,
-                    password=settings.REDIS_PASSWORD,
-                    decode_responses=True
-                )
-        except Exception as e:
-            print(f"Failed to connect to Redis: {e}")
+            except Exception as e:
+                print(f"Failed to connect to Redis: {e}")
 
     def _get_cache_key(self, query: str, job_ids: List[str]) -> str:
         # Create a unique key based on query and job IDs
