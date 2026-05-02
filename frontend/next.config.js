@@ -26,6 +26,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://backend:3000/api/:path*',
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);
