@@ -1,5 +1,7 @@
 import { JobStatus, JobType, ExperienceLevel, JobSearchFilters } from '@smartjob/shared';
 
+export const JOB_REPOSITORY = 'JOB_REPOSITORY';
+
 export interface CreateJobInput {
   employerId: string;
   title: string;

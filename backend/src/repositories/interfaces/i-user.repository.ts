@@ -1,5 +1,7 @@
 import { UserRole, UserStatus } from '@smartjob/shared';
 
+export const USER_REPOSITORY = 'USER_REPOSITORY';
+
 export interface CreateUserInput {
   email: string;
   password: string;

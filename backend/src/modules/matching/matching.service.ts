@@ -1,16 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  SkillGapAnalysisSchema,
-  PreScreeningQuestionsResponseSchema,
-  ScreeningEvaluationSchema,
-  ResumeParserResponseSchema,
+import type {
+  SkillGapAnalysis,
+  PreScreeningQuestionsResponse,
+  ScreeningEvaluation,
+  ResumeParserResponse,
 } from '@smartjob/shared';
-
-type SkillGapAnalysis = typeof SkillGapAnalysisSchema.static;
-type PreScreeningQuestionsResponse = typeof PreScreeningQuestionsResponseSchema.static;
-type ScreeningEvaluation = typeof ScreeningEvaluationSchema.static;
-type ResumeParserResponse = typeof ResumeParserResponseSchema.static;
 
 @Injectable()
 export class MatchingService {

@@ -2,6 +2,7 @@
 export * from './schemas/user.schema';
 export * from './schemas/job.schema';
 export * from './schemas/application.schema';
+export * from './schemas/ai.schema';
 
 // Common utilities
 export { LocationSchema } from './schemas/user.schema';

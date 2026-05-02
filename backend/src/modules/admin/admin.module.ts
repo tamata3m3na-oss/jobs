@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
-import { IUserRepository } from '../../repositories/interfaces/i-user.repository';
+import { USER_REPOSITORY } from '../../repositories/interfaces/i-user.repository';
 import { PrismaUserRepository } from '../../repositories/implementations/prisma-user.repository';
-import { IJobRepository } from '../../repositories/interfaces/i-job.repository';
+import { JOB_REPOSITORY } from '../../repositories/interfaces/i-job.repository';
 import { PrismaJobRepository } from '../../repositories/implementations/prisma-job.repository';
 import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
@@ -11,11 +11,11 @@ import { AdminController } from './admin.controller';
   providers: [
     PrismaService,
     {
-      provide: IUserRepository,
+      provide: USER_REPOSITORY,
       useClass: PrismaUserRepository,
     },
     {
-      provide: IJobRepository,
+      provide: JOB_REPOSITORY,
       useClass: PrismaJobRepository,
     },
     AdminService,

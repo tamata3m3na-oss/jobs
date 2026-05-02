@@ -16,21 +16,23 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
-import { UserRole, UserStatus } from '@smartjob/shared';
-import {
+import type { UserRole, UserStatus } from '@smartjob/shared';
+import type {
   UpdateUserDto,
-  UpdateUserSchema,
   PaginationQueryDto,
-  PaginationQuerySchema,
   UpdateJobSeekerProfileDto,
-  UpdateJobSeekerProfileSchema,
   UpdateEmployerProfileDto,
+} from './dto';
+import {
+  UpdateUserSchema,
+  PaginationQuerySchema,
+  UpdateJobSeekerProfileSchema,
   UpdateEmployerProfileSchema,
 } from './dto';
 

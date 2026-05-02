@@ -45,7 +45,8 @@ export class AuditLoggingInterceptor implements NestInterceptor {
               userAgent,
             });
           } catch (error) {
-            this.logger.error('Failed to save audit log', error.stack);
+            const err = error as Error;
+            this.logger.error('Failed to save audit log', err.stack);
           }
         }
       })
